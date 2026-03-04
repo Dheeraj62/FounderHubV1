@@ -1,0 +1,26 @@
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build & Dependencies
+node_modules/
+dist/
+bin/
+obj/
+publish/
+.angular/
+
+# Environment
+.env
+*.user
+appsettings.Development.json
+appsettings.local.json
+
+# Docker
+.dockerignore

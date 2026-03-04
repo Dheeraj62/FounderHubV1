@@ -1,0 +1,6 @@
+@FounderHub.Api_HostAddress = http://localhost:5111
+
+GET {{FounderHub.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

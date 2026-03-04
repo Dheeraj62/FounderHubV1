@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="FounderHub.Api/FounderHub.Api.csproj" />
+  <Project Path="FounderHub.Application/FounderHub.Application.csproj" />
+  <Project Path="FounderHub.Domain/FounderHub.Domain.csproj" />
+  <Project Path="FounderHub.Infrastructure/FounderHub.Infrastructure.csproj" />
+</Solution>
