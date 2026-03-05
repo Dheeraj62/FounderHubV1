@@ -1,13 +1,12 @@
 {
-    "version": 2,
-    "rewrites": [
+    "routes": [
         {
-            "source": "/api/(.*)",
-            "destination": "https://founderhubv1.onrender.com/api/$1"
+            "src": "/api/(.*)",
+            "dest": "https://founderhubv1.onrender.com/api/$1"
         },
         {
-            "source": "/(.*)",
-            "destination": "/index.html"
+            "src": "/(.*)",
+            "dest": "/index.html"
         }
     ]
 }
