@@ -1,11 +1,14 @@
 {
     "routes": [
         {
-            "src": "/api/(.*)",
+            "src": "^/api/(.*)",
             "dest": "https://founderhubv1.onrender.com/api/$1"
         },
         {
-            "src": "/(.*)",
+            "handle": "filesystem"
+        },
+        {
+            "src": "/.*",
             "dest": "/index.html"
         }
     ]
