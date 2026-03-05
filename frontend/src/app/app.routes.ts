@@ -14,6 +14,7 @@ import { ConnectionsListComponent } from './shared/components/connections-list/c
 import { MessageThreadComponent } from './shared/components/message-thread/message-thread.component';
 import { NotificationsPanelComponent } from './shared/components/notifications-panel/notifications-panel.component';
 import { SavedIdeasComponent } from './investor/saved-ideas/saved-ideas.component';
+import { FeedPageComponent } from './feed/feed-page/feed-page.component';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
@@ -23,6 +24,7 @@ export const routes: Routes = [
     { path: 'auth/register', component: RegisterComponent },
 
     // UNIVERSAL ROUTES (Both Roles)
+    { path: 'feed', component: FeedPageComponent, canActivate: [authGuard] },
     { path: 'idea/:id', component: IdeaDetailComponent, canActivate: [authGuard] },
     { path: 'connections', component: ConnectionsListComponent, canActivate: [authGuard] },
     { path: 'messages/:id', component: MessageThreadComponent, canActivate: [authGuard] },

@@ -12,6 +12,8 @@ namespace FounderHub.Domain.Entities
         public int DomainExperienceYears { get; set; }
         public int TeamSize { get; set; }
         public bool LinkedInVerified { get; set; }
+        public string? LinkedInProfileUrl { get; set; }
+        public string? StartupWebsite { get; set; }
 
         public string Bio { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;

@@ -9,6 +9,8 @@ namespace FounderHub.Domain.Entities
         public string Username { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
         public Enums.UserRole Role { get; set; }
+        public bool LinkedInVerified { get; set; }
+        public string? LinkedInProfileUrl { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

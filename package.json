@@ -2,8 +2,9 @@
   "name": "founderhub",
   "private": true,
   "scripts": {
-    "dev": "npm run dev --prefix frontend",
-    "build": "npm run build --prefix frontend",
-    "preview": "npm run preview --prefix frontend"
+    "dev": "npm start --prefix frontend",
+    "frontend:build": "npm run build --prefix frontend",
+    "backend:dev": "dotnet run --project backend/FounderHub.Api",
+    "build": "npm run frontend:build"
   }
 }

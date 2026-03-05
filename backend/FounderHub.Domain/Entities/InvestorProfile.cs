@@ -14,6 +14,13 @@ namespace FounderHub.Domain.Entities
         public string Location { get; set; } = string.Empty;
         public string Bio { get; set; } = string.Empty;
 
+        // MVP-3: Investor verification signals
+        public string? InvestmentFirm { get; set; }
+        public List<string> PortfolioCompanies { get; set; } = new();
+        public string? AngelListProfile { get; set; }
+        public bool LinkedInVerified { get; set; }
+        public string? LinkedInProfileUrl { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }

@@ -9,6 +9,9 @@ using FounderHub.Application.DTOs.Messages;
 using FounderHub.Application.DTOs.Notifications;
 using FounderHub.Application.DTOs.SavedIdeas;
 using System.Collections.Generic;
+using FounderHub.Application.DTOs.Feed;
+using FounderHub.Application.DTOs.Updates;
+using FounderHub.Application.DTOs.Follows;
 
 namespace FounderHub.Application.Interfaces
 {
@@ -27,6 +30,7 @@ namespace FounderHub.Application.Interfaces
         Task<IEnumerable<IdeaDto>> GetMyIdeasAsync(string founderId);
         Task<PaginatedResult<IdeaDto>> GetIdeasAsync(string? stage, string? industry, bool? previouslyRejected, int page, int pageSize);
         Task<IEnumerable<RecommendedIdeaDto>> GetRecommendedAsync(string investorId);
+        Task<IEnumerable<TrendingIdeaDto>> GetTrendingAsync(int limit = 10);
     }
 
     public interface IInterestService
@@ -75,6 +79,35 @@ namespace FounderHub.Application.Interfaces
         Task<IEnumerable<NotificationDto>> GetMyNotificationsAsync(string userId);
         Task MarkAsReadAsync(string userId, string notificationId);
         Task MarkAllAsReadAsync(string userId);
+    }
+
+    // MVP-3
+    public interface IFeedService
+    {
+        Task<IEnumerable<FeedItemDto>> GetGlobalFeedAsync(string userId, int page = 1, int pageSize = 20);
+        Task<IEnumerable<FeedItemDto>> GetFollowingFeedAsync(string userId, int page = 1, int pageSize = 20);
+        Task<IEnumerable<FeedItemDto>> GetTrendingFeedAsync(string userId, int limit = 10);
+    }
+
+    public interface IFounderUpdateService
+    {
+        Task<FounderUpdateDto> CreateAsync(string founderId, CreateFounderUpdateRequest request);
+        Task<IEnumerable<FounderUpdateDto>> GetByFounderIdAsync(string founderId, int page = 1, int pageSize = 20);
+    }
+
+    public interface IFollowService
+    {
+        Task FollowAsync(string followerId, FollowRequest request);
+        Task UnfollowAsync(string followerId, FollowRequest request);
+        Task<IEnumerable<FollowDto>> GetFollowingAsync(string followerId, string? type = null);
+        Task<IEnumerable<FollowDto>> GetFollowersAsync(string followingId, string? type = null);
+    }
+
+    public interface IIdeaViewService
+    {
+        Task TrackViewAsync(string ideaId, string viewerId);
+        Task<int> GetIdeaViewsAsync(string ideaId);
+        Task<int> GetFounderTotalViewsAsync(string founderId);
     }
     
     public interface IJwtProvider

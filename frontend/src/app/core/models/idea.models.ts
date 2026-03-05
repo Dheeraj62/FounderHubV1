@@ -6,6 +6,9 @@ export interface Idea {
     solution: string;
     stage: string;
     industry: string;
+    pitchDeckUrl?: string;
+    demoUrl?: string;
+    startupWebsite?: string;
     previouslyRejected: boolean;
     rejectedBy?: string;
     rejectionReasonCategory?: string;
@@ -27,6 +30,9 @@ export interface CreateIdeaRequest {
     solution: string;
     stage: string;
     industry: string;
+    pitchDeckUrl?: string;
+    demoUrl?: string;
+    startupWebsite?: string;
     previouslyRejected: boolean;
     rejectedBy?: string;
     rejectionReasonCategory?: string;

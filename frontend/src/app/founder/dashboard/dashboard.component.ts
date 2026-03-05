@@ -10,11 +10,11 @@ import { InterestService } from '../../core/services/interest.service';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="py-8">
-      <div class="flex justify-between items-center mb-8">
+    <div class="app-page">
+      <div class="app-page-header">
         <div>
-          <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">My Ideas</h1>
-          <p class="mt-2 text-sm text-gray-500">Manage and track your startup concepts.</p>
+          <h1 class="app-page-title">My Ideas</h1>
+          <p class="app-page-subtitle">Manage and track your startup concepts.</p>
         </div>
         <a routerLink="/founder/create-idea" class="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:-translate-y-0.5">
           <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">

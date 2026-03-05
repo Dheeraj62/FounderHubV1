@@ -17,6 +17,10 @@ namespace FounderHub.Application
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<ISavedIdeaService, SavedIdeaService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IFeedService, FeedService>();
+            services.AddScoped<IFounderUpdateService, FounderUpdateService>();
+            services.AddScoped<IFollowService, FollowService>();
+            services.AddScoped<IIdeaViewService, IdeaViewService>();
 
             return services;
         }

@@ -12,6 +12,11 @@ namespace FounderHub.Domain.Entities
         public string Solution { get; set; } = string.Empty;
         public string Stage { get; set; } = string.Empty; // Idea / MVP / EarlyRevenue
         public string Industry { get; set; } = string.Empty;
+
+        // MVP-3: Pitch & demo links
+        public string? PitchDeckUrl { get; set; }
+        public string? DemoUrl { get; set; }
+        public string? StartupWebsite { get; set; }
         
         public bool PreviouslyRejected { get; set; }
         public string? RejectedBy { get; set; }

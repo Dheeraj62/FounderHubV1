@@ -23,6 +23,11 @@ namespace FounderHub.Infrastructure.Repositories
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<Interest?> GetByIdAsync(string id)
+        {
+            return await _context.Interests.Find(i => i.Id == id).FirstOrDefaultAsync();
+        }
+
         public async Task CreateAsync(Interest interest)
         {
             await _context.Interests.InsertOneAsync(interest);

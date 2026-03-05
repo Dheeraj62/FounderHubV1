@@ -11,6 +11,8 @@ namespace FounderHub.Application.DTOs.Profiles
         public int DomainExperienceYears { get; set; }
         public int TeamSize { get; set; }
         public bool LinkedInVerified { get; set; }
+        public string? LinkedInProfileUrl { get; set; }
+        public string? StartupWebsite { get; set; }
         public string Bio { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
     }
@@ -22,6 +24,8 @@ namespace FounderHub.Application.DTOs.Profiles
         public int DomainExperienceYears { get; set; }
         public int TeamSize { get; set; }
         public bool LinkedInVerified { get; set; }
+        public string? LinkedInProfileUrl { get; set; }
+        public string? StartupWebsite { get; set; }
         public string Bio { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
     }
@@ -35,6 +39,12 @@ namespace FounderHub.Application.DTOs.Profiles
         public string TicketSizeRange { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
         public string Bio { get; set; } = string.Empty;
+
+        public string? InvestmentFirm { get; set; }
+        public List<string> PortfolioCompanies { get; set; } = new();
+        public string? AngelListProfile { get; set; }
+        public bool LinkedInVerified { get; set; }
+        public string? LinkedInProfileUrl { get; set; }
     }
 
     public class UpsertInvestorProfileRequest
@@ -44,5 +54,11 @@ namespace FounderHub.Application.DTOs.Profiles
         public string TicketSizeRange { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
         public string Bio { get; set; } = string.Empty;
+
+        public string? InvestmentFirm { get; set; }
+        public List<string> PortfolioCompanies { get; set; } = new();
+        public string? AngelListProfile { get; set; }
+        public bool LinkedInVerified { get; set; }
+        public string? LinkedInProfileUrl { get; set; }
     }
 }

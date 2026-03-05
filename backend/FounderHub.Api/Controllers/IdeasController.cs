@@ -14,10 +14,12 @@ namespace FounderHub.Api.Controllers
     public class IdeasController : ControllerBase
     {
         private readonly IIdeaService _ideaService;
+        private readonly IIdeaViewService _ideaViews;
 
-        public IdeasController(IIdeaService ideaService)
+        public IdeasController(IIdeaService ideaService, IIdeaViewService ideaViews)
         {
             _ideaService = ideaService;
+            _ideaViews = ideaViews;
         }
 
         private string GetUserId() => User.FindFirstValue("sub") ?? User.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -61,6 +63,9 @@ namespace FounderHub.Api.Controllers
         {
             var result = await _ideaService.GetIdeaByIdAsync(id);
             if (result == null) return NotFound();
+
+            // MVP-3: Track views for engagement/trending
+            await _ideaViews.TrackViewAsync(id, GetUserId());
             return Ok(result);
         }
 
@@ -78,6 +83,13 @@ namespace FounderHub.Api.Controllers
         public async Task<IActionResult> GetRecommended()
         {
             var result = await _ideaService.GetRecommendedAsync(GetUserId());
+            return Ok(result);
+        }
+
+        [HttpGet("trending")]
+        public async Task<IActionResult> GetTrending([FromQuery] int limit = 10)
+        {
+            var result = await _ideaService.GetTrendingAsync(limit);
             return Ok(result);
         }
     }

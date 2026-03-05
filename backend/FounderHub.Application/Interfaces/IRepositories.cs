@@ -33,6 +33,7 @@ namespace FounderHub.Application.Interfaces
     public interface IInterestRepository
     {
         Task<Interest?> GetInterestAsync(string ideaId, string investorId);
+        Task<Interest?> GetByIdAsync(string id);
         Task CreateAsync(Interest interest);
         Task UpdateAsync(Interest interest);
         
@@ -91,5 +92,35 @@ namespace FounderHub.Application.Interfaces
         Task CreateAsync(Notification notification);
         Task UpdateAsync(Notification notification);
         Task<Notification?> GetByIdAsync(string id);
+    }
+
+    // MVP-3
+    public interface IFeedEventRepository
+    {
+        Task CreateAsync(FeedEvent feedEvent);
+        Task<IEnumerable<FeedEvent>> GetLatestAsync(int skip, int take);
+    }
+
+    public interface IFounderUpdateRepository
+    {
+        Task CreateAsync(FounderUpdate update);
+        Task<IEnumerable<FounderUpdate>> GetByFounderIdAsync(string founderId, int skip, int take);
+        Task<FounderUpdate?> GetByIdAsync(string id);
+    }
+
+    public interface IFollowRepository
+    {
+        Task CreateAsync(Follow follow);
+        Task DeleteAsync(string followerId, string followingId, string type);
+        Task<Follow?> GetAsync(string followerId, string followingId, string type);
+        Task<IEnumerable<Follow>> GetFollowingAsync(string followerId, string? type = null);
+        Task<IEnumerable<Follow>> GetFollowersAsync(string followingId, string? type = null);
+    }
+
+    public interface IIdeaViewRepository
+    {
+        Task CreateAsync(IdeaView view);
+        Task<int> GetIdeaViewCountAsync(string ideaId);
+        Task<int> GetFounderTotalViewsAsync(string founderId);
     }
 }

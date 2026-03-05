@@ -11,11 +11,11 @@ import { Idea } from '../../core/models/idea.models';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+    <div class="app-page">
+      <div class="app-page-header">
         <div>
-          <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Discover Ideas</h1>
-          <p class="mt-2 text-sm text-gray-500">Find the next big thing and connect with visionary founders.</p>
+          <h1 class="app-page-title">Discover Ideas</h1>
+          <p class="app-page-subtitle">Find the next big thing and connect with visionary founders.</p>
         </div>
       </div>
 

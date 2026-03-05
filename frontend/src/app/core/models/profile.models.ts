@@ -6,6 +6,8 @@ export interface FounderProfile {
     domainExperienceYears: number;
     teamSize: number;
     linkedInVerified: boolean;
+    linkedInProfileUrl?: string;
+    startupWebsite?: string;
     bio: string;
     location: string;
 }
@@ -16,6 +18,8 @@ export interface UpsertFounderProfileRequest {
     domainExperienceYears: number;
     teamSize: number;
     linkedInVerified: boolean;
+    linkedInProfileUrl?: string;
+    startupWebsite?: string;
     bio: string;
     location: string;
 }
@@ -28,6 +32,11 @@ export interface InvestorProfile {
     ticketSizeRange: string;
     location: string;
     bio: string;
+    investmentFirm?: string;
+    portfolioCompanies: string[];
+    angelListProfile?: string;
+    linkedInVerified: boolean;
+    linkedInProfileUrl?: string;
 }
 
 export interface UpsertInvestorProfileRequest {
@@ -36,4 +45,9 @@ export interface UpsertInvestorProfileRequest {
     ticketSizeRange: string;
     location: string;
     bio: string;
+    investmentFirm?: string;
+    portfolioCompanies: string[];
+    angelListProfile?: string;
+    linkedInVerified: boolean;
+    linkedInProfileUrl?: string;
 }

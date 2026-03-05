@@ -10,6 +10,56 @@ namespace FounderHub.Application.Services
 {
     public class IdeaService : IIdeaService
     {
+        public async Task<IEnumerable<TrendingIdeaDto>> GetTrendingAsync(int limit = 10)
+        {
+            if (limit < 1) limit = 10;
+
+            var ideas = (await _ideaRepository.GetIdeasAsync(null, null, null, 1, 200)).Ideas.ToList();
+            var scored = new List<TrendingIdeaDto>(ideas.Count);
+
+            foreach (var idea in ideas)
+            {
+                var views = await _ideaViewRepository.GetIdeaViewCountAsync(idea.Id);
+                var interested = await _interestRepository.GetInterestedCountAsync(idea.Id);
+                var maybe = await _interestRepository.GetMaybeCountAsync(idea.Id);
+
+                var ageDays = (DateTime.UtcNow - idea.UpdatedAt).TotalDays;
+                var recencyBoost = (int)Math.Max(0, 20 - (ageDays * 2)); // simple decay
+
+                var score = (interested * 8) + (maybe * 3) + views + recencyBoost;
+
+                scored.Add(new TrendingIdeaDto
+                {
+                    TrendingScore = score,
+                    ViewsLast7Days = views,
+                    InterestsLast7Days = interested + maybe,
+                    ConnectionsLast7Days = 0,
+                    Id = idea.Id,
+                    FounderId = idea.FounderId,
+                    Title = idea.Title,
+                    Problem = idea.Problem,
+                    Solution = idea.Solution,
+                    Stage = idea.Stage,
+                    Industry = idea.Industry,
+                    PitchDeckUrl = idea.PitchDeckUrl,
+                    DemoUrl = idea.DemoUrl,
+                    StartupWebsite = idea.StartupWebsite,
+                    PreviouslyRejected = idea.PreviouslyRejected,
+                    RejectedBy = idea.RejectedBy,
+                    RejectionReasonCategory = idea.RejectionReasonCategory,
+                    WhatChangedAfterRejection = idea.WhatChangedAfterRejection,
+                    FundingRange = idea.FundingRange,
+                    Location = idea.Location,
+                    CreatedAt = idea.CreatedAt,
+                    UpdatedAt = idea.UpdatedAt
+                });
+            }
+
+            return scored
+                .OrderByDescending(s => s.TrendingScore)
+                .Take(limit);
+        }
+
         public async Task<IEnumerable<RecommendedIdeaDto>> GetRecommendedAsync(string investorId)
         {
             var investorProfile = await _investorRepository.GetByUserIdAsync(investorId);
@@ -75,11 +125,22 @@ namespace FounderHub.Application.Services
 
         private readonly IIdeaRepository _ideaRepository;
         private readonly IInvestorProfileRepository _investorRepository;
+        private readonly IInterestRepository _interestRepository;
+        private readonly IIdeaViewRepository _ideaViewRepository;
+        private readonly IFeedEventRepository _feedEvents;
 
-        public IdeaService(IIdeaRepository ideaRepository, IInvestorProfileRepository investorRepository)
+        public IdeaService(
+            IIdeaRepository ideaRepository,
+            IInvestorProfileRepository investorRepository,
+            IInterestRepository interestRepository,
+            IIdeaViewRepository ideaViewRepository,
+            IFeedEventRepository feedEvents)
         {
             _ideaRepository = ideaRepository;
             _investorRepository = investorRepository;
+            _interestRepository = interestRepository;
+            _ideaViewRepository = ideaViewRepository;
+            _feedEvents = feedEvents;
         }
 
         public async Task<IdeaDto> CreateIdeaAsync(string founderId, CreateIdeaRequest request)
@@ -92,6 +153,9 @@ namespace FounderHub.Application.Services
                 Solution = request.Solution,
                 Stage = request.Stage,
                 Industry = request.Industry,
+                PitchDeckUrl = request.PitchDeckUrl,
+                DemoUrl = request.DemoUrl,
+                StartupWebsite = request.StartupWebsite,
                 PreviouslyRejected = request.PreviouslyRejected,
                 RejectedBy = request.RejectedBy,
                 RejectionReasonCategory = request.RejectionReasonCategory,
@@ -103,6 +167,13 @@ namespace FounderHub.Application.Services
             };
 
             await _ideaRepository.CreateAsync(idea);
+            await _feedEvents.CreateAsync(new FeedEvent
+            {
+                Type = "IDEA_CREATED",
+                UserId = founderId,
+                ReferenceId = idea.Id,
+                CreatedAt = idea.CreatedAt
+            });
             return MapToDto(idea);
         }
 
@@ -117,6 +188,9 @@ namespace FounderHub.Application.Services
             idea.Solution = request.Solution;
             idea.Stage = request.Stage;
             idea.Industry = request.Industry;
+            idea.PitchDeckUrl = request.PitchDeckUrl;
+            idea.DemoUrl = request.DemoUrl;
+            idea.StartupWebsite = request.StartupWebsite;
             idea.PreviouslyRejected = request.PreviouslyRejected;
             idea.RejectedBy = request.RejectedBy;
             idea.RejectionReasonCategory = request.RejectionReasonCategory;
@@ -126,6 +200,13 @@ namespace FounderHub.Application.Services
             idea.UpdatedAt = DateTime.UtcNow;
 
             await _ideaRepository.UpdateAsync(idea);
+            await _feedEvents.CreateAsync(new FeedEvent
+            {
+                Type = "IDEA_UPDATED",
+                UserId = founderId,
+                ReferenceId = idea.Id,
+                CreatedAt = idea.UpdatedAt
+            });
             return MapToDto(idea);
         }
 
@@ -173,6 +254,9 @@ namespace FounderHub.Application.Services
                 Solution = idea.Solution,
                 Stage = idea.Stage,
                 Industry = idea.Industry,
+                PitchDeckUrl = idea.PitchDeckUrl,
+                DemoUrl = idea.DemoUrl,
+                StartupWebsite = idea.StartupWebsite,
                 PreviouslyRejected = idea.PreviouslyRejected,
                 RejectedBy = idea.RejectedBy,
                 RejectionReasonCategory = idea.RejectionReasonCategory,
@@ -195,6 +279,9 @@ namespace FounderHub.Application.Services
                 Solution = idea.Solution,
                 Stage = idea.Stage,
                 Industry = idea.Industry,
+                PitchDeckUrl = idea.PitchDeckUrl,
+                DemoUrl = idea.DemoUrl,
+                StartupWebsite = idea.StartupWebsite,
                 PreviouslyRejected = idea.PreviouslyRejected,
                 RejectedBy = idea.RejectedBy,
                 RejectionReasonCategory = idea.RejectionReasonCategory,

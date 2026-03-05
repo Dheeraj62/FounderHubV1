@@ -66,6 +66,24 @@ import { FounderSignalsComponent } from '../founder-signals/founder-signals.comp
                   <p class="text-xl font-bold text-indigo-400">Validated Flow</p>
                 </div>
               </div>
+
+              <section *ngIf="idea.pitchDeckUrl || idea.demoUrl || idea.startupWebsite" class="mt-8">
+                <h2 class="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-4 border-b border-gray-800 pb-2">Links</h2>
+                <div class="flex flex-wrap gap-3">
+                  <a *ngIf="idea.pitchDeckUrl" class="px-4 py-2 rounded-xl bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 text-sm font-bold hover:bg-indigo-600/30 transition"
+                     [href]="idea.pitchDeckUrl" target="_blank" rel="noopener noreferrer">
+                    📄 Pitch Deck
+                  </a>
+                  <a *ngIf="idea.demoUrl" class="px-4 py-2 rounded-xl bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 text-sm font-bold hover:bg-emerald-600/30 transition"
+                     [href]="idea.demoUrl" target="_blank" rel="noopener noreferrer">
+                    ▶ Demo
+                  </a>
+                  <a *ngIf="idea.startupWebsite" class="px-4 py-2 rounded-xl bg-sky-600/20 text-sky-300 border border-sky-500/30 text-sm font-bold hover:bg-sky-600/30 transition"
+                     [href]="idea.startupWebsite" target="_blank" rel="noopener noreferrer">
+                    🔗 Website
+                  </a>
+                </div>
+              </section>
             </div>
           </div>
 

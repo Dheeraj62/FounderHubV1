@@ -12,11 +12,13 @@ namespace FounderHub.Application.Services
     {
         private readonly IIdeaVersionRepository _versionRepo;
         private readonly IIdeaRepository _ideaRepo;
+        private readonly IFeedEventRepository _feedEvents;
 
-        public IdeaVersionService(IIdeaVersionRepository versionRepo, IIdeaRepository ideaRepo)
+        public IdeaVersionService(IIdeaVersionRepository versionRepo, IIdeaRepository ideaRepo, IFeedEventRepository feedEvents)
         {
             _versionRepo = versionRepo;
             _ideaRepo = ideaRepo;
+            _feedEvents = feedEvents;
         }
 
         public async Task CreateVersionAsync(string userId, string ideaId, CreateVersionRequest request)
@@ -43,6 +45,14 @@ namespace FounderHub.Application.Services
             idea.Solution = request.Solution;
             idea.UpdatedAt = DateTime.UtcNow;
             await _ideaRepo.UpdateAsync(idea);
+
+            await _feedEvents.CreateAsync(new FeedEvent
+            {
+                Type = "IDEA_UPDATED",
+                UserId = userId,
+                ReferenceId = ideaId,
+                CreatedAt = idea.UpdatedAt
+            });
         }
 
         public async Task<IEnumerable<IdeaVersionDto>> GetVersionsAsync(string ideaId)

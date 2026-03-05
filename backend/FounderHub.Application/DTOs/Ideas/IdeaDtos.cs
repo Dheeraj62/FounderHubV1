@@ -16,6 +16,12 @@ namespace FounderHub.Application.DTOs.Ideas
 
         public string Stage { get; set; } = string.Empty;
         public string Industry { get; set; } = string.Empty;
+
+        // MVP-3: Pitch & demo links
+        public string? PitchDeckUrl { get; set; }
+        public string? DemoUrl { get; set; }
+        public string? StartupWebsite { get; set; }
+
         public bool PreviouslyRejected { get; set; }
         public string? RejectedBy { get; set; }
         public string? RejectionReasonCategory { get; set; }
@@ -28,6 +34,14 @@ namespace FounderHub.Application.DTOs.Ideas
     {
         public int MatchScore { get; set; }
         public List<string> MatchReasons { get; set; } = new();
+    }
+
+    public class TrendingIdeaDto : IdeaDto
+    {
+        public int TrendingScore { get; set; }
+        public int ViewsLast7Days { get; set; }
+        public int InterestsLast7Days { get; set; }
+        public int ConnectionsLast7Days { get; set; }
     }
 
     public class UpdateIdeaRequest : CreateIdeaRequest

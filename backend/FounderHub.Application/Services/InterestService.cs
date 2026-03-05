@@ -13,17 +13,20 @@ namespace FounderHub.Application.Services
         private readonly IIdeaRepository _ideaRepository;
         private readonly INotificationRepository _notificationRepository;
         private readonly IConnectionRepository _connectionRepository;
+        private readonly IFeedEventRepository _feedEvents;
 
         public InterestService(
             IInterestRepository interestRepository, 
             IIdeaRepository ideaRepository,
             INotificationRepository notificationRepository,
-            IConnectionRepository connectionRepository)
+            IConnectionRepository connectionRepository,
+            IFeedEventRepository feedEvents)
         {
             _interestRepository = interestRepository;
             _ideaRepository = ideaRepository;
             _notificationRepository = notificationRepository;
             _connectionRepository = connectionRepository;
+            _feedEvents = feedEvents;
         }
 
         public async Task ExpressInterestAsync(string ideaId, string investorId, ExpressInterestRequest request)
@@ -36,11 +39,13 @@ namespace FounderHub.Application.Services
                 throw new Exception("Invalid status. Must be 'Interested', 'HighlyInterested', 'Maybe', or 'Pass'.");
 
             var existingInterest = await _interestRepository.GetInterestAsync(ideaId, investorId);
+            string interestId;
             if (existingInterest != null)
             {
                 existingInterest.Status = status;
                 existingInterest.UpdatedAt = DateTime.UtcNow;
                 await _interestRepository.UpdateAsync(existingInterest);
+                interestId = existingInterest.Id;
             }
             else
             {
@@ -53,7 +58,16 @@ namespace FounderHub.Application.Services
                     UpdatedAt = DateTime.UtcNow
                 };
                 await _interestRepository.CreateAsync(interest);
+                interestId = interest.Id;
             }
+
+            await _feedEvents.CreateAsync(new FeedEvent
+            {
+                Type = "INTEREST_EVENT",
+                UserId = investorId,
+                ReferenceId = interestId,
+                CreatedAt = DateTime.UtcNow
+            });
 
             // Trigger Notification to Founder
             await _notificationRepository.CreateAsync(new Notification

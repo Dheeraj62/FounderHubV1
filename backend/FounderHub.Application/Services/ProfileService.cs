@@ -31,6 +31,8 @@ namespace FounderHub.Application.Services
                 DomainExperienceYears = profile.DomainExperienceYears,
                 TeamSize = profile.TeamSize,
                 LinkedInVerified = profile.LinkedInVerified,
+                LinkedInProfileUrl = profile.LinkedInProfileUrl,
+                StartupWebsite = profile.StartupWebsite,
                 Bio = profile.Bio,
                 Location = profile.Location
             };
@@ -70,7 +72,12 @@ namespace FounderHub.Application.Services
                 InvestmentStage = profile.InvestmentStage,
                 TicketSizeRange = profile.TicketSizeRange,
                 Location = profile.Location,
-                Bio = profile.Bio
+                Bio = profile.Bio,
+                InvestmentFirm = profile.InvestmentFirm,
+                PortfolioCompanies = profile.PortfolioCompanies,
+                AngelListProfile = profile.AngelListProfile,
+                LinkedInVerified = profile.LinkedInVerified,
+                LinkedInProfileUrl = profile.LinkedInProfileUrl
             };
         }
 
@@ -102,6 +109,8 @@ namespace FounderHub.Application.Services
             profile.DomainExperienceYears = request.DomainExperienceYears;
             profile.TeamSize = request.TeamSize;
             profile.LinkedInVerified = request.LinkedInVerified;
+            profile.LinkedInProfileUrl = request.LinkedInProfileUrl;
+            profile.StartupWebsite = request.StartupWebsite;
             profile.Bio = request.Bio;
             profile.Location = request.Location;
         }
@@ -113,6 +122,11 @@ namespace FounderHub.Application.Services
             profile.TicketSizeRange = request.TicketSizeRange;
             profile.Location = request.Location;
             profile.Bio = request.Bio;
+            profile.InvestmentFirm = request.InvestmentFirm;
+            profile.PortfolioCompanies = request.PortfolioCompanies;
+            profile.AngelListProfile = request.AngelListProfile;
+            profile.LinkedInVerified = request.LinkedInVerified;
+            profile.LinkedInProfileUrl = request.LinkedInProfileUrl;
         }
     }
 }

@@ -12,12 +12,14 @@ namespace FounderHub.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IJwtProvider _jwtProvider;
+        private readonly IFeedEventRepository _feedEvents;
 
-        public AuthService(IUserRepository userRepository, IPasswordHasher passwordHasher, IJwtProvider jwtProvider)
+        public AuthService(IUserRepository userRepository, IPasswordHasher passwordHasher, IJwtProvider jwtProvider, IFeedEventRepository feedEvents)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _jwtProvider = jwtProvider;
+            _feedEvents = feedEvents;
         }
 
         public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
@@ -45,6 +47,17 @@ namespace FounderHub.Application.Services
             };
 
             await _userRepository.CreateAsync(user);
+
+            if (user.Role == UserRole.Founder)
+            {
+                await _feedEvents.CreateAsync(new FeedEvent
+                {
+                    Type = "NEW_FOUNDER",
+                    UserId = user.Id,
+                    ReferenceId = null,
+                    CreatedAt = user.CreatedAt
+                });
+            }
 
             var token = _jwtProvider.GenerateToken(user);
 

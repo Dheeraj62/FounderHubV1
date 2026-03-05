@@ -101,7 +101,12 @@ export class InvestorProfileComponent implements OnInit {
     investmentStage: 'Early-Traction',
     ticketSizeRange: '',
     location: '',
-    bio: ''
+    bio: '',
+    investmentFirm: '',
+    portfolioCompanies: [],
+    angelListProfile: '',
+    linkedInVerified: false,
+    linkedInProfileUrl: ''
   };
 
   industries: string[] = ['Fintech', 'Healthtech', 'AI/ML', 'SaaS', 'Edtech', 'E-commerce', 'Crypto', 'Clean Energy'];
@@ -122,7 +127,12 @@ export class InvestorProfileComponent implements OnInit {
             investmentStage: p.investmentStage,
             ticketSizeRange: p.ticketSizeRange,
             location: p.location,
-            bio: p.bio
+            bio: p.bio,
+            investmentFirm: p.investmentFirm || '',
+            portfolioCompanies: p.portfolioCompanies || [],
+            angelListProfile: p.angelListProfile || '',
+            linkedInVerified: !!p.linkedInVerified,
+            linkedInProfileUrl: p.linkedInProfileUrl || ''
           };
           this.cdr.markForCheck();
         },

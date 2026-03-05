@@ -26,6 +26,10 @@ namespace FounderHub.Infrastructure
             services.AddScoped<IMessageRepository, MessageRepository>();
             services.AddScoped<ISavedIdeaRepository, SavedIdeaRepository>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<IFeedEventRepository, FeedEventRepository>();
+            services.AddScoped<IFounderUpdateRepository, FounderUpdateRepository>();
+            services.AddScoped<IFollowRepository, FollowRepository>();
+            services.AddScoped<IIdeaViewRepository, IdeaViewRepository>();
             
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<IJwtProvider, JwtProvider>();

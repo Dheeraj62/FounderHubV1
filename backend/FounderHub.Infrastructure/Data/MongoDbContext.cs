@@ -27,6 +27,10 @@ namespace FounderHub.Infrastructure.Data
         public IMongoCollection<Message> Messages => _database.GetCollection<Message>("Messages");
         public IMongoCollection<SavedIdea> SavedIdeas => _database.GetCollection<SavedIdea>("SavedIdeas");
         public IMongoCollection<Notification> Notifications => _database.GetCollection<Notification>("Notifications");
+        public IMongoCollection<FeedEvent> FeedEvents => _database.GetCollection<FeedEvent>("FeedEvents");
+        public IMongoCollection<FounderUpdate> FounderUpdates => _database.GetCollection<FounderUpdate>("FounderUpdates");
+        public IMongoCollection<Follow> Follows => _database.GetCollection<Follow>("Follows");
+        public IMongoCollection<IdeaView> IdeaViews => _database.GetCollection<IdeaView>("IdeaViews");
 
         private void ConfigureIndexes()
         {
@@ -75,6 +79,31 @@ namespace FounderHub.Infrastructure.Data
             // Notifications: Index on UserId
             Notifications.Indexes.CreateOne(new CreateIndexModel<Notification>(
                 Builders<Notification>.IndexKeys.Ascending(n => n.UserId)));
+
+            // FeedEvents: Index on CreatedAt + actor
+            FeedEvents.Indexes.CreateOne(new CreateIndexModel<FeedEvent>(
+                Builders<FeedEvent>.IndexKeys.Descending(e => e.CreatedAt)));
+            FeedEvents.Indexes.CreateOne(new CreateIndexModel<FeedEvent>(
+                Builders<FeedEvent>.IndexKeys.Ascending(e => e.UserId).Descending(e => e.CreatedAt)));
+
+            // FounderUpdates: Index on FounderId + CreatedAt
+            FounderUpdates.Indexes.CreateOne(new CreateIndexModel<FounderUpdate>(
+                Builders<FounderUpdate>.IndexKeys.Ascending(u => u.FounderId).Descending(u => u.CreatedAt)));
+
+            // Follows: Unique compound FollowerId + FollowingId + Type
+            Follows.Indexes.CreateOne(new CreateIndexModel<Follow>(
+                Builders<Follow>.IndexKeys.Ascending(f => f.FollowerId).Ascending(f => f.FollowingId).Ascending(f => f.Type),
+                new CreateIndexOptions { Unique = true }));
+            Follows.Indexes.CreateOne(new CreateIndexModel<Follow>(
+                Builders<Follow>.IndexKeys.Ascending(f => f.FollowerId).Ascending(f => f.Type)));
+            Follows.Indexes.CreateOne(new CreateIndexModel<Follow>(
+                Builders<Follow>.IndexKeys.Ascending(f => f.FollowingId).Ascending(f => f.Type)));
+
+            // IdeaViews: Index on IdeaId + ViewedAt (for trending) and IdeaId + UserId (for de-dupe queries)
+            IdeaViews.Indexes.CreateOne(new CreateIndexModel<IdeaView>(
+                Builders<IdeaView>.IndexKeys.Ascending(v => v.IdeaId).Descending(v => v.ViewedAt)));
+            IdeaViews.Indexes.CreateOne(new CreateIndexModel<IdeaView>(
+                Builders<IdeaView>.IndexKeys.Ascending(v => v.IdeaId).Ascending(v => v.UserId)));
         }
     }
 }

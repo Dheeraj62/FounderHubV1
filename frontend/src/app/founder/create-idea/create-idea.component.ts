@@ -91,6 +91,32 @@ import { IdeaService } from '../../core/services/idea.service';
                   <input type="text" formControlName="location" id="location" class="px-4 py-3 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-lg bg-gray-50" placeholder="e.g. San Francisco, CA">
                 </div>
               </div>
+
+              <div class="sm:col-span-6">
+                <h3 class="text-sm font-bold text-gray-900 mt-4">Pitch Deck & Demo</h3>
+                <p class="text-xs text-gray-500 mt-1">Optional links help investors evaluate faster.</p>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="pitchDeckUrl" class="block text-sm font-semibold text-gray-700">Pitch Deck URL</label>
+                <div class="mt-1">
+                  <input type="url" formControlName="pitchDeckUrl" id="pitchDeckUrl" class="px-4 py-3 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-lg bg-gray-50" placeholder="https://...">
+                </div>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="demoUrl" class="block text-sm font-semibold text-gray-700">Demo URL</label>
+                <div class="mt-1">
+                  <input type="url" formControlName="demoUrl" id="demoUrl" class="px-4 py-3 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-lg bg-gray-50" placeholder="https://...">
+                </div>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="startupWebsite" class="block text-sm font-semibold text-gray-700">Startup Website</label>
+                <div class="mt-1">
+                  <input type="url" formControlName="startupWebsite" id="startupWebsite" class="px-4 py-3 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-lg bg-gray-50" placeholder="https://...">
+                </div>
+              </div>
             </div>
 
             <!-- Rejection Data -->
@@ -170,6 +196,9 @@ export class CreateIdeaComponent {
     industry: ['', Validators.required],
     fundingRange: [''],
     location: [''],
+    pitchDeckUrl: [''],
+    demoUrl: [''],
+    startupWebsite: [''],
     previouslyRejected: [false],
     rejectedBy: [''],
     rejectionReasonCategory: [''],
