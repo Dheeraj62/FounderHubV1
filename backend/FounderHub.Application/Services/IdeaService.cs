@@ -14,7 +14,7 @@ namespace FounderHub.Application.Services
         {
             if (limit < 1) limit = 10;
 
-            var ideas = (await _ideaRepository.GetIdeasAsync(null, null, null, 1, 200)).Ideas.ToList();
+            var ideas = (await _ideaRepository.GetIdeasAsync(null, null, null, null, null, 1, 200)).Ideas.ToList();
             var scored = new List<TrendingIdeaDto>(ideas.Count);
 
             foreach (var idea in ideas)
@@ -44,6 +44,10 @@ namespace FounderHub.Application.Services
                     PitchDeckUrl = idea.PitchDeckUrl,
                     DemoUrl = idea.DemoUrl,
                     StartupWebsite = idea.StartupWebsite,
+                    ProductImages = idea.ProductImages,
+                    MarketSize = idea.MarketSize,
+                    TargetCustomers = idea.TargetCustomers,
+                    TractionMetrics = idea.TractionMetrics,
                     PreviouslyRejected = idea.PreviouslyRejected,
                     RejectedBy = idea.RejectedBy,
                     RejectionReasonCategory = idea.RejectionReasonCategory,
@@ -65,7 +69,7 @@ namespace FounderHub.Application.Services
             var investorProfile = await _investorRepository.GetByUserIdAsync(investorId);
             if (investorProfile == null) return Enumerable.Empty<RecommendedIdeaDto>();
 
-            var allIdeas = (await _ideaRepository.GetIdeasAsync(null, null, null, 1, 1000)).Ideas;
+            var allIdeas = (await _ideaRepository.GetIdeasAsync(null, null, null, null, null, 1, 1000)).Ideas;
             var recommendations = new List<RecommendedIdeaDto>();
 
             foreach (var idea in allIdeas)
@@ -156,6 +160,10 @@ namespace FounderHub.Application.Services
                 PitchDeckUrl = request.PitchDeckUrl,
                 DemoUrl = request.DemoUrl,
                 StartupWebsite = request.StartupWebsite,
+                ProductImages = request.ProductImages ?? new List<string>(),
+                MarketSize = request.MarketSize,
+                TargetCustomers = request.TargetCustomers,
+                TractionMetrics = request.TractionMetrics,
                 PreviouslyRejected = request.PreviouslyRejected,
                 RejectedBy = request.RejectedBy,
                 RejectionReasonCategory = request.RejectionReasonCategory,
@@ -191,6 +199,10 @@ namespace FounderHub.Application.Services
             idea.PitchDeckUrl = request.PitchDeckUrl;
             idea.DemoUrl = request.DemoUrl;
             idea.StartupWebsite = request.StartupWebsite;
+            idea.ProductImages = request.ProductImages ?? new List<string>();
+            idea.MarketSize = request.MarketSize;
+            idea.TargetCustomers = request.TargetCustomers;
+            idea.TractionMetrics = request.TractionMetrics;
             idea.PreviouslyRejected = request.PreviouslyRejected;
             idea.RejectedBy = request.RejectedBy;
             idea.RejectionReasonCategory = request.RejectionReasonCategory;
@@ -231,9 +243,9 @@ namespace FounderHub.Application.Services
             return ideas.Select(MapToDto);
         }
 
-        public async Task<PaginatedResult<IdeaDto>> GetIdeasAsync(string? stage, string? industry, bool? previouslyRejected, int page, int pageSize)
+        public async Task<PaginatedResult<IdeaDto>> GetIdeasAsync(string? stage, string? industry, bool? previouslyRejected, string? location, string? keyword, int page, int pageSize)
         {
-            var result = await _ideaRepository.GetIdeasAsync(stage, industry, previouslyRejected, page, pageSize);
+            var result = await _ideaRepository.GetIdeasAsync(stage, industry, previouslyRejected, location, keyword, page, pageSize);
             return new PaginatedResult<IdeaDto>
             {
                 Items = result.Ideas.Select(MapToDto),
@@ -257,6 +269,10 @@ namespace FounderHub.Application.Services
                 PitchDeckUrl = idea.PitchDeckUrl,
                 DemoUrl = idea.DemoUrl,
                 StartupWebsite = idea.StartupWebsite,
+                ProductImages = idea.ProductImages,
+                MarketSize = idea.MarketSize,
+                TargetCustomers = idea.TargetCustomers,
+                TractionMetrics = idea.TractionMetrics,
                 PreviouslyRejected = idea.PreviouslyRejected,
                 RejectedBy = idea.RejectedBy,
                 RejectionReasonCategory = idea.RejectionReasonCategory,
@@ -282,6 +298,10 @@ namespace FounderHub.Application.Services
                 PitchDeckUrl = idea.PitchDeckUrl,
                 DemoUrl = idea.DemoUrl,
                 StartupWebsite = idea.StartupWebsite,
+                ProductImages = idea.ProductImages,
+                MarketSize = idea.MarketSize,
+                TargetCustomers = idea.TargetCustomers,
+                TractionMetrics = idea.TractionMetrics,
                 PreviouslyRejected = idea.PreviouslyRejected,
                 RejectedBy = idea.RejectedBy,
                 RejectionReasonCategory = idea.RejectionReasonCategory,

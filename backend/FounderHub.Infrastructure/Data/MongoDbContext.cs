@@ -31,6 +31,10 @@ namespace FounderHub.Infrastructure.Data
         public IMongoCollection<FounderUpdate> FounderUpdates => _database.GetCollection<FounderUpdate>("FounderUpdates");
         public IMongoCollection<Follow> Follows => _database.GetCollection<Follow>("Follows");
         public IMongoCollection<IdeaView> IdeaViews => _database.GetCollection<IdeaView>("IdeaViews");
+        public IMongoCollection<InvestorDeal> InvestorDeals => _database.GetCollection<InvestorDeal>("InvestorDeals");
+        public IMongoCollection<Watchlist> Watchlists => _database.GetCollection<Watchlist>("Watchlists");
+        public IMongoCollection<InvestorFeedback> InvestorFeedbacks => _database.GetCollection<InvestorFeedback>("InvestorFeedbacks");
+        public IMongoCollection<Meeting> Meetings => _database.GetCollection<Meeting>("Meetings");
 
         private void ConfigureIndexes()
         {
@@ -104,6 +108,16 @@ namespace FounderHub.Infrastructure.Data
                 Builders<IdeaView>.IndexKeys.Ascending(v => v.IdeaId).Descending(v => v.ViewedAt)));
             IdeaViews.Indexes.CreateOne(new CreateIndexModel<IdeaView>(
                 Builders<IdeaView>.IndexKeys.Ascending(v => v.IdeaId).Ascending(v => v.UserId)));
+
+            // InvestorDeals: Compound InvestorId + IdeaId
+            InvestorDeals.Indexes.CreateOne(new CreateIndexModel<InvestorDeal>(
+                Builders<InvestorDeal>.IndexKeys.Ascending(d => d.InvestorId).Ascending(d => d.IdeaId),
+                new CreateIndexOptions { Unique = true }));
+
+            // Watchlists: Compound InvestorId + IdeaId
+            Watchlists.Indexes.CreateOne(new CreateIndexModel<Watchlist>(
+                Builders<Watchlist>.IndexKeys.Ascending(w => w.InvestorId).Ascending(w => w.IdeaId),
+                new CreateIndexOptions { Unique = true }));
         }
     }
 }

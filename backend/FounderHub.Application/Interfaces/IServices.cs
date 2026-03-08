@@ -28,7 +28,7 @@ namespace FounderHub.Application.Interfaces
         Task DeleteIdeaAsync(string founderId, string ideaId);
         Task<IdeaDto?> GetIdeaByIdAsync(string ideaId);
         Task<IEnumerable<IdeaDto>> GetMyIdeasAsync(string founderId);
-        Task<PaginatedResult<IdeaDto>> GetIdeasAsync(string? stage, string? industry, bool? previouslyRejected, int page, int pageSize);
+        Task<PaginatedResult<IdeaDto>> GetIdeasAsync(string? stage, string? industry, bool? previouslyRejected, string? location, string? keyword, int page, int pageSize);
         Task<IEnumerable<RecommendedIdeaDto>> GetRecommendedAsync(string investorId);
         Task<IEnumerable<TrendingIdeaDto>> GetTrendingAsync(int limit = 10);
     }

@@ -21,6 +21,11 @@ namespace FounderHub.Application.DTOs.Ideas
         public string? PitchDeckUrl { get; set; }
         public string? DemoUrl { get; set; }
         public string? StartupWebsite { get; set; }
+        
+        public List<string> ProductImages { get; set; } = new();
+        public string? MarketSize { get; set; }
+        public string? TargetCustomers { get; set; }
+        public string? TractionMetrics { get; set; }
 
         public bool PreviouslyRejected { get; set; }
         public string? RejectedBy { get; set; }

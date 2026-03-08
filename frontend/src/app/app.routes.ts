@@ -1,85 +1,129 @@
 import { Routes } from '@angular/router';
 import { LandingComponent } from './landing/landing.component';
-import { LoginComponent } from './auth/login/login.component';
-import { RegisterComponent } from './auth/register/register.component';
-import { DashboardComponent } from './founder/dashboard/dashboard.component';
-import { CreateIdeaComponent } from './founder/create-idea/create-idea.component';
-import { EditIdeaComponent } from './founder/edit-idea/edit-idea.component';
-import { BrowseIdeasComponent } from './investor/browse-ideas/browse-ideas.component';
-import { FounderProfileComponent } from './founder/profile/profile.component';
-import { InvestorProfileComponent } from './investor/profile/profile.component';
-import { IdeaDetailComponent } from './shared/components/idea-detail/idea-detail.component';
-import { RecommendationsComponent } from './investor/recommendations/recommendations.component';
-import { ConnectionsListComponent } from './shared/components/connections-list/connections-list.component';
-import { MessageThreadComponent } from './shared/components/message-thread/message-thread.component';
-import { NotificationsPanelComponent } from './shared/components/notifications-panel/notifications-panel.component';
-import { SavedIdeasComponent } from './investor/saved-ideas/saved-ideas.component';
-import { FeedPageComponent } from './feed/feed-page/feed-page.component';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { DashboardLayoutComponent } from './shared/layouts/dashboard-layout/dashboard-layout.component';
 
 export const routes: Routes = [
+    // PUBLIC ROUTES
     { path: '', component: LandingComponent, pathMatch: 'full' },
-    { path: 'auth/login', component: LoginComponent },
-    { path: 'auth/register', component: RegisterComponent },
-
-    // UNIVERSAL ROUTES (Both Roles)
-    { path: 'feed', component: FeedPageComponent, canActivate: [authGuard] },
-    { path: 'idea/:id', component: IdeaDetailComponent, canActivate: [authGuard] },
-    { path: 'connections', component: ConnectionsListComponent, canActivate: [authGuard] },
-    { path: 'messages/:id', component: MessageThreadComponent, canActivate: [authGuard] },
-    { path: 'notifications', component: NotificationsPanelComponent, canActivate: [authGuard] },
-
-    // Founder Routes
     {
-        path: 'founder/dashboard',
-        component: DashboardComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { role: 'Founder' }
+        path: 'auth/login',
+        loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent)
     },
     {
-        path: 'founder/create-idea',
-        component: CreateIdeaComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { role: 'Founder' }
-    },
-    {
-        path: 'founder/edit-idea/:id',
-        component: EditIdeaComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { role: 'Founder' }
-    },
-    {
-        path: 'founder/profile',
-        component: FounderProfileComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { role: 'Founder' }
+        path: 'auth/register',
+        loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent)
     },
 
-    // Investor Routes
+    // AUTHENTICATED DASHBOARD ROUTES
     {
-        path: 'investor/browse',
-        component: BrowseIdeasComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { role: 'Investor' }
-    },
-    {
-        path: 'investor/recommendations',
-        component: RecommendationsComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { role: 'Investor' }
-    },
-    {
-        path: 'investor/saved-ideas',
-        component: SavedIdeasComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { role: 'Investor' }
-    },
-    {
-        path: 'investor/profile',
-        component: InvestorProfileComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { role: 'Investor' }
+        path: '',
+        component: DashboardLayoutComponent,
+        canActivate: [authGuard],
+        children: [
+            {
+                path: 'feed',
+                loadComponent: () => import('./feed/feed-page/feed-page.component').then(m => m.FeedPageComponent)
+            },
+            {
+                path: 'idea/:id',
+                loadComponent: () => import('./shared/components/idea-detail/idea-detail.component').then(m => m.IdeaDetailComponent)
+            },
+            {
+                path: 'connections',
+                loadComponent: () => import('./shared/components/connections-list/connections-list.component').then(m => m.ConnectionsListComponent)
+            },
+            {
+                path: 'messages/:id',
+                loadComponent: () => import('./shared/components/message-thread/message-thread.component').then(m => m.MessageThreadComponent)
+            },
+            {
+                path: 'notifications',
+                loadComponent: () => import('./shared/components/notifications-panel/notifications-panel.component').then(m => m.NotificationsPanelComponent)
+            },
+
+            // Founder specific
+            {
+                path: 'founder/dashboard',
+                loadComponent: () => import('./founder/dashboard/dashboard.component').then(m => m.DashboardComponent),
+                canActivate: [roleGuard],
+                data: { role: 'Founder' }
+            },
+            {
+                path: 'founder/create-idea',
+                loadComponent: () => import('./founder/create-idea/create-idea.component').then(m => m.CreateIdeaComponent),
+                canActivate: [roleGuard],
+                data: { role: 'Founder' }
+            },
+            {
+                path: 'founder/edit-idea/:id',
+                loadComponent: () => import('./founder/edit-idea/edit-idea.component').then(m => m.EditIdeaComponent),
+                canActivate: [roleGuard],
+                data: { role: 'Founder' }
+            },
+            {
+                path: 'founder/profile',
+                loadComponent: () => import('./founder/profile/profile.component').then(m => m.FounderProfileComponent),
+                canActivate: [roleGuard],
+                data: { role: 'Founder' }
+            },
+            {
+                path: 'founder/analytics',
+                loadComponent: () => import('./founder/analytics/analytics.component').then(m => m.AnalyticsComponent),
+                canActivate: [roleGuard],
+                data: { role: 'Founder' }
+            },
+            {
+                path: 'founder/updates',
+                loadComponent: () => import('./founder/updates/updates.component').then(m => m.UpdatesComponent),
+                canActivate: [roleGuard],
+                data: { role: 'Founder' }
+            },
+            {
+                path: 'meetings',
+                loadComponent: () => import('./shared/meetings/meetings.component').then(m => m.MeetingsComponent),
+                canActivate: [authGuard]
+            },
+
+            // Investor specific
+            {
+                path: 'investor/browse',
+                loadComponent: () => import('./investor/browse-ideas/browse-ideas.component').then(m => m.BrowseIdeasComponent),
+                canActivate: [roleGuard],
+                data: { role: 'Investor' }
+            },
+            {
+                path: 'investor/watchlist',
+                loadComponent: () => import('./investor/watchlist/watchlist.component').then(m => m.WatchlistComponent),
+                canActivate: [roleGuard],
+                data: { role: 'Investor' }
+            },
+            {
+                path: 'investor/pipeline',
+                loadComponent: () => import('./investor/deal-pipeline/deal-pipeline.component').then(m => m.DealPipelineComponent),
+                canActivate: [roleGuard],
+                data: { role: 'Investor' }
+            },
+            {
+                path: 'investor/recommendations',
+                loadComponent: () => import('./investor/recommendations/recommendations.component').then(m => m.RecommendationsComponent),
+                canActivate: [roleGuard],
+                data: { role: 'Investor' }
+            },
+            {
+                path: 'investor/saved-ideas',
+                loadComponent: () => import('./investor/saved-ideas/saved-ideas.component').then(m => m.SavedIdeasComponent),
+                canActivate: [roleGuard],
+                data: { role: 'Investor' }
+            },
+            {
+                path: 'investor/profile',
+                loadComponent: () => import('./investor/profile/profile.component').then(m => m.InvestorProfileComponent),
+                canActivate: [roleGuard],
+                data: { role: 'Investor' }
+            }
+        ]
     },
 
     // Fallback

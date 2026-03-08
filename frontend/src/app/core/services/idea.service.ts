@@ -30,7 +30,7 @@ export class IdeaService {
     }
 
     // Investor
-    getIdeas(stage?: string, industry?: string, previouslyRejected?: boolean, page: number = 1, pageSize: number = 10): Observable<PaginatedIdeas> {
+    getIdeas(stage?: string, industry?: string, previouslyRejected?: boolean, location?: string, keyword?: string, page: number = 1, pageSize: number = 10): Observable<PaginatedIdeas> {
         let params = new HttpParams()
             .set('page', page.toString())
             .set('pageSize', pageSize.toString());
@@ -38,6 +38,8 @@ export class IdeaService {
         if (stage) params = params.set('stage', stage);
         if (industry) params = params.set('industry', industry);
         if (previouslyRejected !== undefined) params = params.set('previouslyRejected', previouslyRejected);
+        if (location) params = params.set('location', location);
+        if (keyword) params = params.set('keyword', keyword);
 
         return this.http.get<PaginatedIdeas>(this.baseUrl, { params });
     }

@@ -27,7 +27,15 @@ namespace FounderHub.Infrastructure.Repositories
             return await _context.Ideas.Find(i => i.FounderId == founderId).ToListAsync();
         }
 
-        public async Task<(IEnumerable<Idea> Ideas, int TotalCount)> GetIdeasAsync(string? stage, string? industry, bool? previouslyRejected, int page, int pageSize)
+        // Paginated & filtered ideas
+        public async Task<(IEnumerable<Idea> Ideas, int TotalCount)> GetIdeasAsync(
+            string? stage,
+            string? industry,
+            bool? previouslyRejected,
+            string? location,
+            string? keyword,
+            int page,
+            int pageSize)
         {
             var query = _context.Ideas.AsQueryable();
 
@@ -39,6 +47,15 @@ namespace FounderHub.Infrastructure.Repositories
 
             if (previouslyRejected.HasValue)
                 query = query.Where(i => i.PreviouslyRejected == previouslyRejected.Value);
+
+            if (!string.IsNullOrEmpty(location))
+                query = query.Where(i => i.Location != null && i.Location.ToLower().Contains(location.ToLower()));
+
+            if (!string.IsNullOrEmpty(keyword))
+                query = query.Where(i =>
+                    i.Title.ToLower().Contains(keyword.ToLower()) ||
+                    i.Problem.ToLower().Contains(keyword.ToLower()) ||
+                    i.Solution.ToLower().Contains(keyword.ToLower()));
 
             var totalCount = await query.CountAsync();
 

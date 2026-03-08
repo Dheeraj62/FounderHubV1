@@ -5,6 +5,7 @@
     "dev": "npm start --prefix frontend",
     "frontend:build": "npm run build --prefix frontend",
     "backend:dev": "dotnet run --project backend/FounderHub.Api",
-    "build": "npm run frontend:build"
+    "build": "npm run frontend:build",
+    "lint": "npm run lint --prefix frontend"
   }
 }

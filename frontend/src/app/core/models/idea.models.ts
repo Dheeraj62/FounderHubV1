@@ -9,6 +9,10 @@ export interface Idea {
     pitchDeckUrl?: string;
     demoUrl?: string;
     startupWebsite?: string;
+    productImages?: string[];
+    marketSize?: string;
+    targetCustomers?: string;
+    tractionMetrics?: string;
     previouslyRejected: boolean;
     rejectedBy?: string;
     rejectionReasonCategory?: string;
@@ -33,6 +37,10 @@ export interface CreateIdeaRequest {
     pitchDeckUrl?: string;
     demoUrl?: string;
     startupWebsite?: string;
+    productImages?: string[];
+    marketSize?: string;
+    targetCustomers?: string;
+    tractionMetrics?: string;
     previouslyRejected: boolean;
     rejectedBy?: string;
     rejectionReasonCategory?: string;

@@ -72,9 +72,12 @@ namespace FounderHub.Api.Controllers
         // Investor only
         [HttpGet]
         [Authorize(Roles = "Investor")]
-        public async Task<IActionResult> GetIdeas([FromQuery] string? stage, [FromQuery] string? industry, [FromQuery] bool? previouslyRejected, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetIdeas(
+            [FromQuery] string? stage, [FromQuery] string? industry, [FromQuery] bool? previouslyRejected,
+            [FromQuery] string? location, [FromQuery] string? keyword,
+            [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var result = await _ideaService.GetIdeasAsync(stage, industry, previouslyRejected, page, pageSize);
+            var result = await _ideaService.GetIdeasAsync(stage, industry, previouslyRejected, location, keyword, page, pageSize);
             return Ok(result);
         }
 

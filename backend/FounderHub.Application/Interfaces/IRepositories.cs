@@ -21,7 +21,9 @@ namespace FounderHub.Application.Interfaces
         Task<(IEnumerable<Idea> Ideas, int TotalCount)> GetIdeasAsync(
             string? stage, 
             string? industry, 
-            bool? previouslyRejected, 
+            bool? previouslyRejected,
+            string? location,
+            string? keyword,
             int page, 
             int pageSize);
             
@@ -122,5 +124,22 @@ namespace FounderHub.Application.Interfaces
         Task CreateAsync(IdeaView view);
         Task<int> GetIdeaViewCountAsync(string ideaId);
         Task<int> GetFounderTotalViewsAsync(string founderId);
+    }
+
+    public interface IInvestorDealRepository
+    {
+        Task<IEnumerable<InvestorDeal>> GetByInvestorIdAsync(string investorId);
+        Task<InvestorDeal?> GetAsync(string investorId, string ideaId);
+        Task<InvestorDeal?> GetByIdAsync(string id);
+        Task CreateAsync(InvestorDeal deal);
+        Task UpdateAsync(InvestorDeal deal);
+        Task<bool> DeleteAsync(string id, string investorId);
+    }
+    public interface IWatchlistRepository
+    {
+        Task<IEnumerable<Watchlist>> GetByInvestorIdAsync(string investorId);
+        Task<Watchlist?> GetAsync(string investorId, string ideaId);
+        Task CreateAsync(Watchlist watchlist);
+        Task<bool> DeleteAsync(string investorId, string ideaId);
     }
 }

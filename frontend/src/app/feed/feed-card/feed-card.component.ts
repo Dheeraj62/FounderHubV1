@@ -6,73 +6,96 @@ import { AuthService } from '../../core/services/auth.service';
 import { InterestService } from '../../core/services/interest.service';
 import { FollowService } from '../../core/services/follow.service';
 import { FollowType } from '../../core/models/follow.models';
+import { CardComponent } from '../../shared/ui/card/card.component';
+import { BadgeComponent } from '../../shared/ui/badge/badge.component';
+import { ButtonComponent } from '../../shared/ui/button/button.component';
 
 @Component({
   selector: 'app-feed-card',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, CardComponent, BadgeComponent, ButtonComponent],
   template: `
-    <div class="app-card p-5">
-      <div class="flex items-start justify-between gap-4">
-        <div class="min-w-0">
-          <div class="flex items-center gap-2 text-sm text-gray-600">
-            <span class="text-base">{{ icon }}</span>
-            <span class="font-semibold text-gray-900">@{{ item.actor.username }}</span>
-            <span *ngIf="item.actor.linkedInVerified" class="app-badge app-badge-verified">LinkedIn Verified</span>
-            <span class="text-gray-400">·</span>
-            <span class="text-gray-500">{{ item.createdAt | date:'short' }}</span>
+    <app-card padding="md" [hoverable]="true" class="block pb-2">
+      <!-- Author & Time -->
+      <div class="flex items-start justify-between gap-4 mb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-lg shrink-0 border border-neutral-200">
+            {{ icon }}
           </div>
-
-          <div class="mt-2">
-            <div class="text-base font-semibold text-gray-900" *ngIf="headline">{{ headline }}</div>
-            <div *ngIf="subline" class="mt-1 text-sm text-gray-600">{{ subline }}</div>
+          <div>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="font-bold text-neutral-900">@{{ item.actor.username }}</span>
+              <span *ngIf="item.actor.linkedInVerified" class="text-[10px] bg-blue-50 text-blue-600 border border-blue-200 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold flex items-center gap-1">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                Verified
+              </span>
+              <span class="text-neutral-400">·</span>
+              <span class="text-sm font-medium text-neutral-500">{{ item.createdAt | date:'MMM d' }}</span>
+            </div>
+            <div class="mt-0.5">
+              <span class="text-sm font-semibold text-neutral-800" *ngIf="headline">{{ headline }}</span>
+              <span *ngIf="subline" class="ml-2 text-sm text-neutral-500">{{ subline }}</span>
+            </div>
           </div>
         </div>
 
-        <button
+        <app-button
           *ngIf="followable && item.idea"
-          type="button"
-          class="app-btn-secondary"
-          (click)="toggleFollow(item.idea.id, 'IDEA')"
+          variant="secondary"
+          size="sm"
+          (onClick)="toggleFollow(item.idea.id, 'IDEA')"
         >
           {{ isFollowed() ? 'Following' : 'Follow' }}
-        </button>
+        </app-button>
       </div>
 
-      <div *ngIf="item.update" class="mt-4 rounded-xl bg-gray-50 border border-gray-200 p-4 text-sm text-gray-700 whitespace-pre-wrap">
-        {{ item.update.content }}
+      <!-- Update Content -->
+      <div *ngIf="item.update" class="ml-12 mt-2 mb-4">
+        <p class="text-[15px] leading-relaxed text-neutral-800 whitespace-pre-wrap">{{ item.update.content }}</p>
       </div>
 
-      <div *ngIf="item.idea" class="mt-4 rounded-xl border border-gray-200 p-4">
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <div class="text-xs text-gray-500">{{ item.idea.industry }} • {{ item.idea.stage }}</div>
-            <div class="mt-1 text-sm font-semibold text-gray-900 line-clamp-2">{{ item.idea.title }}</div>
-            <div class="mt-1 text-xs text-gray-500">Founder: @{{ item.idea.founderUsername }}</div>
+      <!-- Idea Snapshot (Embedded Card) -->
+      <div *ngIf="item.idea" class="ml-12 mt-3 rounded-2xl border border-neutral-200 bg-white hover:bg-neutral-50 transition-colors cursor-pointer" [routerLink]="['/idea', item.idea.id]">
+        <div class="p-4">
+          <div class="flex items-start justify-between gap-3 mb-2">
+            <div class="flex items-center gap-2">
+              <app-badge variant="indigo">{{ item.idea.industry }}</app-badge>
+              <app-badge variant="neutral">{{ item.idea.stage }}</app-badge>
+            </div>
+            <!-- Status/Action Badge -->
+            <app-badge *ngIf="item.idea.previouslyRejected" variant="error">Second chance</app-badge>
+            <app-badge *ngIf="!item.idea.previouslyRejected && item.idea.stage === 'EarlyRevenue'" variant="success">Revenue generating</app-badge>
           </div>
-          <span *ngIf="item.idea.previouslyRejected" class="app-badge app-badge-warn">Second chance</span>
-        </div>
-
-        <div class="mt-4 flex flex-wrap items-center gap-2">
-          <a *ngIf="item.idea" [routerLink]="['/idea', item.idea.id]" class="app-btn-secondary">
-            View Idea
-          </a>
-
-          <ng-container *ngIf="isInvestor && !isMineIdea">
-            <button type="button" class="app-btn-primary" (click)="express(item.idea.id, 'Interested')">
-              Interested
-            </button>
-            <button type="button" class="app-btn-secondary" (click)="express(item.idea.id, 'Maybe')">
-              Maybe
-            </button>
-          </ng-container>
-
-          <span *ngIf="item.type === 'INTEREST_EVENT' && item.interestStatus" class="text-xs text-gray-500 ml-auto">
-            Interest: <span class="font-semibold text-gray-700">{{ item.interestStatus }}</span>
-          </span>
+          
+          <h3 class="text-lg font-bold text-neutral-900 line-clamp-2 mb-1 group-hover:text-primary-600 transition-colors">{{ item.idea.title }}</h3>
+          
+          <!-- Actions & Info -->
+          <div class="mt-4 flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-neutral-100">
+            <div class="flex items-center gap-2">
+              <ng-container *ngIf="isInvestor && !isMineIdea">
+                <app-button variant="primary" size="sm" (onClick)="$event.stopPropagation(); express(item.idea.id, 'Interested')">
+                  Interested
+                </app-button>
+                <app-button variant="secondary" size="sm" (onClick)="$event.stopPropagation(); express(item.idea.id, 'Maybe')">
+                  Maybe
+                </app-button>
+              </ng-container>
+              <app-button *ngIf="!isInvestor || isMineIdea" variant="ghost" size="sm" (onClick)="$event.stopPropagation();">
+                View Details
+              </app-button>
+            </div>
+            
+            <span *ngIf="item.type === 'INTEREST_EVENT' && item.interestStatus" class="text-[10px] font-black uppercase tracking-widest text-neutral-500">
+              Interest: 
+              <span [class.text-primary-600]="item.interestStatus === 'HighlyInterested'" 
+                    [class.text-amber-600]="item.interestStatus === 'Maybe'"
+                    [class.text-rose-600]="item.interestStatus === 'Pass'"
+                    class="ml-1">{{ item.interestStatus }}</span>
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+    </app-card>
   `,
 })
 export class FeedCardComponent {

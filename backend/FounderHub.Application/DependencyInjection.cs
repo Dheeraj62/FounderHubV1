@@ -21,6 +21,12 @@ namespace FounderHub.Application
             services.AddScoped<IFounderUpdateService, FounderUpdateService>();
             services.AddScoped<IFollowService, FollowService>();
             services.AddScoped<IIdeaViewService, IdeaViewService>();
+            services.AddScoped<IDealService, DealService>();
+            services.AddScoped<IWatchlistService, WatchlistService>();
+            services.AddScoped<IAnalyticsService, AnalyticsService>();
+            services.AddScoped<IFeedbackService, FeedbackService>();
+            services.AddScoped<IMeetingService, MeetingService>();
+            services.AddScoped<ICredibilityScoreService, CredibilityScoreService>();
 
             return services;
         }

@@ -3,138 +3,135 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { InputComponent } from '../../shared/ui/input/input.component';
+import { ButtonComponent } from '../../shared/ui/button/button.component';
+import { CardComponent } from '../../shared/ui/card/card.component';
 
 @Component({
-    selector: 'app-login',
-    standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, RouterLink],
-    template: `
-    <div class="min-h-screen bg-[#f8faff] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <!-- Header / Logo Area -->
-      <div class="sm:mx-auto sm:w-full sm:max-w-md text-center mb-4">
+  selector: 'app-login',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, InputComponent, ButtonComponent, CardComponent],
+  template: `
+    <div class="min-h-[100dvh] flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-neutral-50 relative overflow-hidden">
+      <!-- Background Decorations -->
+      <div class="absolute inset-0 pointer-events-none overflow-hidden">
+        <div class="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-primary-100/50 blur-3xl opacity-50"></div>
+        <div class="absolute -bottom-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-indigo-100/50 blur-3xl opacity-50"></div>
+      </div>
+
+      <div class="relative z-10 sm:mx-auto sm:w-full sm:max-w-md text-center mb-6">
         <div class="flex justify-center items-center mb-4">
-          <div class="bg-[#1e40af] p-2 rounded-lg shadow-lg">
-            <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="bg-primary-600 p-2.5 rounded-xl shadow-lg shadow-primary-500/20">
+            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
-          <span class="ml-3 text-3xl font-bold text-[#1e293b]">FounderHub</span>
+          <span class="ml-3 text-2xl font-black tracking-tight text-neutral-900">FounderHub</span>
         </div>
-        <p class="text-[#64748b] text-sm">Connect founders with investors. No noise.</p>
+        <p class="text-neutral-500 text-sm font-medium">Connect founders with investors. No noise.</p>
       </div>
 
-      <div class="mt-4 sm:mx-auto sm:w-full sm:max-w-[440px]">
-        <div class="bg-white py-10 px-8 shadow-2xl rounded-3xl border border-gray-50">
-          <h2 class="text-2xl font-bold text-[#1e293b] mb-8">Sign in to your account</h2>
+      <div class="relative z-10 mt-2 sm:mx-auto sm:w-full sm:max-w-[420px]">
+        <app-card padding="lg" class="shadow-premium border-0 ring-1 ring-neutral-200/50">
+          <h2 class="text-xl font-bold text-neutral-900 mb-6 text-center">Sign in to your account</h2>
           
-          <form class="space-y-6" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <form class="space-y-5" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
             
-            <div *ngIf="errorMessage" class="bg-red-50 border-l-4 border-red-400 p-4 mb-4 rounded-r-md">
-              <div class="flex">
-                <div class="ml-3">
-                  <p class="text-sm text-red-700">{{ errorMessage }}</p>
-                </div>
-              </div>
+            <div *ngIf="errorMessage" class="bg-rose-50 border border-rose-200 p-4 mb-4 rounded-xl flex items-start gap-3">
+              <svg class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p class="text-sm font-medium text-rose-800">{{ errorMessage }}</p>
             </div>
 
-            <div>
-              <label for="identifier" class="block text-sm font-semibold text-[#475569] mb-1.5">Email or Username</label>
-              <div class="mt-1">
-                <input id="identifier" type="text" formControlName="identifier" 
-                  placeholder="Enter email or username"
-                  class="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent transition-all sm:text-sm">
-              </div>
-            </div>
+            <app-input
+              id="identifier"
+              formControlName="identifier"
+              label="Email or Username"
+              placeholder="Enter email or username">
+            </app-input>
 
-            <div>
-              <label for="password" class="block text-sm font-semibold text-[#475569] mb-1.5">Password</label>
-              <div class="mt-1 relative">
-                <input id="password" type="password" formControlName="password" 
-                  placeholder="Enter password"
-                  class="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent transition-all sm:text-sm">
-              </div>
-            </div>
+            <app-input
+              id="password"
+              type="password"
+              formControlName="password"
+              label="Password"
+              placeholder="Enter password">
+            </app-input>
 
             <div class="pt-2">
-              <button type="submit" [disabled]="loginForm.invalid || isLoading" 
-                class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-[#1e40af] hover:bg-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1e40af] disabled:opacity-50 transition transform hover:-translate-y-0.5 active:scale-95">
-                <span *ngIf="isLoading" class="mr-2">
-                  <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                </span>
-                <span class="flex items-center">
-                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                  </svg>
-                  Sign In
-                </span>
-              </button>
+              <app-button 
+                type="submit" 
+                variant="primary" 
+                [fullWidth]="true" 
+                [loading]="isLoading" 
+                [disabled]="loginForm.invalid">
+                Sign In
+              </app-button>
             </div>
           </form>
 
           <!-- Demo Accounts Section -->
-          <div class="mt-8 bg-[#f8fafc] p-5 rounded-2xl border border-gray-100">
-            <p class="text-xs font-semibold text-[#64748b] mb-2 uppercase tracking-wider">Demo accounts:</p>
-            <div class="space-y-1">
-              <p class="text-sm text-[#475569] flex justify-between">
-                <span class="font-medium">Founder:</span>
-                <span>sarahchen / founder123</span>
-              </p>
-              <p class="text-sm text-[#475569] flex justify-between">
-                <span class="font-medium">Investor:</span>
-                <span>investormark / investor123</span>
-              </p>
+          <div class="mt-8 bg-neutral-50 p-4 rounded-xl border border-neutral-200/60">
+            <p class="text-[10px] font-black text-neutral-400 mb-2 uppercase tracking-widest text-center">Demo accounts</p>
+            <div class="space-y-1.5 break-all">
+              <div class="text-[13px] text-neutral-600 flex flex-col sm:flex-row sm:justify-between border-b border-neutral-200 pb-1.5">
+                <span class="font-bold text-neutral-800">Founder:</span>
+                <span class="font-mono text-xs">sarahchen / founder123</span>
+              </div>
+              <div class="text-[13px] text-neutral-600 flex flex-col sm:flex-row sm:justify-between pt-1">
+                <span class="font-bold text-neutral-800">Investor:</span>
+                <span class="font-mono text-xs">investormark / investor123</span>
+              </div>
             </div>
           </div>
 
-          <div class="mt-8 text-center">
-            <p class="text-sm text-[#64748b]">
+          <div class="mt-8 text-center bg-neutral-50 -mx-8 -mb-8 px-8 py-4 border-t border-neutral-100 rounded-b-[24px]">
+            <p class="text-sm text-neutral-500">
               Don't have an account? 
-              <a routerLink="/auth/register" class="font-bold text-[#1e40af] hover:underline">Register</a>
+              <a routerLink="/auth/register" class="font-bold text-primary-600 hover:text-primary-700 transition-colors">Create one</a>
             </p>
           </div>
-        </div>
+        </app-card>
       </div>
     </div>
   `
 })
 export class LoginComponent {
-    private fb = inject(FormBuilder);
-    private authService = inject(AuthService);
-    private router = inject(Router);
-    private cdr = inject(ChangeDetectorRef);
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
-    loginForm: FormGroup = this.fb.group({
-        identifier: ['', Validators.required],
-        password: ['', Validators.required]
+  loginForm: FormGroup = this.fb.group({
+    identifier: ['', Validators.required],
+    password: ['', Validators.required]
+  });
+
+  isLoading = false;
+  errorMessage = '';
+
+  onSubmit() {
+    if (this.loginForm.invalid) return;
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.authService.login(this.loginForm.value).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        this.cdr.markForCheck();
+        if (res.role === 'Founder') {
+          this.router.navigate(['/founder/dashboard']);
+        } else {
+          this.router.navigate(['/investor/browse']);
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = err.error?.message || 'Login failed. Please check your credentials.';
+        this.cdr.markForCheck();
+      }
     });
-
-    isLoading = false;
-    errorMessage = '';
-
-    onSubmit() {
-        if (this.loginForm.invalid) return;
-
-        this.isLoading = true;
-        this.errorMessage = '';
-
-        this.authService.login(this.loginForm.value).subscribe({
-            next: (res) => {
-                this.isLoading = false;
-                this.cdr.markForCheck();
-                if (res.role === 'Founder') {
-                    this.router.navigate(['/founder/dashboard']);
-                } else {
-                    this.router.navigate(['/investor/browse']);
-                }
-            },
-            error: (err) => {
-                this.isLoading = false;
-                this.errorMessage = err.error?.message || 'Login failed. Please check your credentials.';
-                this.cdr.markForCheck();
-            }
-        });
-    }
+  }
 }

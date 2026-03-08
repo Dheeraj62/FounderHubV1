@@ -5,17 +5,20 @@ import { IdeaService } from '../../../core/services/idea.service';
 import { ProfileService } from '../../../core/services/profile.service';
 import { ConnectionService } from '../../../core/services/connection.service';
 import { SavedIdeaService } from '../../../core/services/saved-idea.service';
+import { WatchlistService } from '../../../core/services/watchlist.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { InterestService } from '../../../core/services/interest.service';
 import { Idea } from '../../../core/models/idea.models';
 import { FounderProfile } from '../../../core/models/profile.models';
 import { IdeaTimelineComponent } from '../idea-timeline/idea-timeline.component';
 import { FounderSignalsComponent } from '../founder-signals/founder-signals.component';
+import { FeedbackPanelComponent } from '../feedback-panel/feedback-panel.component';
+import { CredibilityScoreComponent } from '../credibility-score/credibility-score.component';
 
 @Component({
   selector: 'app-idea-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, IdeaTimelineComponent, FounderSignalsComponent],
+  imports: [CommonModule, RouterModule, IdeaTimelineComponent, FounderSignalsComponent, FeedbackPanelComponent, CredibilityScoreComponent],
   template: `
     <div class="max-w-6xl mx-auto py-10 px-4" *ngIf="idea">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -37,11 +40,18 @@ import { FounderSignalsComponent } from '../founder-signals/founder-signals.comp
               </div>
               
               <div *ngIf="isInvestor" class="flex flex-col gap-2">
-                <button (click)="toggleSave()" 
-                        [class]="isSaved ? 'text-rose-500 bg-rose-500/10 border-rose-500/30' : 'text-gray-400 bg-gray-800 border-gray-700'"
-                        class="p-3 rounded-2xl border transition-all hover:scale-110">
-                  <span class="text-xl">{{ isSaved ? '❤️' : '🤍' }}</span>
-                </button>
+                <div class="flex items-center gap-2">
+                  <button (click)="toggleWatchlist()" 
+                          [class]="isWatchlisted ? 'text-primary-500 bg-primary-500/10 border-primary-500/30' : 'text-gray-400 bg-gray-800 border-gray-700'"
+                          class="p-3 rounded-2xl border transition-all hover:scale-110 flex items-center justify-center" title="Watchlist">
+                    <span class="text-xl">{{ isWatchlisted ? '👀' : '👁️' }}</span>
+                  </button>
+                  <button (click)="toggleSave()" 
+                          [class]="isSaved ? 'text-rose-500 bg-rose-500/10 border-rose-500/30' : 'text-gray-400 bg-gray-800 border-gray-700'"
+                          class="p-3 rounded-2xl border transition-all hover:scale-110 flex items-center justify-center" title="Save Idea">
+                    <span class="text-xl">{{ isSaved ? '❤️' : '🤍' }}</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -62,8 +72,19 @@ import { FounderSignalsComponent } from '../founder-signals/founder-signals.comp
                   <p class="text-xl font-bold text-emerald-400">{{ idea.fundingRange || 'Not Specified' }}</p>
                 </div>
                 <div class="p-5 bg-gray-800/30 rounded-2xl border border-gray-700/50">
-                  <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Pivot Status</h3>
-                  <p class="text-xl font-bold text-indigo-400">Validated Flow</p>
+                  <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Target Customers</h3>
+                  <p class="text-xl font-bold text-indigo-400">{{ idea.targetCustomers || 'B2B/B2C' }}</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="p-5 bg-gray-800/30 rounded-2xl border border-gray-700/50">
+                  <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Total Addressable Market (TAM)</h3>
+                  <p class="text-lg font-bold text-gray-200">{{ idea.marketSize || 'Data not provided' }}</p>
+                </div>
+                <div class="p-5 bg-gray-800/30 rounded-2xl border border-gray-700/50">
+                  <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Traction & Metrics</h3>
+                  <p class="text-sm font-medium text-gray-300">{{ idea.tractionMetrics || 'Pre-traction / Early Stage' }}</p>
                 </div>
               </div>
 
@@ -89,6 +110,13 @@ import { FounderSignalsComponent } from '../founder-signals/founder-signals.comp
 
           <!-- Evolution Timeline Component -->
           <app-idea-timeline [ideaId]="idea.id"></app-idea-timeline>
+
+          <!-- Feedback Panel (investors can submit, founders can view) -->
+          <app-feedback-panel
+            [ideaId]="idea.id"
+            [isInvestor]="isInvestor && !isMine"
+            [isFounderOfIdea]="isMine"
+          ></app-feedback-panel>
         </div>
 
         <!-- Sidebar -->
@@ -111,6 +139,9 @@ import { FounderSignalsComponent } from '../founder-signals/founder-signals.comp
               </div>
 
               <app-founder-signals [profile]="founderProfile"></app-founder-signals>
+              
+              <!-- Credibility Score Widget -->
+              <app-credibility-score *ngIf="founderProfile && idea" [founderId]="idea.founderId"></app-credibility-score>
               
               <div class="pt-4 border-t border-gray-800 mt-6">
                 <p class="text-sm text-gray-300 italic">
@@ -158,6 +189,7 @@ export class IdeaDetailComponent implements OnInit {
   isInvestor = false;
   isMine = false;
   isSaved = false;
+  isWatchlisted = false;
   connectionStatus?: string;
 
   constructor(
@@ -166,6 +198,7 @@ export class IdeaDetailComponent implements OnInit {
     private profileService: ProfileService,
     private connectionService: ConnectionService,
     private savedIdeaService: SavedIdeaService,
+    private watchlistService: WatchlistService,
     private authService: AuthService,
     private interestService: InterestService,
     private cdr: ChangeDetectorRef
@@ -187,6 +220,7 @@ export class IdeaDetailComponent implements OnInit {
 
       if (this.isInvestor) {
         this.checkIfSaved(id);
+        this.checkIfWatchlisted(id);
         this.checkConnection(idea.founderId);
       }
       this.cdr.markForCheck();
@@ -207,6 +241,13 @@ export class IdeaDetailComponent implements OnInit {
     });
   }
 
+  checkIfWatchlisted(ideaId: string) {
+    this.watchlistService.getMyWatchlist().subscribe(list => {
+      this.isWatchlisted = list.some(i => i.ideaId === ideaId);
+      this.cdr.markForCheck();
+    });
+  }
+
   checkConnection(founderId: string) {
     this.connectionService.getMyConnections().subscribe(list => {
       const conn = list.find(c => c.founderId === founderId);
@@ -218,9 +259,18 @@ export class IdeaDetailComponent implements OnInit {
   toggleSave() {
     if (!this.idea) return;
     if (this.isSaved) {
-      this.savedIdeaService.unsaveIdea(this.idea.id).subscribe(() => this.isSaved = false);
+      this.savedIdeaService.unsaveIdea(this.idea.id).subscribe(() => { this.isSaved = false; this.cdr.markForCheck(); });
     } else {
-      this.savedIdeaService.saveIdea(this.idea.id).subscribe(() => this.isSaved = true);
+      this.savedIdeaService.saveIdea(this.idea.id).subscribe(() => { this.isSaved = true; this.cdr.markForCheck(); });
+    }
+  }
+
+  toggleWatchlist() {
+    if (!this.idea) return;
+    if (this.isWatchlisted) {
+      this.watchlistService.removeFromWatchlist(this.idea.id).subscribe(() => { this.isWatchlisted = false; this.cdr.markForCheck(); });
+    } else {
+      this.watchlistService.addToWatchlist({ ideaId: this.idea.id }).subscribe(() => { this.isWatchlisted = true; this.cdr.markForCheck(); });
     }
   }
 

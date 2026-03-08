@@ -30,6 +30,10 @@ namespace FounderHub.Infrastructure
             services.AddScoped<IFounderUpdateRepository, FounderUpdateRepository>();
             services.AddScoped<IFollowRepository, FollowRepository>();
             services.AddScoped<IIdeaViewRepository, IdeaViewRepository>();
+            services.AddScoped<IInvestorDealRepository, InvestorDealRepository>();
+            services.AddScoped<IWatchlistRepository, WatchlistRepository>();
+            services.AddScoped<IFeedbackRepository, FeedbackRepository>();
+            services.AddScoped<IMeetingRepository, MeetingRepository>();
             
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<IJwtProvider, JwtProvider>();

@@ -1,86 +1,93 @@
 import { Component, inject, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { IdeaService } from '../../core/services/idea.service';
 import { Idea } from '../../core/models/idea.models';
 import { InterestService } from '../../core/services/interest.service';
 
+import { CardComponent } from '../../shared/ui/card/card.component';
+import { BadgeComponent } from '../../shared/ui/badge/badge.component';
+import { ButtonComponent } from '../../shared/ui/button/button.component';
+
 @Component({
   selector: 'app-founder-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, CardComponent, BadgeComponent, ButtonComponent],
   template: `
-    <div class="app-page">
-      <div class="app-page-header">
+    <div class="space-y-8">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 class="app-page-title">My Ideas</h1>
-          <p class="app-page-subtitle">Manage and track your startup concepts.</p>
+          <h1 class="text-h1">My Ideas</h1>
+          <p class="text-body mt-2">Manage and track your startup concepts.</p>
         </div>
-        <a routerLink="/founder/create-idea" class="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all transform hover:-translate-y-0.5">
+        <app-button variant="primary" (onClick)="router.navigate(['/founder/create-idea'])">
           <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
           </svg>
           Post New Idea
-        </a>
+        </app-button>
       </div>
 
+      <!-- Loading State -->
       <div *ngIf="isLoading()" class="flex justify-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
 
-      <div *ngIf="!isLoading() && ideas().length === 0" class="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No ideas yet</h3>
-        <p class="mt-1 text-sm text-gray-500">Get started by posting your first startup idea.</p>
-        <div class="mt-6">
-          <a routerLink="/founder/create-idea" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+      <!-- Empty State -->
+      <div *ngIf="!isLoading() && ideas().length === 0">
+        <app-card class="text-center py-20" padding="lg">
+          <div class="mx-auto w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
+            <svg class="h-8 w-8 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <h3 class="text-h3">No ideas yet</h3>
+          <p class="text-body mt-2 mb-6 max-w-sm mx-auto">Get started by posting your first startup idea and see how investors react.</p>
+          <app-button variant="primary" (onClick)="router.navigate(['/founder/create-idea'])">
             Post Idea
-          </a>
-        </div>
+          </app-button>
+        </app-card>
       </div>
 
-      <div *ngIf="!isLoading() && ideas().length > 0" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <div *ngFor="let idea of ideas()" class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-          <div class="p-6">
-            <div class="flex items-center justify-between mb-4">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                {{ idea.industry }}
-              </span>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                {{ idea.stage }}
-              </span>
-            </div>
-            
-            <h3 class="text-xl font-bold text-gray-900 mb-2 truncate" title="{{idea.title}}">{{ idea.title }}</h3>
-            <p class="text-gray-600 text-sm line-clamp-3 mb-4 h-16">{{ idea.problem }}</p>
-            
-            <div class="border-t border-gray-100 pt-4 flex gap-4 text-sm text-gray-500">
-              <div class="flex flex-col">
-                <span class="text-xs uppercase tracking-wider font-semibold text-gray-400">Interested</span>
-                <span class="font-medium text-indigo-600 text-lg">{{ getInterestCount(idea.id, 'interestedCount') }}</span>
-              </div>
-              <div class="flex flex-col ml-4">
-                <span class="text-xs uppercase tracking-wider font-semibold text-gray-400">Maybe</span>
-                <span class="font-medium text-gray-900 text-lg">{{ getInterestCount(idea.id, 'maybeCount') }}</span>
-              </div>
-            </div>
+      <!-- Content Grid -->
+      <div *ngIf="!isLoading() && ideas().length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <app-card *ngFor="let idea of ideas()" [hoverable]="true" [hasFooter]="true" padding="md" class="flex flex-col h-full">
+          <div class="flex items-center gap-2 mb-4">
+             <app-badge variant="indigo">{{ idea.industry }}</app-badge>
+             <app-badge variant="neutral">{{ idea.stage }}</app-badge>
           </div>
           
-          <div class="bg-gray-50 px-6 py-3 border-t border-gray-100 flex justify-between items-center">
-            <span class="text-xs text-gray-500">{{ idea.createdAt | date:'mediumDate' }}</span>
-            <div class="space-x-3">
-              <a [routerLink]="['/founder/edit-idea', idea.id]" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium transition-colors">Edit</a>
-              <button (click)="deleteIdea(idea.id)" class="text-red-600 hover:text-red-900 text-sm font-medium transition-colors">Delete</button>
+          <h3 class="text-h3 mb-2 line-clamp-1" [title]="idea.title">{{ idea.title }}</h3>
+          <p class="text-body text-sm line-clamp-3 mb-6 flex-grow">{{ idea.problem }}</p>
+          
+          <!-- Metrics -->
+          <div class="grid grid-cols-2 gap-4 p-4 rounded-xl bg-neutral-50 border border-neutral-100 mt-auto">
+            <div>
+              <span class="text-[10px] font-black uppercase tracking-wider text-neutral-500 block mb-1">High Interest</span>
+              <span class="text-2xl font-bold text-primary-600">{{ getInterestCount(idea.id, 'interestedCount') }}</span>
+            </div>
+            <div>
+              <span class="text-[10px] font-black uppercase tracking-wider text-neutral-500 block mb-1">Maybe</span>
+              <span class="text-2xl font-bold text-neutral-900">{{ getInterestCount(idea.id, 'maybeCount') }}</span>
             </div>
           </div>
-        </div>
+
+          <!-- Footer Area -->
+          <ng-container card-footer>
+            <span class="text-xs text-neutral-500 font-medium">{{ idea.createdAt | date:'MMM d, y' }}</span>
+            <div class="flex items-center gap-2">
+              <app-button variant="ghost" size="sm" (onClick)="router.navigate(['/founder/edit-idea', idea.id])">Edit</app-button>
+              <app-button variant="danger" size="sm" (onClick)="deleteIdea(idea.id)">Delete</app-button>
+            </div>
+          </ng-container>
+        </app-card>
       </div>
     </div>
   `
 })
 export class DashboardComponent implements OnInit {
+  router = inject(Router);
   private ideaService = inject(IdeaService);
   private interestService = inject(InterestService);
   private cdr = inject(ChangeDetectorRef);

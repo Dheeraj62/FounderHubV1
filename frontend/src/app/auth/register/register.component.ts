@@ -3,64 +3,82 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { InputComponent } from '../../shared/ui/input/input.component';
+import { ButtonComponent } from '../../shared/ui/button/button.component';
+import { CardComponent } from '../../shared/ui/card/card.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, InputComponent, ButtonComponent, CardComponent],
   template: `
-    <div class="min-h-screen bg-[#f8faff] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div class="sm:mx-auto sm:w-full sm:max-w-md text-center mb-4">
+    <div class="min-h-[100dvh] bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+      <!-- Background Decorations -->
+      <div class="absolute inset-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-indigo-100/50 blur-3xl opacity-50"></div>
+        <div class="absolute bottom-[10%] -right-[10%] w-[40%] h-[40%] rounded-full bg-primary-100/50 blur-3xl opacity-50"></div>
+      </div>
+
+      <div class="relative z-10 sm:mx-auto sm:w-full sm:max-w-md text-center mb-6">
         <div class="flex justify-center items-center mb-4">
-          <div class="bg-[#1e40af] p-2 rounded-lg shadow-lg">
-            <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="bg-primary-600 p-2.5 rounded-xl shadow-lg shadow-primary-500/20">
+            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
-          <span class="ml-3 text-3xl font-bold text-[#1e293b]">FounderHub</span>
+          <span class="ml-3 text-2xl font-black tracking-tight text-neutral-900">FounderHub</span>
         </div>
-        <p class="text-[#64748b] text-sm">Join the network of the future builders.</p>
+        <p class="text-neutral-500 text-sm font-medium">Join the network of the future builders.</p>
       </div>
 
-      <div class="mt-4 sm:mx-auto sm:w-full sm:max-w-[480px]">
-        <div class="bg-white py-10 px-8 shadow-2xl rounded-3xl border border-gray-50">
-          <h2 class="text-2xl font-bold text-[#1e293b] mb-8 text-center">Create your account</h2>
+      <div class="relative z-10 mt-2 sm:mx-auto sm:w-full sm:max-w-[480px]">
+        <app-card padding="lg" class="shadow-premium border-0 ring-1 ring-neutral-200/50">
+          <h2 class="text-xl font-bold text-neutral-900 mb-6 text-center">Create your account</h2>
           
           <form class="space-y-5" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
             
-            <div *ngIf="errorMessage" class="bg-red-50 border-l-4 border-red-400 p-4 mb-4 rounded-r-md text-sm text-red-700">
-              {{ errorMessage }}
+            <div *ngIf="errorMessage" class="bg-rose-50 border border-rose-200 p-4 rounded-xl flex items-start gap-3">
+              <svg class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p class="text-sm font-medium text-rose-800">{{ errorMessage }}</p>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label for="username" class="block text-sm font-semibold text-[#475569] mb-1.5">Username</label>
-                <input id="username" type="text" formControlName="username" 
-                  class="appearance-none block w-full px-4 py-2.5 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent transition-all sm:text-sm">
-              </div>
-              <div>
-                <label for="fullName" class="block text-sm font-semibold text-[#475569] mb-1.5">Full Name</label>
-                <input id="fullName" type="text" formControlName="fullName" 
-                  class="appearance-none block w-full px-4 py-2.5 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent transition-all sm:text-sm">
-              </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <app-input
+                id="username"
+                formControlName="username"
+                label="Username"
+                placeholder="johndoe">
+              </app-input>
+              <app-input
+                id="fullName"
+                formControlName="fullName"
+                label="Full Name"
+                placeholder="John Doe">
+              </app-input>
             </div>
 
-            <div>
-              <label for="email" class="block text-sm font-semibold text-[#475569] mb-1.5">Email address</label>
-              <input id="email" type="email" formControlName="email" 
-                class="appearance-none block w-full px-4 py-2.5 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent transition-all sm:text-sm">
-            </div>
+            <app-input
+              id="email"
+              type="email"
+              formControlName="email"
+              label="Email address"
+              placeholder="john@example.com">
+            </app-input>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <app-input
+                id="password"
+                type="password"
+                formControlName="password"
+                label="Password"
+                placeholder="Min. 6 characters">
+              </app-input>
               <div>
-                <label for="password" class="block text-sm font-semibold text-[#475569] mb-1.5">Password</label>
-                <input id="password" type="password" formControlName="password" 
-                  class="appearance-none block w-full px-4 py-2.5 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent transition-all sm:text-sm">
-              </div>
-              <div>
-                <label for="role" class="block text-sm font-semibold text-[#475569] mb-1.5">I am a...</label>
+                <label for="role" class="block text-sm font-bold text-neutral-900 mb-1.5">I am a...</label>
                 <select id="role" formControlName="role" 
-                  class="block w-full px-4 py-2.5 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1e40af] focus:border-transparent transition-all sm:text-sm">
+                  class="block w-full px-4 py-2.5 bg-neutral-50 border border-neutral-300 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-200 leading-none h-[42px]">
                   <option value="Founder">Founder</option>
                   <option value="Investor">Investor</option>
                 </select>
@@ -68,26 +86,24 @@ import { AuthService } from '../../core/services/auth.service';
             </div>
 
             <div class="pt-4">
-              <button type="submit" [disabled]="registerForm.invalid || isLoading" 
-                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-[#1e40af] hover:bg-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1e40af] disabled:opacity-50 transition transform hover:-translate-y-0.5 active:scale-95">
-                <span *ngIf="isLoading" class="mr-2">
-                  <svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                </span>
+              <app-button 
+                type="submit" 
+                variant="primary" 
+                [fullWidth]="true" 
+                [loading]="isLoading" 
+                [disabled]="registerForm.invalid">
                 Start Your Journey
-              </button>
+              </app-button>
             </div>
           </form>
 
-          <div class="mt-8 text-center">
-            <p class="text-sm text-[#64748b]">
+          <div class="mt-8 text-center bg-neutral-50 -mx-8 -mb-8 px-8 py-4 border-t border-neutral-100 rounded-b-[24px]">
+            <p class="text-sm text-neutral-500">
               Already have an account? 
-              <a routerLink="/auth/login" class="font-bold text-[#1e40af] hover:underline">Sign in</a>
+              <a routerLink="/auth/login" class="font-bold text-primary-600 hover:text-primary-700 transition-colors">Sign in</a>
             </p>
           </div>
-        </div>
+        </app-card>
       </div>
     </div>
   `

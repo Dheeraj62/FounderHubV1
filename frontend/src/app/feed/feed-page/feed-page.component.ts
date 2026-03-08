@@ -8,64 +8,90 @@ import { FeedCardComponent } from '../feed-card/feed-card.component';
 import { TrendingWidgetComponent } from '../trending-widget/trending-widget.component';
 import { AuthService } from '../../core/services/auth.service';
 import { FounderUpdatesService } from '../../core/services/founder-updates.service';
+import { CardComponent } from '../../shared/ui/card/card.component';
+import { ButtonComponent } from '../../shared/ui/button/button.component';
 
 @Component({
   selector: 'app-feed-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, FeedFilterBarComponent, FeedCardComponent, TrendingWidgetComponent],
+  imports: [CommonModule, FormsModule, FeedFilterBarComponent, FeedCardComponent, TrendingWidgetComponent, CardComponent, ButtonComponent],
   template: `
-    <div class="app-page">
-      <div class="app-page-header">
-        <div>
-          <h1 class="app-page-title">Network feed</h1>
-          <p class="app-page-subtitle">Platform activity across ideas, pivots, and founder updates.</p>
-        </div>
-        <app-feed-filter-bar [mode]="mode()" (modeChange)="setMode($event)"></app-feed-filter-bar>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- Left -->
-        <div class="lg:col-span-8 space-y-5">
-
-        <!-- Composer (Founders) -->
-        <div *ngIf="isFounder" class="app-card p-5">
-          <div class="text-sm font-semibold text-gray-900">Post an update</div>
-          <textarea
-            [(ngModel)]="newUpdate"
-            rows="3"
-            class="app-input mt-3 resize-none"
-            placeholder="We launched MVP today…"
-          ></textarea>
-          <div class="mt-3 flex items-center justify-end gap-2">
-            <button type="button" class="app-btn-secondary" (click)="newUpdate=''">Clear</button>
-            <button type="button" class="app-btn-primary" [disabled]="posting() || !newUpdate.trim()" (click)="postUpdate()">
-              {{ posting() ? 'Posting…' : 'Post' }}
-            </button>
+    <div class="max-w-5xl mx-auto flex gap-8 items-start">
+      <!-- CENTER FEED: max-w-3xl -->
+      <div class="flex-1 w-full max-w-3xl mx-auto space-y-6">
+        
+        <div class="mb-8">
+          <h1 class="text-h1">Network feed</h1>
+          <p class="text-body mt-2">Platform activity across ideas, pivots, and founder updates.</p>
+          <div class="mt-6">
+            <app-feed-filter-bar [mode]="mode()" (modeChange)="setMode($event)"></app-feed-filter-bar>
           </div>
         </div>
 
-        <div *ngIf="loading()" class="app-card p-6 text-sm text-gray-600">Loading feed…</div>
-        <div *ngIf="!loading() && items().length === 0" class="app-card p-6 text-sm text-gray-600">
-          Nothing here yet. Try switching to Global or follow a few founders/ideas.
+        <!-- Composer (Founders) -->
+        <div *ngIf="isFounder">
+          <app-card padding="md" class="border-2 border-primary-100 hover:border-primary-200 transition-colors">
+            <h3 class="text-sm font-black text-neutral-900 uppercase tracking-widest mb-3">Post an update</h3>
+            <textarea
+              [(ngModel)]="newUpdate"
+              rows="3"
+              class="w-full px-4 py-3 bg-neutral-50 border border-neutral-300 rounded-xl text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-200 resize-none"
+              placeholder="We launched MVP today…"
+            ></textarea>
+            <div class="mt-4 flex items-center justify-end gap-3">
+              <app-button variant="ghost" size="sm" (onClick)="newUpdate=''">Clear</app-button>
+              <app-button variant="primary" size="sm" [disabled]="posting() || !newUpdate.trim()" (onClick)="postUpdate()">
+                {{ posting() ? 'Posting…' : 'Post Update' }}
+              </app-button>
+            </div>
+          </app-card>
         </div>
 
-        <div class="space-y-4" *ngIf="!loading() && items().length > 0">
+        <div *ngIf="loading()" class="py-12 text-center text-sm font-medium text-neutral-500">
+          <div class="animate-spin inline-block w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full mb-2"></div>
+          <p>Loading activity feed...</p>
+        </div>
+        
+        <div *ngIf="!loading() && items().length === 0">
+          <app-card padding="lg" class="text-center py-16">
+            <div class="mx-auto w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
+              <svg class="h-6 w-6 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            </div>
+            <h3 class="text-h3 text-neutral-900">It's quiet here</h3>
+            <p class="text-body mt-2 max-w-sm mx-auto">Try switching to Global view or matching with more founders and ideas.</p>
+          </app-card>
+        </div>
+
+        <div class="space-y-6 pb-20" *ngIf="!loading() && items().length > 0">
           <app-feed-card *ngFor="let item of items()" [item]="item"></app-feed-card>
         </div>
       </div>
 
-        <!-- Right -->
-        <div class="lg:col-span-4 space-y-5">
-          <app-trending-widget></app-trending-widget>
-          <div class="app-card p-5">
-            <div class="text-sm font-semibold text-gray-900">Tips</div>
-            <ul class="mt-3 text-sm text-gray-600 space-y-2 list-disc pl-5">
-              <li>Follow founders and ideas to personalize your feed.</li>
-              <li>Founders: post updates to build credibility.</li>
-              <li>Investors: express interest to surface activity.</li>
-            </ul>
-          </div>
-        </div>
+      <!-- RIGHT WIDGETS -->
+      <div class="hidden lg:block w-[300px] shrink-0 space-y-6 pt-[120px]">
+        <app-trending-widget></app-trending-widget>
+        
+        <app-card padding="md" class="bg-gradient-to-br from-neutral-50 to-neutral-100/50 border-neutral-200/60">
+          <h3 class="text-xs font-black text-neutral-900 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <span class="text-primary-500">💡</span> Pro Tips
+          </h3>
+          <ul class="text-sm text-neutral-600 space-y-3 font-medium">
+            <li class="flex items-start gap-2">
+              <div class="mt-1 w-1.5 h-1.5 rounded-full bg-primary-400 shrink-0"></div>
+              <span>Follow founders and ideas to personalize your feed.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <div class="mt-1 w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"></div>
+              <span>Founders: post updates to build credibility.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <div class="mt-1 w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></div>
+              <span>Investors: express interest to surface activity.</span>
+            </li>
+          </ul>
+        </app-card>
       </div>
     </div>
   `,
