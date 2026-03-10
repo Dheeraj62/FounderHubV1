@@ -35,6 +35,10 @@ namespace FounderHub.Application.DTOs.Profiles
         public string Id { get; set; } = string.Empty;
         public string UserId { get; set; } = string.Empty;
         public List<string> PreferredIndustries { get; set; } = new();
+        public List<string> PreferredStages { get; set; } = new();
+        public string PreferredFundingRange { get; set; } = string.Empty;
+        public string PreferredLocation { get; set; } = string.Empty;
+        public string PreferredTeamSize { get; set; } = string.Empty;
         public string InvestmentStage { get; set; } = string.Empty;
         public string TicketSizeRange { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
@@ -50,6 +54,10 @@ namespace FounderHub.Application.DTOs.Profiles
     public class UpsertInvestorProfileRequest
     {
         public List<string> PreferredIndustries { get; set; } = new();
+        public List<string> PreferredStages { get; set; } = new();
+        public string PreferredFundingRange { get; set; } = string.Empty;
+        public string PreferredLocation { get; set; } = string.Empty;
+        public string PreferredTeamSize { get; set; } = string.Empty;
         public string InvestmentStage { get; set; } = string.Empty;
         public string TicketSizeRange { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;

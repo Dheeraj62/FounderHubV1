@@ -28,6 +28,10 @@ export interface InvestorProfile {
     id: string;
     userId: string;
     preferredIndustries: string[];
+    preferredStages?: string[];
+    preferredFundingRange?: string;
+    preferredLocation?: string;
+    preferredTeamSize?: string;
     investmentStage: string;
     ticketSizeRange: string;
     location: string;
@@ -41,6 +45,10 @@ export interface InvestorProfile {
 
 export interface UpsertInvestorProfileRequest {
     preferredIndustries: string[];
+    preferredStages?: string[];
+    preferredFundingRange?: string;
+    preferredLocation?: string;
+    preferredTeamSize?: string;
     investmentStage: string;
     ticketSizeRange: string;
     location: string;

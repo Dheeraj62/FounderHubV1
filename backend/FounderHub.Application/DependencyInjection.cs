@@ -27,6 +27,7 @@ namespace FounderHub.Application
             services.AddScoped<IFeedbackService, FeedbackService>();
             services.AddScoped<IMeetingService, MeetingService>();
             services.AddScoped<ICredibilityScoreService, CredibilityScoreService>();
+            services.AddScoped<ISmartMatchService, SmartMatchService>();
 
             return services;
         }

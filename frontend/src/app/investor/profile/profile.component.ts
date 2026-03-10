@@ -38,14 +38,15 @@ import { UpsertInvestorProfileRequest } from '../../core/models/profile.models';
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-gray-500 mb-2">Investment Stage</label>
-                <select [(ngModel)]="model.investmentStage" name="stage"
-                        class="w-full bg-gray-800 border-gray-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-emerald-500 transition-all">
-                  <option value="Idea">Idea Stage</option>
-                  <option value="MVP">MVP / Prototype</option>
-                  <option value="Early-Traction">Early Traction</option>
-                  <option value="Growth">Growth</option>
-                </select>
+                <label class="block text-sm font-semibold text-gray-500 mb-2">Target Stages</label>
+                <div class="grid grid-cols-2 gap-3">
+                  <div *ngFor="let stg of ['Idea', 'MVP', 'Early-Traction', 'Growth']" class="flex items-center">
+                    <input type="checkbox" [id]="stg" [checked]="isStageSelected(stg)"
+                           (change)="toggleStage(stg)"
+                           class="w-4 h-4 rounded border-gray-700 bg-gray-800 text-emerald-600">
+                    <label [for]="stg" class="ml-2 text-sm text-gray-300">{{ stg }}</label>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -56,15 +57,27 @@ import { UpsertInvestorProfileRequest } from '../../core/models/profile.models';
               </h3>
 
               <div>
-                <label class="block text-sm font-semibold text-gray-500 mb-2">Typical Ticket Size</label>
-                <input type="text" [(ngModel)]="model.ticketSizeRange" name="ticket" placeholder="$50k - $250k"
+                <label class="block text-sm font-semibold text-gray-500 mb-2">Preferred Funding Range</label>
+                <input type="text" [(ngModel)]="model.preferredFundingRange" name="fundingRange" placeholder="$50k - $250k"
                        class="w-full bg-gray-800 border-gray-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-emerald-500 transition-all">
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-gray-500 mb-2">Target Location</label>
-                <input type="text" [(ngModel)]="model.location" name="loc" placeholder="San Francisco, Berlin, etc."
+                <label class="block text-sm font-semibold text-gray-500 mb-2">Preferred Location</label>
+                <input type="text" [(ngModel)]="model.preferredLocation" name="preferredLocation" placeholder="San Francisco, Berlin, etc."
                        class="w-full bg-gray-800 border-gray-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-emerald-500 transition-all">
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-gray-500 mb-2">Preferred Team Size</label>
+                <select [(ngModel)]="model.preferredTeamSize" name="teamSize"
+                        class="w-full bg-gray-800 border-gray-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-emerald-500 transition-all">
+                  <option value="">Any</option>
+                  <option value="1">Solo Founder</option>
+                  <option value="2-5">2-5 members</option>
+                  <option value="6-10">6-10 members</option>
+                  <option value="11+">11+ members</option>
+                </select>
               </div>
               
               <div class="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl mt-4">
@@ -98,6 +111,10 @@ import { UpsertInvestorProfileRequest } from '../../core/models/profile.models';
 export class InvestorProfileComponent implements OnInit {
   model: UpsertInvestorProfileRequest = {
     preferredIndustries: [],
+    preferredStages: [],
+    preferredFundingRange: '',
+    preferredLocation: '',
+    preferredTeamSize: '',
     investmentStage: 'Early-Traction',
     ticketSizeRange: '',
     location: '',
@@ -124,6 +141,10 @@ export class InvestorProfileComponent implements OnInit {
         next: (p) => {
           this.model = {
             preferredIndustries: p.preferredIndustries || [],
+            preferredStages: p.preferredStages || [],
+            preferredFundingRange: p.preferredFundingRange || '',
+            preferredLocation: p.preferredLocation || '',
+            preferredTeamSize: p.preferredTeamSize || '',
             investmentStage: p.investmentStage,
             ticketSizeRange: p.ticketSizeRange,
             location: p.location,
@@ -155,6 +176,21 @@ export class InvestorProfileComponent implements OnInit {
       this.model.preferredIndustries = this.model.preferredIndustries.filter(i => i !== industry);
     } else {
       this.model.preferredIndustries.push(industry);
+    }
+  }
+
+  isStageSelected(stage: string): boolean {
+    return this.model.preferredStages?.includes(stage) || false;
+  }
+
+  toggleStage(stage: string) {
+    if (!this.model.preferredStages) {
+      this.model.preferredStages = [];
+    }
+    if (this.isStageSelected(stage)) {
+      this.model.preferredStages = this.model.preferredStages.filter(s => s !== stage);
+    } else {
+      this.model.preferredStages.push(stage);
     }
   }
 

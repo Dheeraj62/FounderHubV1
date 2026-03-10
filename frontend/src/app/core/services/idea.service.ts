@@ -51,4 +51,11 @@ export class IdeaService {
     getRecommended(): Observable<RecommendedIdea[]> {
         return this.http.get<RecommendedIdea[]>(`${this.baseUrl}/recommended`);
     }
+
+    getSmartMatches(page: number = 1, pageSize: number = 20): Observable<RecommendedIdea[]> {
+        let params = new HttpParams()
+            .set('page', page.toString())
+            .set('pageSize', pageSize.toString());
+        return this.http.get<RecommendedIdea[]>(`${API_CONFIG.baseUrl}/smart-matches`, { params });
+    }
 }

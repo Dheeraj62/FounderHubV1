@@ -69,6 +69,10 @@ namespace FounderHub.Application.Services
                 Id = profile.Id,
                 UserId = profile.UserId,
                 PreferredIndustries = profile.PreferredIndustries,
+                PreferredStages = profile.PreferredStages,
+                PreferredFundingRange = profile.PreferredFundingRange,
+                PreferredLocation = profile.PreferredLocation,
+                PreferredTeamSize = profile.PreferredTeamSize,
                 InvestmentStage = profile.InvestmentStage,
                 TicketSizeRange = profile.TicketSizeRange,
                 Location = profile.Location,
@@ -118,6 +122,10 @@ namespace FounderHub.Application.Services
         private void UpdateInvestorProfile(InvestorProfile profile, UpsertInvestorProfileRequest request)
         {
             profile.PreferredIndustries = request.PreferredIndustries;
+            profile.PreferredStages = request.PreferredStages;
+            profile.PreferredFundingRange = request.PreferredFundingRange;
+            profile.PreferredLocation = request.PreferredLocation;
+            profile.PreferredTeamSize = request.PreferredTeamSize;
             profile.InvestmentStage = request.InvestmentStage;
             profile.TicketSizeRange = request.TicketSizeRange;
             profile.Location = request.Location;
