@@ -1,6 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, Router } from '@angular/router';
+import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { AvatarComponent } from '../../ui/avatar/avatar.component';
@@ -75,11 +77,25 @@ import { AvatarComponent } from '../../ui/avatar/avatar.component';
   `,
     styles: []
 })
-export class DashboardLayoutComponent {
+export class DashboardLayoutComponent implements OnInit, OnDestroy {
     authService = inject(AuthService);
     router = inject(Router);
+    private routerSub?: Subscription;
 
     isMobileMenuOpen = signal(false);
+
+    ngOnInit() {
+        // Automatically close the mobile menu when a navigation completes
+        this.routerSub = this.router.events.pipe(
+            filter(event => event instanceof NavigationEnd)
+        ).subscribe(() => {
+            this.isMobileMenuOpen.set(false);
+        });
+    }
+
+    ngOnDestroy() {
+        this.routerSub?.unsubscribe();
+    }
 
     toggleMobileMenu() {
         this.isMobileMenuOpen.update(v => !v);
