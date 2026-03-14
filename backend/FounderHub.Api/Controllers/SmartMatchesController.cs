@@ -22,7 +22,7 @@ namespace FounderHub.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetSmartMatches([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirstValue("sub") ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 

@@ -43,8 +43,8 @@ export class MatchScoreBadgeComponent {
     @Input() reasons: string[] = [];
 
     getScoreColor(score: number): string {
-        if (score >= 80) return 'text-emerald-400 border-emerald-500/30';
-        if (score >= 50) return 'text-amber-400 border-amber-500/30';
+        if (score >= 80) return 'text-primary-500 border-primary-500/30';
+        if (score >= 50) return 'text-accent border-accent/30';
         return 'text-rose-400 border-rose-500/30';
     }
 }
