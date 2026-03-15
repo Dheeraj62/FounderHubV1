@@ -6,11 +6,12 @@ import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth.service';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { AvatarComponent } from '../../ui/avatar/avatar.component';
+import { FooterComponent } from '../../components/footer/footer.component';
 
 @Component({
     selector: 'app-dashboard-layout',
     standalone: true,
-    imports: [CommonModule, RouterOutlet, SidebarComponent, AvatarComponent, RouterLink],
+    imports: [CommonModule, RouterOutlet, SidebarComponent, AvatarComponent, RouterLink, FooterComponent],
     template: `
     <div class="flex h-screen bg-neutral-50 overflow-hidden font-sans">
       
@@ -57,20 +58,40 @@ import { AvatarComponent } from '../../ui/avatar/avatar.component';
 
             <div class="h-6 w-px bg-neutral-200 hidden sm:block"></div>
 
-            <div class="flex items-center gap-3">
-               <button (click)="logout()" class="text-xs font-black text-neutral-400 hover:text-rose-600 uppercase tracking-widest transition-colors mr-2">
-                Logout
-              </button>
-              <app-avatar [initials]="(authService.getRole() || 'U')[0]" size="sm" color="indigo" class="cursor-pointer hover:opacity-80 transition-opacity"></app-avatar>
+            <div class="relative flex items-center gap-3">
+              <div class="relative cursor-pointer group" (click)="toggleProfileMenu($event)">
+                <app-avatar [initials]="(authService.getRole() || 'U')[0]" size="sm" color="primary" class="hover:opacity-80 transition-opacity"></app-avatar>
+                
+                <!-- Dropdown Menu -->
+                <div *ngIf="isProfileMenuOpen()" class="absolute right-0 mt-3 w-48 bg-white border border-neutral-200 rounded-xl shadow-lg py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                  <div class="px-4 py-2 border-b border-neutral-100 mb-1">
+                    <p class="text-xs font-bold text-neutral-500 uppercase tracking-widest">Signed in as</p>
+                    <p class="text-sm font-semibold text-neutral-900 truncate">{{ authService.getRole() }}</p>
+                  </div>
+                  
+                  <button [routerLink]="['/', authService.getRole()?.toLowerCase(), 'profile']" 
+                          class="w-full text-left px-4 py-2 text-sm text-neutral-700 hover:text-primary-600 hover:bg-primary-50 transition-colors flex items-center">
+                    <span class="mr-2">👤</span> My Profile
+                  </button>
+                  
+                  <button (click)="logout()" 
+                          class="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors flex items-center mt-1 border-top border-neutral-100">
+                    <span class="mr-2">🚪</span> Logout
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </header>
 
         <!-- CONTENT SCROLL AREA -->
-        <main class="flex-1 overflow-y-auto p-4 sm:p-8">
-          <div class="layout-container py-4">
-            <router-outlet></router-outlet>
+        <main class="flex-1 overflow-y-auto flex flex-col">
+          <div class="p-4 sm:p-8 flex-1">
+            <div class="layout-container py-4">
+              <router-outlet></router-outlet>
+            </div>
           </div>
+          <app-footer></app-footer>
         </main>
       </div>
     </div>
@@ -83,6 +104,7 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
     private routerSub?: Subscription;
 
     isMobileMenuOpen = signal(false);
+    isProfileMenuOpen = signal(false);
 
     ngOnInit() {
         // Automatically close the mobile menu when a navigation completes
@@ -90,15 +112,29 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
             filter(event => event instanceof NavigationEnd)
         ).subscribe(() => {
             this.isMobileMenuOpen.set(false);
+            this.isProfileMenuOpen.set(false);
         });
+        
+        // Close profile menu if clicked outside
+        document.addEventListener('click', this.closeProfileMenuOutside.bind(this));
     }
 
     ngOnDestroy() {
         this.routerSub?.unsubscribe();
+        document.removeEventListener('click', this.closeProfileMenuOutside.bind(this));
+    }
+
+    closeProfileMenuOutside(event: Event) {
+        this.isProfileMenuOpen.set(false);
     }
 
     toggleMobileMenu() {
         this.isMobileMenuOpen.update(v => !v);
+    }
+
+    toggleProfileMenu(event: Event) {
+        event.stopPropagation();
+        this.isProfileMenuOpen.update(v => !v);
     }
 
     getBreadcrumb(): string {

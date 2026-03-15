@@ -11,10 +11,10 @@ import { Notification } from '../../../core/models/notification.models';
     <div class="max-w-4xl mx-auto py-12 px-4">
       <div class="flex justify-between items-center mb-10">
         <div>
-          <h1 class="text-4xl font-black text-white tracking-tight">Updates</h1>
-          <p class="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-1">Stay informed on your ecosystem events</p>
+          <h1 class="text-4xl font-black text-neutral-900 tracking-tight">Updates</h1>
+          <p class="text-neutral-500 font-bold uppercase tracking-widest text-[10px] mt-1">Stay informed on your ecosystem events</p>
         </div>
-        <button (click)="markAll()" class="text-xs font-black text-indigo-400 hover:text-indigo-300 uppercase tracking-[0.2em] border-b border-indigo-400/30">
+        <button (click)="markAll()" class="text-xs font-black text-primary-600 hover:text-primary-800 uppercase tracking-[0.2em] border-b border-primary-600/30 transition-colors">
           Mark all as read
         </button>
       </div>
@@ -22,30 +22,30 @@ import { Notification } from '../../../core/models/notification.models';
       <div class="space-y-4" *ngIf="notifications.length > 0">
         <div *ngFor="let note of notifications" 
              [class.opacity-50]="note.isRead"
-             class="bg-gray-900 border border-gray-800 rounded-2xl p-6 flex items-start gap-5 transition-all hover:bg-gray-800/10 group">
+             class="bg-white border border-neutral-200 rounded-2xl p-6 flex items-start gap-5 transition-all hover:bg-neutral-50 hover:shadow-sm group">
           
-          <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl bg-gray-800 border border-gray-700 group-hover:border-indigo-500/30 transition-colors">
+          <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl bg-primary-50 border border-primary-100 text-primary-700 transition-colors">
             {{ getIcon(note.type) }}
           </div>
           
           <div class="flex-1">
             <div class="flex justify-between items-start mb-1">
-              <h3 class="text-white font-bold leading-tight">{{ note.title }}</h3>
-              <span class="text-[9px] text-gray-500 uppercase font-black">{{ note.createdAt | date:'shortTime' }}</span>
+              <h3 class="text-neutral-900 font-bold leading-tight">{{ note.title }}</h3>
+              <span class="text-[9px] text-neutral-500 uppercase font-black">{{ note.createdAt | date:'shortTime' }}</span>
             </div>
-            <p class="text-sm text-gray-400 leading-relaxed">{{ note.body }}</p>
+            <p class="text-sm text-neutral-600 leading-relaxed">{{ note.body }}</p>
             
             <button *ngIf="!note.isRead" (click)="mark(note.id)" 
-                    class="mt-3 text-[10px] font-black text-indigo-400 hover:text-indigo-300 uppercase tracking-widest">
+                    class="mt-3 text-[10px] font-black text-primary-600 hover:text-primary-800 uppercase tracking-widest transition-colors">
               Mark Read
             </button>
           </div>
         </div>
       </div>
 
-      <div *ngIf="notifications.length === 0" class="text-center py-24 bg-gray-900/30 rounded-3xl border border-dashed border-gray-800">
-        <div class="text-5xl mb-4 text-gray-700">🔔</div>
-        <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">All caught up! No new activity.</p>
+      <div *ngIf="notifications.length === 0" class="text-center py-24 bg-neutral-50 rounded-3xl border border-dashed border-neutral-300">
+        <div class="text-5xl mb-4 text-neutral-300">🔔</div>
+        <p class="text-neutral-500 font-bold uppercase tracking-widest text-xs">All caught up! No new activity.</p>
       </div>
     </div>
   `,

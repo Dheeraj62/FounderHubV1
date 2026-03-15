@@ -32,12 +32,7 @@ import { AvatarComponent } from '../../ui/avatar/avatar.component';
               </svg>
               Dashboard
             </a>
-            <a routerLink="/founder/profile" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm" class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-bold text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-all group">
-              <svg class="w-5 h-5 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-              </svg>
-              My Profile
-            </a>
+
             <a routerLink="/founder/analytics" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm" class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-bold text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 transition-all group">
               <svg class="w-5 h-5 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>

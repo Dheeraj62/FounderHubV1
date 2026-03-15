@@ -25,7 +25,7 @@ import { InputComponent } from '../../ui/input/input.component';
           <app-button variant="ghost" size="sm" class="sm:hidden -ml-2 text-neutral-500" routerLink="/founder/dashboard">
             &larr;
           </app-button>
-          <app-avatar [alt]="partnerName" size="md" variant="squircle" [online]="true" color="indigo"></app-avatar>
+          <app-avatar [alt]="partnerName" size="md" variant="squircle" [online]="true" color="primary"></app-avatar>
           <div>
             <h2 class="text-neutral-900 font-bold text-lg tracking-tight leading-tight">{{ partnerName }}</h2>
             <div class="flex items-center text-xs font-semibold tracking-wide text-emerald-600">
@@ -47,10 +47,10 @@ import { InputComponent } from '../../ui/input/input.component';
 
         <div *ngFor="let msg of messages" 
              [class]="isMe(msg.senderId) ? 'flex justify-end' : 'flex justify-start'">
-          <div [class]="isMe(msg.senderId) ? 'bg-indigo-600 text-white rounded-br-none shadow-sm' : 'bg-white border border-neutral-200 text-neutral-800 rounded-bl-none shadow-sm'"
+          <div [class]="isMe(msg.senderId) ? 'bg-primary-600 text-white rounded-br-none shadow-sm' : 'bg-white border border-neutral-200 text-neutral-800 rounded-bl-none shadow-sm'"
                class="max-w-[85%] sm:max-w-[70%] px-5 py-3.5 rounded-2xl relative group">
             <p class="text-[15px] leading-relaxed break-words">{{ msg.content }}</p>
-            <span [class]="isMe(msg.senderId) ? 'text-indigo-200' : 'text-neutral-400'"
+            <span [class]="isMe(msg.senderId) ? 'text-primary-200' : 'text-neutral-400'"
                   class="text-[10px] font-bold uppercase tracking-wider mt-1.5 block text-right select-none">
               {{ msg.sentAt | date:'shortTime' }}
             </span>
@@ -68,7 +68,7 @@ import { InputComponent } from '../../ui/input/input.component';
               rows="1"
               placeholder="Type your message..."
               (keydown.enter)="$event.preventDefault(); send()"
-              class="block w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-400 transition-all duration-200 resize-none max-h-32"
+              class="block w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-400 transition-all duration-200 resize-none max-h-32"
               ></textarea>
           </div>
           <app-button type="submit" [disabled]="!newMessage.trim()" variant="primary" size="md" class="shrink-0 pb-[2px]">

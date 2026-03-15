@@ -8,6 +8,14 @@ export const routes: Routes = [
     // PUBLIC ROUTES
     { path: '', component: LandingComponent, pathMatch: 'full' },
     {
+        path: 'about',
+        loadComponent: () => import('./public/about/about.component').then(m => m.AboutComponent)
+    },
+    {
+        path: 'contact',
+        loadComponent: () => import('./public/contact/contact.component').then(m => m.ContactComponent)
+    },
+    {
         path: 'auth/login',
         loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent)
     },
