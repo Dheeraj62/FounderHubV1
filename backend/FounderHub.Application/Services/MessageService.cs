@@ -13,12 +13,14 @@ namespace FounderHub.Application.Services
         private readonly IMessageRepository _messageRepo;
         private readonly IConnectionRepository _connectionRepo;
         private readonly INotificationRepository _notificationRepo;
+        private readonly IHtmlSanitizerService _sanitizer;
 
-        public MessageService(IMessageRepository messageRepo, IConnectionRepository connectionRepo, INotificationRepository notificationRepo)
+        public MessageService(IMessageRepository messageRepo, IConnectionRepository connectionRepo, INotificationRepository notificationRepo, IHtmlSanitizerService sanitizer)
         {
             _messageRepo = messageRepo;
             _connectionRepo = connectionRepo;
             _notificationRepo = notificationRepo;
+            _sanitizer = sanitizer;
         }
 
         public async Task SendMessageAsync(string senderId, SendMessageRequest request)
@@ -35,7 +37,7 @@ namespace FounderHub.Application.Services
                 ConnectionId = request.ConnectionId,
                 SenderId = senderId,
                 RecipientId = request.RecipientId,
-                Content = request.Content,
+                Content = _sanitizer.Sanitize(request.Content),
                 SentAt = DateTime.UtcNow
             };
 

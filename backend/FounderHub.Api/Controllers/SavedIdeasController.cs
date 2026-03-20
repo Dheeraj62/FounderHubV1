@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FounderHub.Application.Interfaces;
@@ -7,7 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace FounderHub.Api.Controllers
 {
     [ApiController]
-    [Route("api/saved-ideas")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/saved-ideas")]
     [Authorize(Roles = "Investor")]
     public class SavedIdeasController : ControllerBase
     {

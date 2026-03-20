@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using System;
 using System.Threading.Tasks;
 using FounderHub.Application.Interfaces;
@@ -8,7 +9,8 @@ using System.Security.Claims;
 namespace FounderHub.Api.Controllers
 {
     [ApiController]
-    [Route("api/smart-matches")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/smart-matches")]
     [Authorize(Roles = "Investor")]
     public class SmartMatchesController : ControllerBase
     {

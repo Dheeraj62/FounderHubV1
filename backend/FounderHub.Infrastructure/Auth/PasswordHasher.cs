@@ -7,7 +7,7 @@ namespace FounderHub.Infrastructure.Auth
     {
         public string Hash(string password)
         {
-            return BCrypt.Net.BCrypt.HashPassword(password);
+            return BCrypt.Net.BCrypt.HashPassword(password, 12);
         }
 
         public bool Verify(string password, string hash)

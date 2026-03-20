@@ -1,4 +1,7 @@
 using System.Text;
+using Microsoft.AspNetCore.RateLimiting;
+using Serilog;
+using Asp.Versioning;
 using FounderHub.Application;
 using FounderHub.Infrastructure;
 using FounderHub.Infrastructure.Data;
@@ -10,9 +13,20 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
 // Configure Kestrel for Render + Local
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
+    serverOptions.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
+
     var port = Environment.GetEnvironmentVariable("PORT");
 
     if (!string.IsNullOrEmpty(port))
@@ -27,6 +41,15 @@ builder.Services.AddControllers();
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// API Versioning
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+})
+.AddMvc();
 
 // Register Clean Architecture Layers
 builder.Services.AddApplication();
@@ -64,16 +87,44 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Rate Limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = System.Threading.RateLimiting.PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? context.TraceIdentifier,
+            factory: partition => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 100,
+                QueueLimit = 0,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+
+    options.AddFixedWindowLimiter("AuthLimiter", opt =>
+    {
+        opt.AutoReplenishment = true;
+        opt.PermitLimit = 5;
+        opt.QueueLimit = 0;
+        opt.Window = TimeSpan.FromMinutes(1);
+    });
+});
+
 var app = builder.Build();
 
 // Global exception middleware
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<SecurityHeadersMiddleware>();
+
+// Serilog Request Logging
+app.UseSerilogRequestLogging();
 
 // Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

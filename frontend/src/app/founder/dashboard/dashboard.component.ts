@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { IdeaService } from '../../core/services/idea.service';
 import { Idea } from '../../core/models/idea.models';
 import { InterestService } from '../../core/services/interest.service';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 
 import { CardComponent } from '../../shared/ui/card/card.component';
 import { BadgeComponent } from '../../shared/ui/badge/badge.component';
@@ -51,7 +52,7 @@ import { ButtonComponent } from '../../shared/ui/button/button.component';
       </div>
 
       <!-- Content Grid -->
-      <div *ngIf="!isLoading() && ideas().length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div *ngIf="!isLoading() && ideas().length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <app-card *ngFor="let idea of ideas()" [hoverable]="true" [hasFooter]="true" padding="md" class="flex flex-col h-full">
           <div class="flex items-center gap-2 mb-4">
              <app-badge variant="indigo">{{ idea.industry }}</app-badge>
@@ -90,6 +91,7 @@ export class DashboardComponent implements OnInit {
   router = inject(Router);
   private ideaService = inject(IdeaService);
   private interestService = inject(InterestService);
+  private toastService = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
 
   // Use Signals for zoneless change detection
@@ -133,8 +135,15 @@ export class DashboardComponent implements OnInit {
     return this.interestCounts()[ideaId]?.[field] ?? 0;
   }
 
-  deleteIdea(id: string) {
-    if (confirm('Are you sure you want to delete this idea?')) {
+  async deleteIdea(id: string) {
+    const confirmed = await this.toastService.requestConfirmation({
+      title: 'Delete Startup Idea',
+      message: 'Are you sure you want to permanently delete this idea? All associated data and metrics will be lost.',
+      danger: true,
+      confirmText: 'Delete Idea'
+    });
+
+    if (confirmed) {
       this.ideaService.deleteIdea(id).subscribe({
         next: () => {
           this.ideas.update(prev => prev.filter(i => i.id !== id));

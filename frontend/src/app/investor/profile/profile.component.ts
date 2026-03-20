@@ -1,9 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProfileService } from '../../core/services/profile.service';
 import { AuthService } from '../../core/services/auth.service';
 import { UpsertInvestorProfileRequest } from '../../core/models/profile.models';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 
 @Component({
   selector: 'app-investor-profile',
@@ -17,7 +18,7 @@ import { UpsertInvestorProfileRequest } from '../../core/models/profile.models';
           <p class="text-primary-700 mt-2">Adjust your criteria to receive higher quality matches.</p>
         </div>
 
-        <form (ngSubmit)="save()" class="p-8 space-y-10">
+        <form #investorForm="ngForm" (ngSubmit)="save(investorForm)" class="p-8 space-y-10">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
             <!-- Investment Thesis -->
             <div class="space-y-6">
@@ -57,14 +58,14 @@ import { UpsertInvestorProfileRequest } from '../../core/models/profile.models';
               </h3>
 
               <div>
-                <label class="block text-sm font-semibold text-neutral-600 mb-2">Preferred Funding Range</label>
-                <input type="text" [(ngModel)]="model.preferredFundingRange" name="fundingRange" placeholder="$50k - $250k"
+                <label class="block text-sm font-semibold text-neutral-600 mb-2">Preferred Funding Range <span class="text-red-500">*</span></label>
+                <input type="text" [(ngModel)]="model.preferredFundingRange" name="fundingRange" placeholder="$50k - $250k" required
                        class="w-full bg-white border border-neutral-300 rounded-xl p-3 text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all shadow-sm">
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-neutral-600 mb-2">Preferred Location</label>
-                <input type="text" [(ngModel)]="model.preferredLocation" name="preferredLocation" placeholder="San Francisco, Berlin, etc."
+                <label class="block text-sm font-semibold text-neutral-600 mb-2">Preferred Location <span class="text-red-500">*</span></label>
+                <input type="text" [(ngModel)]="model.preferredLocation" name="preferredLocation" placeholder="San Francisco, Berlin, etc." required
                        class="w-full bg-white border border-neutral-300 rounded-xl p-3 text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all shadow-sm">
               </div>
 
@@ -90,15 +91,15 @@ import { UpsertInvestorProfileRequest } from '../../core/models/profile.models';
 
           <div class="space-y-3">
             <h3 class="text-xl font-bold text-primary-600 flex items-center">
-              <span class="mr-2">✍️</span> Investor Bio
+              <span class="mr-2">✍️</span> Investor Bio <span class="text-red-500 text-sm ml-2">*</span>
             </h3>
-            <textarea [(ngModel)]="model.bio" name="bio" rows="4" placeholder="Briefly describe your investment philosophy..."
+            <textarea [(ngModel)]="model.bio" name="bio" rows="4" placeholder="Briefly describe your investment philosophy..." required
                       class="w-full bg-white border border-neutral-300 rounded-xl p-4 text-neutral-900 placeholder:text-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none shadow-sm"></textarea>
           </div>
 
           <div class="flex justify-center sm:justify-end">
-            <button type="submit" 
-                    class="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 text-white font-bold py-4 px-12 rounded-xl transition-all shadow-md hover:shadow-lg focus:ring-4 focus:ring-primary-500/30">
+            <button type="submit" [disabled]="investorForm.invalid"
+                    class="w-full sm:w-auto bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-700 text-white font-bold py-4 px-12 rounded-xl transition-all shadow-md hover:shadow-lg focus:ring-4 focus:ring-primary-500/30">
               Update Criteria
             </button>
           </div>
@@ -109,6 +110,8 @@ import { UpsertInvestorProfileRequest } from '../../core/models/profile.models';
   styles: []
 })
 export class InvestorProfileComponent implements OnInit {
+  private toastService = inject(ToastService);
+  
   model: UpsertInvestorProfileRequest = {
     preferredIndustries: [],
     preferredStages: [],
@@ -194,12 +197,29 @@ export class InvestorProfileComponent implements OnInit {
     }
   }
 
-  save() {
+  save(form: any) {
+    if (form.invalid) {
+      this.toastService.warning('Please fill in all required fields correctly.');
+      return;
+    }
+    
+    // Fill in default values for required backed fields missing from UI
+    this.model.investmentStage = this.model.investmentStage || 'Any';
+    this.model.ticketSizeRange = this.model.ticketSizeRange || this.model.preferredFundingRange || 'Any';
+    this.model.location = this.model.location || this.model.preferredLocation || 'Any';
+    this.model.preferredTeamSize = this.model.preferredTeamSize || 'Any';
+
     this.profileService.upsertInvestorProfile(this.model).subscribe({
-      next: () => alert('Preferences updated successfully!'),
-      error: (err) => {
+      next: () => this.toastService.success('Preferences updated successfully!'),
+      error: (err: any) => {
         console.error('Error saving investor profile:', err);
-        alert('Failed to update preferences. Status: ' + (err.status || 'Unknown'));
+        let errorMsg = 'Failed to update preferences. Status: ' + (err.status || 'Unknown');
+        if (err.status === 400 && err.error?.errors) {
+            errorMsg = Object.values<{[_: string]: string[]}>(err.error.errors).flat().join(' ');
+        } else if (err.status === 400 && typeof err.error === 'string') {
+            errorMsg = err.error;
+        }
+        this.toastService.error(errorMsg);
       }
     });
   }

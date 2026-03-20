@@ -21,6 +21,7 @@ namespace FounderHub.Application.DTOs.Watchlists
         [Required]
         public string IdeaId { get; set; } = string.Empty;
         
+        [MaxLength(2000)]
         public string? Notes { get; set; }
     }
 }

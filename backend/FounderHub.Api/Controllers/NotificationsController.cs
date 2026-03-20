@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FounderHub.Application.Interfaces;
@@ -7,7 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace FounderHub.Api.Controllers
 {
     [ApiController]
-    [Route("api/notifications")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/notifications")]
     [Authorize]
     public class NotificationsController : ControllerBase
     {

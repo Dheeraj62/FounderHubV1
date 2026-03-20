@@ -12,11 +12,13 @@ namespace FounderHub.Application.Services
     {
         private readonly IFounderUpdateRepository _updates;
         private readonly IFeedEventRepository _feedEvents;
+        private readonly IHtmlSanitizerService _sanitizer;
 
-        public FounderUpdateService(IFounderUpdateRepository updates, IFeedEventRepository feedEvents)
+        public FounderUpdateService(IFounderUpdateRepository updates, IFeedEventRepository feedEvents, IHtmlSanitizerService sanitizer)
         {
             _updates = updates;
             _feedEvents = feedEvents;
+            _sanitizer = sanitizer;
         }
 
         public async Task<FounderUpdateDto> CreateAsync(string founderId, CreateFounderUpdateRequest request)
@@ -24,7 +26,7 @@ namespace FounderHub.Application.Services
             var update = new FounderUpdate
             {
                 FounderId = founderId,
-                Content = request.Content.Trim(),
+                Content = _sanitizer.Sanitize(request.Content.Trim()),
                 CreatedAt = DateTime.UtcNow
             };
 

@@ -35,17 +35,26 @@ namespace FounderHub.Api.Middleware
         {
             context.Response.ContentType = "application/json";
 
-            context.Response.StatusCode = exception switch
+            var statusCode = (int)HttpStatusCode.InternalServerError;
+            var message = "Internal server error";
+
+            if (exception is UnauthorizedAccessException)
             {
-                UnauthorizedAccessException => (int)HttpStatusCode.Forbidden,
-                ArgumentException => (int)HttpStatusCode.BadRequest,
-                _ => (int)HttpStatusCode.BadRequest // Map to 400 instead of 500 for business logic exceptions
-            };
+                statusCode = (int)HttpStatusCode.Forbidden;
+                message = "Access denied";
+            }
+            else if (exception is ArgumentException)
+            {
+                statusCode = (int)HttpStatusCode.BadRequest;
+                message = exception.Message;
+            }
+
+            context.Response.StatusCode = statusCode;
 
             var response = new
             {
-                message = exception.Message,
-                statusCode = context.Response.StatusCode
+                error = message,
+                status = context.Response.StatusCode
             };
 
             var json = JsonSerializer.Serialize(response);

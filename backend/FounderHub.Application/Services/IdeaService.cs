@@ -132,19 +132,22 @@ namespace FounderHub.Application.Services
         private readonly IInterestRepository _interestRepository;
         private readonly IIdeaViewRepository _ideaViewRepository;
         private readonly IFeedEventRepository _feedEvents;
+        private readonly IHtmlSanitizerService _sanitizer;
 
         public IdeaService(
             IIdeaRepository ideaRepository,
             IInvestorProfileRepository investorRepository,
             IInterestRepository interestRepository,
             IIdeaViewRepository ideaViewRepository,
-            IFeedEventRepository feedEvents)
+            IFeedEventRepository feedEvents,
+            IHtmlSanitizerService sanitizer)
         {
             _ideaRepository = ideaRepository;
             _investorRepository = investorRepository;
             _interestRepository = interestRepository;
             _ideaViewRepository = ideaViewRepository;
             _feedEvents = feedEvents;
+            _sanitizer = sanitizer;
         }
 
         public async Task<IdeaDto> CreateIdeaAsync(string founderId, CreateIdeaRequest request)
@@ -152,9 +155,9 @@ namespace FounderHub.Application.Services
             var idea = new Idea
             {
                 FounderId = founderId,
-                Title = request.Title,
-                Problem = request.Problem,
-                Solution = request.Solution,
+                Title = _sanitizer.Sanitize(request.Title),
+                Problem = _sanitizer.Sanitize(request.Problem),
+                Solution = _sanitizer.Sanitize(request.Solution),
                 Stage = request.Stage,
                 Industry = request.Industry,
                 PitchDeckUrl = request.PitchDeckUrl,
@@ -162,12 +165,12 @@ namespace FounderHub.Application.Services
                 StartupWebsite = request.StartupWebsite,
                 ProductImages = request.ProductImages ?? new List<string>(),
                 MarketSize = request.MarketSize,
-                TargetCustomers = request.TargetCustomers,
-                TractionMetrics = request.TractionMetrics,
+                TargetCustomers = _sanitizer.Sanitize(request.TargetCustomers ?? ""),
+                TractionMetrics = _sanitizer.Sanitize(request.TractionMetrics ?? ""),
                 PreviouslyRejected = request.PreviouslyRejected,
-                RejectedBy = request.RejectedBy,
+                RejectedBy = _sanitizer.Sanitize(request.RejectedBy ?? ""),
                 RejectionReasonCategory = request.RejectionReasonCategory,
-                WhatChangedAfterRejection = request.WhatChangedAfterRejection,
+                WhatChangedAfterRejection = _sanitizer.Sanitize(request.WhatChangedAfterRejection ?? ""),
                 FundingRange = request.FundingRange,
                 Location = request.Location,
                 CreatedAt = DateTime.UtcNow,
@@ -191,9 +194,9 @@ namespace FounderHub.Application.Services
             if (idea == null) throw new Exception("Idea not found");
             if (idea.FounderId != founderId) throw new UnauthorizedAccessException("You can only edit your own ideas");
 
-            idea.Title = request.Title;
-            idea.Problem = request.Problem;
-            idea.Solution = request.Solution;
+            idea.Title = _sanitizer.Sanitize(request.Title);
+            idea.Problem = _sanitizer.Sanitize(request.Problem);
+            idea.Solution = _sanitizer.Sanitize(request.Solution);
             idea.Stage = request.Stage;
             idea.Industry = request.Industry;
             idea.PitchDeckUrl = request.PitchDeckUrl;
@@ -201,12 +204,12 @@ namespace FounderHub.Application.Services
             idea.StartupWebsite = request.StartupWebsite;
             idea.ProductImages = request.ProductImages ?? new List<string>();
             idea.MarketSize = request.MarketSize;
-            idea.TargetCustomers = request.TargetCustomers;
-            idea.TractionMetrics = request.TractionMetrics;
+            idea.TargetCustomers = _sanitizer.Sanitize(request.TargetCustomers ?? "");
+            idea.TractionMetrics = _sanitizer.Sanitize(request.TractionMetrics ?? "");
             idea.PreviouslyRejected = request.PreviouslyRejected;
-            idea.RejectedBy = request.RejectedBy;
+            idea.RejectedBy = _sanitizer.Sanitize(request.RejectedBy ?? "");
             idea.RejectionReasonCategory = request.RejectionReasonCategory;
-            idea.WhatChangedAfterRejection = request.WhatChangedAfterRejection;
+            idea.WhatChangedAfterRejection = _sanitizer.Sanitize(request.WhatChangedAfterRejection ?? "");
             idea.FundingRange = request.FundingRange;
             idea.Location = request.Location;
             idea.UpdatedAt = DateTime.UtcNow;

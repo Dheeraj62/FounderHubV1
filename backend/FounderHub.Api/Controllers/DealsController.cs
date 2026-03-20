@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using FounderHub.Application.DTOs.Deals;
 using FounderHub.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +8,8 @@ using System.Security.Claims;
 namespace FounderHub.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [Authorize(Roles = "Investor")] // Only Investors manage deals
     public class DealsController : ControllerBase
     {

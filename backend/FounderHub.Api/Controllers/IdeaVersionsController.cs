@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FounderHub.Application.DTOs.IdeaVersions;
@@ -8,7 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace FounderHub.Api.Controllers
 {
     [ApiController]
-    [Route("api/ideas/{ideaId}/versions")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/ideas/{ideaId}/versions")]
     [Authorize]
     public class IdeaVersionsController : ControllerBase
     {

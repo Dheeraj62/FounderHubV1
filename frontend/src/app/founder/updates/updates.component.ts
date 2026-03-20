@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FounderUpdatesService, FounderUpdate } from '../../core/services/founder-updates.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 import { CardComponent } from '../../shared/ui/card/card.component';
 import { ButtonComponent } from '../../shared/ui/button/button.component';
 
@@ -11,12 +12,12 @@ import { ButtonComponent } from '../../shared/ui/button/button.component';
     standalone: true,
     imports: [CommonModule, FormsModule, CardComponent, ButtonComponent],
     template: `
-    <div class="h-full flex flex-col p-4 sm:p-8 space-y-8">
+    <div class="max-w-3xl mx-auto space-y-4">
 
       <!-- Header -->
-      <div>
-        <h1 class="text-3xl font-black text-neutral-900 tracking-tight">Startup Updates</h1>
-        <p class="text-neutral-500 font-medium mt-1">Share milestones and progress with your network.</p>
+      <div class="mb-6">
+        <h1 class="text-h1">Startup Updates</h1>
+        <p class="text-body mt-1">Share milestones and progress with your network.</p>
       </div>
 
       <!-- Post Update Card -->
@@ -68,6 +69,7 @@ import { ButtonComponent } from '../../shared/ui/button/button.component';
 })
 export class UpdatesComponent implements OnInit {
     private updatesService = inject(FounderUpdatesService);
+    private toastService = inject(ToastService);
     private authService = inject(AuthService);
     private cdr = inject(ChangeDetectorRef);
 
@@ -107,9 +109,10 @@ export class UpdatesComponent implements OnInit {
                 this.isPosting.set(false);
                 this.cdr.markForCheck();
             },
-            error: () => {
+            error: (err) => {
+                console.error(err);
                 this.isPosting.set(false);
-                alert('Failed to post update. Please try again.');
+                this.toastService.error('Failed to post update. Please try again.');
                 this.cdr.markForCheck();
             }
         });

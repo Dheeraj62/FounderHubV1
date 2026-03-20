@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FounderHub.Application.DTOs.Messages;
@@ -8,7 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace FounderHub.Api.Controllers
 {
     [ApiController]
-    [Route("api/messages")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/messages")]
     [Authorize]
     public class MessagesController : ControllerBase
     {

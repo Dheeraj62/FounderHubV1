@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -8,7 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace FounderHub.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [Authorize(Roles = "Founder")]
     public class AnalyticsController : ControllerBase
     {

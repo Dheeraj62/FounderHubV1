@@ -57,6 +57,15 @@ namespace FounderHub.Infrastructure.Data
                 
             Interests.Indexes.CreateOne(interestCompoundModel);
 
+            // Ideas: Index on Industry, Stage, FundingRange, CreatedAt
+            Ideas.Indexes.CreateMany(new[]
+            {
+                new CreateIndexModel<Idea>(Builders<Idea>.IndexKeys.Ascending(i => i.Industry)),
+                new CreateIndexModel<Idea>(Builders<Idea>.IndexKeys.Ascending(i => i.Stage)),
+                new CreateIndexModel<Idea>(Builders<Idea>.IndexKeys.Descending(i => i.CreatedAt)),
+                new CreateIndexModel<Idea>(Builders<Idea>.IndexKeys.Ascending(i => i.FundingRange))
+            });
+
             // FounderProfiles: Unique UserId
             FounderProfiles.Indexes.CreateOne(new CreateIndexModel<FounderProfile>(
                 Builders<FounderProfile>.IndexKeys.Ascending(p => p.UserId), new CreateIndexOptions { Unique = true }));

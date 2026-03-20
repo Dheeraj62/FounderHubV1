@@ -37,9 +37,9 @@ export class ButtonComponent {
 
         const variants = {
             primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 shadow-sm',
-            secondary: 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200 focus:ring-neutral-400',
-            outline: 'bg-transparent border border-neutral-300 text-neutral-700 hover:bg-neutral-50 focus:ring-neutral-400',
-            ghost: 'bg-transparent text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 focus:ring-neutral-400',
+            secondary: 'bg-white border border-border text-textPrimary hover:bg-neutral-50 focus:ring-neutral-400',
+            outline: 'bg-transparent border border-border text-textSecondary hover:bg-neutral-50 focus:ring-neutral-400',
+            ghost: 'bg-transparent text-textSecondary hover:bg-neutral-100 focus:ring-neutral-400',
             danger: 'bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-500 shadow-sm'
         };
 

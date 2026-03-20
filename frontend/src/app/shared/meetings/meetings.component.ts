@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MeetingService, MeetingDto, RequestMeetingDto } from '../../core/services/meeting.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../ui/toast/toast.service';
 import { CardComponent } from '../ui/card/card.component';
 import { ButtonComponent } from '../ui/button/button.component';
 import { BadgeComponent } from '../ui/badge/badge.component';
@@ -119,6 +120,7 @@ import { BadgeComponent } from '../ui/badge/badge.component';
 })
 export class MeetingsComponent implements OnInit {
     private meetingService = inject(MeetingService);
+    private toastService = inject(ToastService);
     private authService = inject(AuthService);
     private cdr = inject(ChangeDetectorRef);
 
@@ -170,9 +172,10 @@ export class MeetingsComponent implements OnInit {
                 this.isScheduling.set(false);
                 this.cdr.markForCheck();
             },
-            error: () => {
+            error: (err) => {
+                console.error(err);
+                this.toastService.error('Failed to request meeting. Check the Founder ID.');
                 this.isScheduling.set(false);
-                alert('Failed to request meeting. Check the Founder ID.');
                 this.cdr.markForCheck();
             }
         });

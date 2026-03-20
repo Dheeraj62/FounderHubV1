@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FounderHub.Application.DTOs.Interests;
@@ -8,7 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace FounderHub.Api.Controllers
 {
     [ApiController]
-    [Route("api/ideas/{ideaId}/interest")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/ideas/{ideaId}/interest")]
     [Authorize]
     public class InterestsController : ControllerBase
     {

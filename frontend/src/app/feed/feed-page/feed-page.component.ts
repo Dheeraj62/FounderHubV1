@@ -16,13 +16,13 @@ import { ButtonComponent } from '../../shared/ui/button/button.component';
   standalone: true,
   imports: [CommonModule, FormsModule, FeedFilterBarComponent, FeedCardComponent, TrendingWidgetComponent, CardComponent, ButtonComponent],
   template: `
-    <div class="max-w-5xl mx-auto flex gap-8 items-start">
+    <div class="flex gap-8 items-start w-full">
       <!-- CENTER FEED: max-w-3xl -->
       <div class="flex-1 w-full max-w-3xl mx-auto space-y-6">
         
-        <div class="mb-8">
+        <div class="mb-6">
           <h1 class="text-h1">Network feed</h1>
-          <p class="text-body mt-2">Platform activity across ideas, pivots, and founder updates.</p>
+          <p class="text-body">Platform activity across ideas, pivots, and founder updates.</p>
           <div class="mt-6">
             <app-feed-filter-bar [mode]="mode()" (modeChange)="setMode($event)"></app-feed-filter-bar>
           </div>

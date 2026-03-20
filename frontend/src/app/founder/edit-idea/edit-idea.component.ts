@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IdeaService } from '../../core/services/idea.service';
 import { VersionService } from '../../core/services/version.service';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 import { Idea } from '../../core/models/idea.models';
 import { InputComponent } from '../../shared/ui/input/input.component';
 import { ButtonComponent } from '../../shared/ui/button/button.component';
@@ -262,6 +263,7 @@ import { CardComponent } from '../../shared/ui/card/card.component';
   `
 })
 export class EditIdeaComponent implements OnInit {
+  private toastService = inject(ToastService);
   private fb = inject(FormBuilder);
   private ideaService = inject(IdeaService);
   private router = inject(Router);
@@ -328,7 +330,13 @@ export class EditIdeaComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.message || 'Failed to update idea.';
+        let errorMsg = err.error?.message || 'Failed to update idea.';
+        if (err.status === 400 && err.error?.errors) {
+            errorMsg = Object.values<{[_: string]: string[]}>(err.error.errors).flat().join(' ');
+        } else if (err.status === 400 && typeof err.error === 'string') {
+            errorMsg = err.error;
+        }
+        this.errorMessage = errorMsg;
       }
     });
   }
@@ -345,12 +353,19 @@ export class EditIdeaComponent implements OnInit {
     this.isLoading = true;
     this.versionService.createVersion(this.ideaId, request).subscribe({
       next: () => {
-        alert('Pivot version created successfully!');
+        this.toastService.success('Pivot version created successfully!');
         this.router.navigate(['/founder/dashboard']);
       },
-      error: (err) => {
+      error: (err: any) => {
+        console.error('Failed to create pivot version:', err);
         this.isLoading = false;
-        alert('Failed to create pivot version.');
+        let errorMsg = 'Failed to create pivot version.';
+        if (err.status === 400 && err.error?.errors) {
+            errorMsg = Object.values<{[_: string]: string[]}>(err.error.errors).flat().join(' ');
+        } else if (err.status === 400 && typeof err.error === 'string') {
+            errorMsg = err.error;
+        }
+        this.toastService.error(errorMsg);
       }
     });
   }

@@ -8,10 +8,10 @@ import { Notification } from '../../../core/models/notification.models';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="max-w-4xl mx-auto py-12 px-4">
-      <div class="flex justify-between items-center mb-10">
+    <div class="max-w-3xl mx-auto">
+      <div class="flex justify-between items-center mb-6">
         <div>
-          <h1 class="text-4xl font-black text-neutral-900 tracking-tight">Updates</h1>
+          <h1 class="text-3xl font-bold text-gray-900">Updates</h1>
           <p class="text-neutral-500 font-bold uppercase tracking-widest text-[10px] mt-1">Stay informed on your ecosystem events</p>
         </div>
         <button (click)="markAll()" class="text-xs font-black text-primary-600 hover:text-primary-800 uppercase tracking-[0.2em] border-b border-primary-600/30 transition-colors">
@@ -22,7 +22,7 @@ import { Notification } from '../../../core/models/notification.models';
       <div class="space-y-4" *ngIf="notifications.length > 0">
         <div *ngFor="let note of notifications" 
              [class.opacity-50]="note.isRead"
-             class="bg-white border border-neutral-200 rounded-2xl p-6 flex items-start gap-5 transition-all hover:bg-neutral-50 hover:shadow-sm group">
+             class="flex items-start gap-4 p-4 rounded-lg border bg-white hover:bg-neutral-50 transition-colors group">
           
           <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl bg-primary-50 border border-primary-100 text-primary-700 transition-colors">
             {{ getIcon(note.type) }}

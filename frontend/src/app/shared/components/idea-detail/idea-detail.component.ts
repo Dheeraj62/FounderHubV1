@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, signal, computed, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { IdeaService } from '../../../core/services/idea.service';
@@ -8,6 +8,7 @@ import { SavedIdeaService } from '../../../core/services/saved-idea.service';
 import { WatchlistService } from '../../../core/services/watchlist.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { InterestService } from '../../../core/services/interest.service';
+import { ToastService } from '../../ui/toast/toast.service';
 import { Idea } from '../../../core/models/idea.models';
 import { FounderProfile } from '../../../core/models/profile.models';
 import { IdeaTimelineComponent } from '../idea-timeline/idea-timeline.component';
@@ -184,6 +185,7 @@ import { CredibilityScoreComponent } from '../credibility-score/credibility-scor
   `]
 })
 export class IdeaDetailComponent implements OnInit {
+  private toastService = inject(ToastService);
   idea?: Idea;
   founderProfile?: FounderProfile;
   isInvestor = false;
@@ -276,9 +278,15 @@ export class IdeaDetailComponent implements OnInit {
 
   connect() {
     if (!this.idea) return;
-    this.connectionService.sendRequest({ founderId: this.idea.founderId }).subscribe(() => {
-      this.connectionStatus = 'Pending';
-      alert('Connection request sent!');
+    this.connectionService.sendRequest({ founderId: this.idea.founderId }).subscribe({
+      next: () => {
+        this.connectionStatus = 'Pending';
+        this.toastService.success('Connection request sent!');
+      },
+      error: (err) => {
+        console.error('Failed to send connection request:', err);
+        this.toastService.error('Failed to send connection request.');
+      }
     });
   }
 
@@ -287,9 +295,9 @@ export class IdeaDetailComponent implements OnInit {
     this.interestService.expressInterest(this.idea.id, { status: 'HighlyInterested' }).subscribe({
       next: () => {
         this.connectionStatus = 'Pending';
-        alert('High interest expressed! A connection request has been sent automatically.');
+        this.toastService.success('High interest expressed! A connection request has been sent automatically.');
       },
-      error: () => alert('Failed to express interest.')
+      error: () => this.toastService.error('Failed to express interest.')
     });
   }
 }

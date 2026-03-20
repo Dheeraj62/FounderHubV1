@@ -8,6 +8,7 @@ namespace FounderHub.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
+            services.AddSingleton<IHtmlSanitizerService, HtmlSanitizerService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IIdeaService, IdeaService>();
             services.AddScoped<IInterestService, InterestService>();

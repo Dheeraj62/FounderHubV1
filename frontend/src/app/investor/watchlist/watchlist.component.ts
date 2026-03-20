@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { WatchlistService } from '../../core/services/watchlist.service';
 import { Watchlist } from '../../core/models/watchlist.models';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 import { CardComponent } from '../../shared/ui/card/card.component';
 import { ButtonComponent } from '../../shared/ui/button/button.component';
 
@@ -85,6 +86,7 @@ import { ButtonComponent } from '../../shared/ui/button/button.component';
 })
 export class WatchlistComponent implements OnInit {
     private watchlistService = inject(WatchlistService);
+    private toastService = inject(ToastService);
     private cdr = inject(ChangeDetectorRef);
 
     watchlists = signal<Watchlist[]>([]);
@@ -109,17 +111,25 @@ export class WatchlistComponent implements OnInit {
         });
     }
 
-    removeFromWatchlist(ideaId: string) {
-        if (!confirm('Remove this startup from your watchlist?')) return;
+    async removeFromWatchlist(ideaId: string) {
+        const confirmed = await this.toastService.requestConfirmation({
+            title: 'Remove Watchlist Item',
+            message: 'Are you sure you want to stop tracking this startup?',
+            danger: true,
+            confirmText: 'Remove'
+        });
+
+        if (!confirmed) return;
 
         // Optimistic UI updates
         const previous = [...this.watchlists()];
         this.watchlists.update(list => list.filter(w => w.ideaId !== ideaId));
 
         this.watchlistService.removeFromWatchlist(ideaId).subscribe({
-            error: () => {
+            error: (err) => {
                 this.watchlists.set(previous);
-                alert('Failed to remove from watchlist.');
+                console.error('Failed to remove from watchlist', err);
+                this.toastService.error('Failed to remove from watchlist.');
             }
         });
     }

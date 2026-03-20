@@ -1,9 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProfileService } from '../../core/services/profile.service';
 import { AuthService } from '../../core/services/auth.service';
-import { UpsertFounderProfileRequest, FounderProfile } from '../../core/models/profile.models';
+import { UpsertFounderProfileRequest } from '../../core/models/profile.models';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 
 @Component({
   selector: 'app-founder-profile',
@@ -17,7 +18,7 @@ import { UpsertFounderProfileRequest, FounderProfile } from '../../core/models/p
           <p class="text-primary-700 mt-2">Build your credibility to attract the best investors.</p>
         </div>
 
-        <form (ngSubmit)="save()" class="p-8 space-y-8">
+        <form #profileForm="ngForm" (ngSubmit)="save(profileForm)" class="p-8 space-y-8">
           <!-- Verification Status -->
           <div class="flex items-center justify-between p-4 bg-primary-50/50 border border-primary-100 rounded-xl">
             <div class="flex items-center">
@@ -70,22 +71,22 @@ import { UpsertFounderProfileRequest, FounderProfile } from '../../core/models/p
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-neutral-700 mb-1">Primary Location</label>
-                <input type="text" [(ngModel)]="model.location" name="loc" placeholder="City, Country"
+                <label class="block text-sm font-medium text-neutral-700 mb-1">Primary Location <span class="text-red-500">*</span></label>
+                <input type="text" [(ngModel)]="model.location" name="loc" placeholder="City, Country" required
                        class="w-full bg-white border border-neutral-300 rounded-lg p-3 text-neutral-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all">
               </div>
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-neutral-700 mb-1">Founder Bio (Pitch yourself)</label>
-            <textarea [(ngModel)]="model.bio" name="bio" rows="4"
+            <label class="block text-sm font-medium text-neutral-700 mb-1">Founder Bio (Pitch yourself) <span class="text-red-500">*</span></label>
+            <textarea [(ngModel)]="model.bio" name="bio" rows="4" required placeholder="Tell investors about yourself..."
                       class="w-full bg-white border border-neutral-300 rounded-lg p-3 text-neutral-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all resize-none"></textarea>
           </div>
 
           <div class="flex justify-end pt-4">
-            <button type="submit" 
-                    class="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-10 rounded-xl transition-all shadow-md hover:shadow-lg focus:ring-4 focus:ring-primary-500/30">
+            <button type="submit" [disabled]="profileForm.invalid"
+                    class="bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-10 rounded-xl transition-all shadow-md hover:shadow-lg focus:ring-4 focus:ring-primary-500/30">
               Save Profile
             </button>
           </div>
@@ -96,6 +97,8 @@ import { UpsertFounderProfileRequest, FounderProfile } from '../../core/models/p
   styles: []
 })
 export class FounderProfileComponent implements OnInit {
+  private toastService = inject(ToastService);
+  
   model: UpsertFounderProfileRequest = {
     technicalFounder: false,
     previousStartupCount: 0,
@@ -133,12 +136,29 @@ export class FounderProfileComponent implements OnInit {
     }
   }
 
-  save() {
+  save(form: any) {
+    if (form.invalid) {
+      this.toastService.warning('Please fill in all required fields correctly.');
+      return;
+    }
+
+    // Safely parse numbers to avoid .NET Int32 JSON binding errors on empty strings
+    this.model.previousStartupCount = Number(this.model.previousStartupCount) || 0;
+    this.model.domainExperienceYears = Number(this.model.domainExperienceYears) || 0;
+    this.model.teamSize = Number(this.model.teamSize) || 1;
+
     this.profileService.upsertFounderProfile(this.model).subscribe({
-      next: () => alert('Profile updated successfully!'),
-      error: (err) => {
+      next: () => this.toastService.success('Profile updated successfully!'),
+      error: (err: any) => {
         console.error('Error saving founder profile:', err);
-        alert('Failed to save profile. Status: ' + (err.status || 'Unknown'));
+        let errorMsg = 'Failed to save profile. Status: ' + (err.status || 'Unknown');
+        if (err.status === 400 && err.error?.errors) {
+            // Flatten the .NET validation errors object into a readable string
+            errorMsg = Object.values<{[_: string]: string[]}>(err.error.errors).flat().join(' ');
+        } else if (err.status === 400 && typeof err.error === 'string') {
+            errorMsg = err.error;
+        }
+        this.toastService.error(errorMsg);
       }
     });
   }

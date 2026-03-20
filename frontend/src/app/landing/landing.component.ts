@@ -17,7 +17,7 @@ import { CommonModule } from '@angular/common';
       <div class="fixed bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-700 opacity-[0.07] blur-[120px] pointer-events-none"></div>
 
       <!-- HERO SECTION -->
-      <section class="relative pt-32 pb-24 px-4 text-center max-w-5xl mx-auto">
+      <section class="relative py-16 px-4 text-center max-w-4xl mx-auto space-y-6">
         <!-- Badge -->
         <div class="inline-flex items-center gap-2 mb-8 px-4 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-sm text-indigo-300 font-medium">
           <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
@@ -40,16 +40,14 @@ import { CommonModule } from '@angular/common';
         </p>
 
         <!-- CTA Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a routerLink="/auth/register"
-            class="group relative inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-base font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-[0_0_40px_rgba(99,102,241,0.3)] hover:shadow-[0_0_60px_rgba(99,102,241,0.5)] transition-all duration-300 transform hover:-translate-y-0.5">
+        <div class="flex gap-4 justify-center">
+          <a routerLink="/auth/register" class="app-button-primary text-base px-8 py-3">
             Get Started Free
-            <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
             </svg>
           </a>
-          <a routerLink="/auth/login"
-            class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-base font-semibold border border-white/10 bg-white/5 hover:bg-white/10 text-white transition-all duration-300">
+          <a routerLink="/auth/login" class="app-button-secondary text-base px-8 py-3 bg-white/5 border-white/20 text-white hover:bg-white/10 hover:text-white">
             Sign In
           </a>
         </div>

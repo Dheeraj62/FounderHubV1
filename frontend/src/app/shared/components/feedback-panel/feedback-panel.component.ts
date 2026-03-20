@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FeedbackService, FeedbackDto, SubmitFeedbackRequest } from '../../../core/services/feedback.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../ui/toast/toast.service';
 import { CardComponent } from '../../ui/card/card.component';
 import { ButtonComponent } from '../../ui/button/button.component';
 
@@ -108,6 +109,8 @@ export class FeedbackPanelComponent implements OnInit {
     @Input() isFounderOfIdea = false;
 
     private feedbackService = inject(FeedbackService);
+    private toastService = inject(ToastService);
+    private auth = inject(AuthService);
     private cdr = inject(ChangeDetectorRef);
 
     feedbacks = signal<FeedbackDto[]>([]);
@@ -175,9 +178,10 @@ export class FeedbackPanelComponent implements OnInit {
                 this.hasSubmitted.set(true);
                 this.cdr.markForCheck();
             },
-            error: () => {
+            error: (err) => {
+                console.error(err);
                 this.isSubmitting.set(false);
-                alert('Failed to submit feedback.');
+                this.toastService.error('Failed to submit feedback.');
                 this.cdr.markForCheck();
             }
         });

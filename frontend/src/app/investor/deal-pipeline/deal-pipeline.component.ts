@@ -1,15 +1,14 @@
 import { Component, inject, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { DealService } from '../../core/services/deal.service';
 import { Deal, DEAL_STAGES } from '../../core/models/deal.models';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 import { CardComponent } from '../../shared/ui/card/card.component';
-import { BadgeComponent } from '../../shared/ui/badge/badge.component';
+import { DealService } from '../../core/services/deal.service';
 
 @Component({
     selector: 'app-deal-pipeline',
     standalone: true,
-    imports: [CommonModule, RouterLink, CardComponent, BadgeComponent],
+    imports: [CommonModule, CardComponent],
     template: `
     <div class="h-full flex flex-col p-6 space-y-6">
       <!-- Header -->
@@ -83,6 +82,7 @@ import { BadgeComponent } from '../../shared/ui/badge/badge.component';
 })
 export class DealPipelineComponent implements OnInit {
     private dealService = inject(DealService);
+    private toastService = inject(ToastService);
     private cdr = inject(ChangeDetectorRef);
 
     stages = DEAL_STAGES;
@@ -135,14 +135,22 @@ export class DealPipelineComponent implements OnInit {
                 // Revert on error
                 this.deals.set(previousDeals);
                 this.cdr.markForCheck();
-                alert('Failed to update stage. Please try again.');
+                this.toastService.error('Failed to update stage. Please try again.');
             }
         });
     }
 
-    removeDeal(deal: Deal, event: Event) {
+    async removeDeal(deal: Deal, event: Event) {
         event.stopPropagation();
-        if (!confirm('Are you sure you want to remove this startup from your pipeline?')) return;
+        
+        const confirmed = await this.toastService.requestConfirmation({
+           title: 'Discard Deal',
+           message: 'Are you sure you want to permanently remove this startup from your pipeline?',
+           danger: true,
+           confirmText: 'Remove Deal'
+        });
+
+        if (!confirmed) return;
 
         this.dealService.deleteDeal(deal.id).subscribe({
             next: () => {

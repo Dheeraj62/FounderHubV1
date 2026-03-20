@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { IdeaService } from '../../core/services/idea.service';
 import { InterestService } from '../../core/services/interest.service';
 import { WatchlistService } from '../../core/services/watchlist.service';
+import { ToastService } from '../../shared/ui/toast/toast.service';
 import { Idea } from '../../core/models/idea.models';
 import { CardComponent } from '../../shared/ui/card/card.component';
 import { BadgeComponent } from '../../shared/ui/badge/badge.component';
@@ -195,6 +196,7 @@ import { ButtonComponent } from '../../shared/ui/button/button.component';
 export class BrowseIdeasComponent implements OnInit {
   private ideaService = inject(IdeaService);
   private interestService = inject(InterestService);
+  private toastService = inject(ToastService);
   private watchlistService = inject(WatchlistService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -273,7 +275,7 @@ export class BrowseIdeasComponent implements OnInit {
     this.cdr.markForCheck();
 
     this.interestService.expressInterest(ideaId, { status }).subscribe({
-      error: () => {
+      error: (err) => {
         // Revert on error
         this.myInterests.update(prev => {
           const copy = { ...prev };
@@ -281,7 +283,8 @@ export class BrowseIdeasComponent implements OnInit {
           return copy;
         });
         this.cdr.markForCheck();
-        alert('Failed to save interest. Please try again.');
+        console.error('Interest error', err);
+        this.toastService.error('Failed to save interest. Please try again.');
       }
     });
   }

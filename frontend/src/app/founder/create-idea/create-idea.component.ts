@@ -265,7 +265,13 @@ export class CreateIdeaComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.message || 'Failed to create idea.';
+        let errorMsg = err.error?.message || 'Failed to create idea.';
+        if (err.status === 400 && err.error?.errors) {
+            errorMsg = Object.values<{[_: string]: string[]}>(err.error.errors).flat().join(' ');
+        } else if (err.status === 400 && typeof err.error === 'string') {
+            errorMsg = err.error;
+        }
+        this.errorMessage = errorMsg;
         this.cdr.markForCheck();
       }
     });
