@@ -303,9 +303,7 @@ export class EditIdeaComponent implements OnInit {
       return;
     }
 
-    // Usually there's a getIdeaById API, let's load from memory or fetch from backend API. 
-    // Oh, I created GetMyIdeas. I need GetIdeaById for Founder? Actually I created it in IIdeaService. Wait, did I expose an endpoint? 
-    // Let's just fetch MyIdeas and find the correct one.
+
     this.ideaService.getIdeaById(this.ideaId).subscribe({
       next: (idea) => {
         this.ideaForm.patchValue(idea);
@@ -332,9 +330,9 @@ export class EditIdeaComponent implements OnInit {
         this.isLoading = false;
         let errorMsg = err.error?.message || 'Failed to update idea.';
         if (err.status === 400 && err.error?.errors) {
-            errorMsg = Object.values<{[_: string]: string[]}>(err.error.errors).flat().join(' ');
+          errorMsg = Object.values<{ [_: string]: string[] }>(err.error.errors).flat().join(' ');
         } else if (err.status === 400 && typeof err.error === 'string') {
-            errorMsg = err.error;
+          errorMsg = err.error;
         }
         this.errorMessage = errorMsg;
       }
@@ -361,9 +359,9 @@ export class EditIdeaComponent implements OnInit {
         this.isLoading = false;
         let errorMsg = 'Failed to create pivot version.';
         if (err.status === 400 && err.error?.errors) {
-            errorMsg = Object.values<{[_: string]: string[]}>(err.error.errors).flat().join(' ');
+          errorMsg = Object.values<{ [_: string]: string[] }>(err.error.errors).flat().join(' ');
         } else if (err.status === 400 && typeof err.error === 'string') {
-            errorMsg = err.error;
+          errorMsg = err.error;
         }
         this.toastService.error(errorMsg);
       }
