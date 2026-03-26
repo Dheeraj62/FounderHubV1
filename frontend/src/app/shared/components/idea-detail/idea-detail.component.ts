@@ -9,6 +9,7 @@ import { WatchlistService } from '../../../core/services/watchlist.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { InterestService } from '../../../core/services/interest.service';
 import { ToastService } from '../../ui/toast/toast.service';
+import { ButtonComponent } from '../../ui/button/button.component';
 import { Idea } from '../../../core/models/idea.models';
 import { FounderProfile } from '../../../core/models/profile.models';
 import { IdeaTimelineComponent } from '../idea-timeline/idea-timeline.component';
@@ -19,7 +20,7 @@ import { CredibilityScoreComponent } from '../credibility-score/credibility-scor
 @Component({
   selector: 'app-idea-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, IdeaTimelineComponent, FounderSignalsComponent, FeedbackPanelComponent, CredibilityScoreComponent],
+  imports: [CommonModule, RouterModule, IdeaTimelineComponent, FounderSignalsComponent, FeedbackPanelComponent, CredibilityScoreComponent, ButtonComponent],
   template: `
     <div class="max-w-6xl mx-auto py-10 px-4" *ngIf="idea">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -151,23 +152,46 @@ import { CredibilityScoreComponent } from '../credibility-score/credibility-scor
               </div>
 
               <!-- Action for Investor -->
-              <div *ngIf="isInvestor && !isMine" class="pt-6 space-y-4">
-                <button *ngIf="!connectionStatus" 
-                        (click)="expressHighlyInterest()"
-                        class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-indigo-500/20 active:scale-95">
-                  🔥 Highly Interested
-                </button>
-                <button *ngIf="!connectionStatus" 
-                        (click)="connect()"
-                        class="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold py-4 rounded-2xl transition-all border border-gray-700 active:scale-95">
-                  Request Direct Connection
-                </button>
-                <div *ngIf="connectionStatus === 'Pending'" class="w-full bg-gray-800 text-amber-400 font-bold py-4 text-center rounded-2xl border border-amber-500/20">
-                  Connection Pending...
+              <div *ngIf="isInvestor && !isMine" class="pt-6 space-y-6">
+                <div>
+                  <h4 class="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Express Interest</h4>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <app-button 
+                      [variant]="myInterest() === 'HighlyInterested' ? 'primary' : 'outline'" 
+                      [selected]="myInterest() === 'HighlyInterested'"
+                      (onClick)="expressInterest('HighlyInterested')">
+                      🔥 Highly Interested
+                    </app-button>
+                    <app-button 
+                      variant="outline" 
+                      [selected]="myInterest() === 'Maybe'"
+                      (onClick)="expressInterest('Maybe')">
+                      🤔 Keep in Touch
+                    </app-button>
+                    <app-button 
+                      [variant]="myInterest() === 'Pass' ? 'danger' : 'outline'" 
+                      [selected]="myInterest() === 'Pass'"
+                      (onClick)="expressInterest('Pass')">
+                      ❌ Pass
+                    </app-button>
+                  </div>
                 </div>
-                <button *ngIf="connectionStatus === 'Accepted'" routerLink="/messages" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl">
-                  Message Founder
-                </button>
+
+                <div class="pt-6 border-t border-gray-800">
+                  <h4 class="text-xs font-black text-gray-500 uppercase tracking-widest mb-4">Direct Connection</h4>
+                  <app-button *ngIf="!connectionStatus" 
+                          (onClick)="connect()"
+                          variant="secondary"
+                          [fullWidth]="true">
+                    Request Direct Connection
+                  </app-button>
+                  <div *ngIf="connectionStatus === 'Pending'" class="w-full bg-gray-800 text-amber-400 font-bold py-4 text-center rounded-2xl border border-amber-500/20">
+                    Connection Pending...
+                  </div>
+                  <button *ngIf="connectionStatus === 'Accepted'" routerLink="/messages" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl">
+                    Message Founder
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -193,6 +217,7 @@ export class IdeaDetailComponent implements OnInit {
   isSaved = false;
   isWatchlisted = false;
   connectionStatus?: string;
+  myInterest = signal<'HighlyInterested' | 'Maybe' | 'Pass' | 'Interested' | undefined>(undefined);
 
   constructor(
     private route: ActivatedRoute,
@@ -224,6 +249,10 @@ export class IdeaDetailComponent implements OnInit {
         this.checkIfSaved(id);
         this.checkIfWatchlisted(id);
         this.checkConnection(idea.founderId);
+        
+        if (idea.currentUserInterest) {
+          this.myInterest.set(idea.currentUserInterest as any);
+        }
       }
       this.cdr.markForCheck();
     });
@@ -290,14 +319,26 @@ export class IdeaDetailComponent implements OnInit {
     });
   }
 
-  expressHighlyInterest() {
+  expressInterest(status: 'HighlyInterested' | 'Maybe' | 'Pass') {
     if (!this.idea) return;
-    this.interestService.expressInterest(this.idea.id, { status: 'HighlyInterested' }).subscribe({
+    
+    // Optimistic Update
+    const oldStatus = this.myInterest();
+    this.myInterest.set(status);
+    this.cdr.markForCheck();
+
+    this.interestService.expressInterest(this.idea.id, { status }).subscribe({
       next: () => {
-        this.connectionStatus = 'Pending';
-        this.toastService.success('High interest expressed! A connection request has been sent automatically.');
+        if (status === 'HighlyInterested' && !this.connectionStatus) {
+            this.connect(); // Auto-connect on high interest
+        }
+        this.toastService.success('Interest updated');
       },
-      error: () => this.toastService.error('Failed to express interest.')
+      error: () => {
+        this.myInterest.set(oldStatus);
+        this.cdr.markForCheck();
+        this.toastService.error('Failed to express interest.');
+      }
     });
   }
 }

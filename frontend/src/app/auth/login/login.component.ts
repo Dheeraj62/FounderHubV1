@@ -71,20 +71,6 @@ import { CardComponent } from '../../shared/ui/card/card.component';
             </div>
           </form>
 
-          <!-- Demo Accounts Section -->
-          <div class="mt-8 bg-neutral-50 p-4 rounded-xl border border-neutral-200/60">
-            <p class="text-[10px] font-black text-neutral-400 mb-2 uppercase tracking-widest text-center">Demo accounts</p>
-            <div class="space-y-1.5 break-all">
-              <div class="text-[13px] text-neutral-600 flex flex-col sm:flex-row sm:justify-between border-b border-neutral-200 pb-1.5">
-                <span class="font-bold text-neutral-800">Founder:</span>
-                <span class="font-mono text-xs">sarahchen / founder123</span>
-              </div>
-              <div class="text-[13px] text-neutral-600 flex flex-col sm:flex-row sm:justify-between pt-1">
-                <span class="font-bold text-neutral-800">Investor:</span>
-                <span class="font-mono text-xs">investormark / investor123</span>
-              </div>
-            </div>
-          </div>
 
           <div class="mt-8 text-center bg-neutral-50 -mx-8 -mb-8 px-8 py-4 border-t border-neutral-100 rounded-b-[24px]">
             <p class="text-sm text-neutral-500">

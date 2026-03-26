@@ -26,11 +26,11 @@ namespace FounderHub.Application.Interfaces
         Task<IdeaDto> CreateIdeaAsync(string founderId, CreateIdeaRequest request);
         Task<IdeaDto> UpdateIdeaAsync(string founderId, string ideaId, UpdateIdeaRequest request);
         Task DeleteIdeaAsync(string founderId, string ideaId);
-        Task<IdeaDto?> GetIdeaByIdAsync(string ideaId);
+        Task<IdeaDto?> GetIdeaByIdAsync(string ideaId, string? currentUserId = null);
         Task<IEnumerable<IdeaDto>> GetMyIdeasAsync(string founderId);
-        Task<PaginatedResult<IdeaDto>> GetIdeasAsync(string? stage, string? industry, bool? previouslyRejected, string? location, string? keyword, int page, int pageSize);
+        Task<PaginatedResult<IdeaDto>> GetIdeasAsync(string? stage, string? industry, bool? previouslyRejected, string? location, string? keyword, int page, int pageSize, string? currentUserId = null);
         Task<IEnumerable<RecommendedIdeaDto>> GetRecommendedAsync(string investorId);
-        Task<IEnumerable<TrendingIdeaDto>> GetTrendingAsync(int limit = 10);
+        Task<IEnumerable<TrendingIdeaDto>> GetTrendingAsync(int limit = 10, string? currentUserId = null);
     }
 
     public interface IInterestService

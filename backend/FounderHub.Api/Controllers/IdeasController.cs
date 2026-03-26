@@ -63,7 +63,7 @@ namespace FounderHub.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetIdeaById(string id)
         {
-            var result = await _ideaService.GetIdeaByIdAsync(id);
+            var result = await _ideaService.GetIdeaByIdAsync(id, GetUserId());
             if (result == null) return NotFound();
 
             // MVP-3: Track views for engagement/trending
@@ -79,7 +79,7 @@ namespace FounderHub.Api.Controllers
             [FromQuery] string? location, [FromQuery] string? keyword,
             [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var result = await _ideaService.GetIdeasAsync(stage, industry, previouslyRejected, location, keyword, page, pageSize);
+            var result = await _ideaService.GetIdeasAsync(stage, industry, previouslyRejected, location, keyword, page, pageSize, GetUserId());
             return Ok(result);
         }
 
@@ -94,7 +94,20 @@ namespace FounderHub.Api.Controllers
         [HttpGet("trending")]
         public async Task<IActionResult> GetTrending([FromQuery] int limit = 10)
         {
-            var result = await _ideaService.GetTrendingAsync(limit);
+            var result = await _ideaService.GetTrendingAsync(limit, GetUserId());
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Public unauthenticated endpoint for SEO startup pages (/startup/:id).
+        /// Does NOT track views (to avoid skewing analytics from web crawlers).
+        /// </summary>
+        [HttpGet("public/{id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPublicIdea(string id)
+        {
+            var result = await _ideaService.GetIdeaByIdAsync(id);
+            if (result == null) return NotFound();
             return Ok(result);
         }
     }

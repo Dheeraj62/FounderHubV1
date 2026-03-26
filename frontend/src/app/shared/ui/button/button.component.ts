@@ -29,6 +29,7 @@ export class ButtonComponent {
     @Input() disabled = false;
     @Input() loading = false;
     @Input() fullWidth = false;
+    @Input() selected = false;
 
     @Output() onClick = new EventEmitter<MouseEvent>();
 
@@ -43,6 +44,14 @@ export class ButtonComponent {
             danger: 'bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-500 shadow-sm'
         };
 
+        const selectedStyles = {
+            primary: 'ring-4 ring-primary-500/30 bg-primary-700',
+            secondary: 'bg-primary-50 border-primary-500 text-primary-700 shadow-sm',
+            outline: 'bg-primary-50 border-primary-500 text-primary-700 shadow-sm',
+            ghost: 'bg-primary-50 text-primary-700',
+            danger: 'ring-4 ring-rose-500/30 bg-rose-700'
+        };
+
         const sizes = {
             sm: 'px-3 py-1.5 text-xs',
             md: 'px-4 py-2 text-sm',
@@ -50,6 +59,6 @@ export class ButtonComponent {
             xl: 'px-6 py-3 text-lg'
         };
 
-        return `${base} ${variants[this.variant]} ${sizes[this.size]} ${this.fullWidth ? 'w-full' : ''}`;
+        return `${base} ${variants[this.variant]} ${this.selected ? selectedStyles[this.variant] : ''} ${sizes[this.size]} ${this.fullWidth ? 'w-full' : ''}`;
     }
 }

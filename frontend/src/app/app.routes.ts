@@ -16,6 +16,10 @@ export const routes: Routes = [
         loadComponent: () => import('./public/contact/contact.component').then(m => m.ContactComponent)
     },
     {
+        path: 'startup/:id',
+        loadComponent: () => import('./public/startup-page/startup-page.component').then(m => m.StartupPageComponent)
+    },
+    {
         path: 'auth/login',
         loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent)
     },
@@ -128,6 +132,12 @@ export const routes: Routes = [
             {
                 path: 'investor/profile',
                 loadComponent: () => import('./investor/profile/profile.component').then(m => m.InvestorProfileComponent),
+                canActivate: [roleGuard],
+                data: { role: 'Investor' }
+            },
+            {
+                path: 'investor/alerts',
+                loadComponent: () => import('./investor/alerts/alerts.component').then(m => m.InvestorAlertsComponent),
                 canActivate: [roleGuard],
                 data: { role: 'Investor' }
             }

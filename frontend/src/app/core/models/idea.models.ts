@@ -21,11 +21,14 @@ export interface Idea {
     location?: string;
     createdAt: string;
     updatedAt: string;
+    currentUserInterest?: string;
 }
 
 export interface RecommendedIdea extends Idea {
     matchScore: number;
     matchReasons: string[];
+    aiScore?: number;
+    aiReason?: string;
 }
 
 export interface CreateIdeaRequest {

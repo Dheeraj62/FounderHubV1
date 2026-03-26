@@ -73,6 +73,17 @@ namespace FounderHub.Application.DTOs.Ideas
     {
         public int MatchScore { get; set; }
         public List<string> MatchReasons { get; set; } = new();
+        // AI enhanced fields
+        public double AiScore { get; set; }
+        public string AiReason { get; set; } = string.Empty;
+    }
+
+    // Raw response from the Python FastAPI microservice
+    public class AiMatchResultDto
+    {
+        public string IdeaId { get; set; } = string.Empty;
+        public double MatchScore { get; set; }
+        public string Reason { get; set; } = string.Empty;
     }
 
     public class TrendingIdeaDto : IdeaDto
@@ -93,6 +104,7 @@ namespace FounderHub.Application.DTOs.Ideas
         public string FounderId { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public string? CurrentUserInterest { get; set; }
     }
     
     public class PaginatedResult<T>

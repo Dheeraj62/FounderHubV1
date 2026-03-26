@@ -4,12 +4,16 @@ import { RouterModule } from '@angular/router';
 import { IdeaService } from '../../core/services/idea.service';
 import { RecommendedIdea } from '../../core/models/idea.models';
 import { MatchScoreBadgeComponent } from '../../shared/components/match-score-badge/match-score-badge.component';
-import { ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, inject, signal } from '@angular/core';
+import { InterestService } from '../../core/services/interest.service';
+import { ToastService } from '../../shared/ui/toast/toast.service';
+import { ButtonComponent } from '../../shared/ui/button/button.component';
+import { BadgeComponent } from '../../shared/ui/badge/badge.component';
 
 @Component({
   selector: 'app-recommendations',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatchScoreBadgeComponent],
+  imports: [CommonModule, RouterModule, MatchScoreBadgeComponent, ButtonComponent, BadgeComponent],
   template: `
     <div class="max-w-7xl mx-auto py-12 px-4 shadow-sm border border-neutral-100 rounded-2xl bg-white mt-6">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
@@ -64,15 +68,25 @@ import { ChangeDetectorRef } from '@angular/core';
             </div>
           </div>
 
-          <div class="pt-4 border-t border-neutral-100 flex justify-between items-center mt-auto group-hover:border-primary-100 transition-colors">
-            <div>
-              <p class="text-[10px] text-neutral-400 uppercase tracking-widest font-semibold mb-0.5">Funding Ask</p>
-              <span class="text-neutral-900 font-bold text-sm">{{ idea.fundingRange || 'Flexible' }}</span>
+          <div class="pt-4 border-t border-neutral-100 mt-auto">
+            <div class="flex flex-col gap-2 mb-4">
+               <div class="flex items-center justify-between">
+                 <h4 class="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Your Interest</h4>
+                 <a [routerLink]="['/idea', idea.id]" class="text-[10px] font-bold text-primary-600 hover:underline">Explore →</a>
+               </div>
+               <div class="grid grid-cols-3 gap-1.5">
+                  <app-button size="sm" [variant]="getInterestStatus(idea.id) === 'HighlyInterested' ? 'primary' : 'outline'" [selected]="getInterestStatus(idea.id) === 'HighlyInterested'" (onClick)="expressInterest(idea.id, 'HighlyInterested')" title="Highly Interested">🔥</app-button>
+                  <app-button size="sm" variant="outline" [selected]="getInterestStatus(idea.id) === 'Maybe'" (onClick)="expressInterest(idea.id, 'Maybe')" title="Keep in Touch">🤔</app-button>
+                  <app-button size="sm" [variant]="getInterestStatus(idea.id) === 'Pass' ? 'danger' : 'outline'" [selected]="getInterestStatus(idea.id) === 'Pass'" (onClick)="expressInterest(idea.id, 'Pass')" title="Pass">❌</app-button>
+               </div>
             </div>
-            <a [routerLink]="['/idea', idea.id]" 
-               class="bg-white text-primary-600 border border-primary-200 font-bold py-2 px-4 rounded-lg text-xs hover:bg-primary-600 hover:text-white transition-all shadow-sm">
-              Explore Idea
-            </a>
+            
+            <div class="flex justify-between items-center group-hover:border-primary-100 transition-colors pt-2 border-t border-neutral-50">
+              <div>
+                <p class="text-[10px] text-neutral-400 uppercase tracking-widest font-semibold mb-0.5">Funding Ask</p>
+                <span class="text-neutral-900 font-bold text-sm">{{ idea.fundingRange || 'Flexible' }}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -88,10 +102,14 @@ import { ChangeDetectorRef } from '@angular/core';
   styles: []
 })
 export class RecommendationsComponent implements OnInit {
+  private ideaService = inject(IdeaService);
+  private interestService = inject(InterestService);
+  private toastService = inject(ToastService);
+  private cdr = inject(ChangeDetectorRef);
+
   ideas: RecommendedIdea[] = [];
   loading = true;
-
-  constructor(private ideaService: IdeaService, private cdr: ChangeDetectorRef) { }
+  myInterests = signal<{ [ideaId: string]: string }>({});
 
   ngOnInit(): void {
     this.loadMatches();
@@ -103,8 +121,17 @@ export class RecommendationsComponent implements OnInit {
 
     this.ideaService.getSmartMatches(1, 20).subscribe({
       next: (list) => {
-        console.log('Smart Matches received:', list);
         this.ideas = list;
+        
+        // Sync interest states from backend
+        const interests: { [id: string]: any } = { ...this.myInterests() };
+        list.forEach(idea => {
+          if (idea.currentUserInterest) {
+            interests[idea.id] = idea.currentUserInterest;
+          }
+        });
+        this.myInterests.set(interests);
+
         this.loading = false;
         this.cdr.markForCheck();
       },
@@ -114,5 +141,29 @@ export class RecommendationsComponent implements OnInit {
         this.cdr.markForCheck();
       }
     });
+  }
+
+  expressInterest(ideaId: string, status: 'HighlyInterested' | 'Maybe' | 'Pass') {
+    this.myInterests.update(prev => ({ ...prev, [ideaId]: status }));
+    this.cdr.markForCheck();
+
+    this.interestService.expressInterest(ideaId, { status }).subscribe({
+      next: () => {
+        this.toastService.success('Interest updated');
+      },
+      error: (err) => {
+        this.myInterests.update(prev => {
+          const copy = { ...prev };
+          delete copy[ideaId];
+          return copy;
+        });
+        this.cdr.markForCheck();
+        this.toastService.error('Failed to save interest');
+      }
+    });
+  }
+
+  getInterestStatus(ideaId: string) {
+    return this.myInterests()[ideaId];
   }
 }

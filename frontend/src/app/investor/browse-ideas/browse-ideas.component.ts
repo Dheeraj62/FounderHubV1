@@ -154,18 +154,21 @@ import { ButtonComponent } from '../../shared/ui/button/button.component';
                 <app-button 
                   (onClick)="expressInterest(idea.id, 'HighlyInterested')" 
                   [variant]="getInterestStatus(idea.id) === 'HighlyInterested' ? 'primary' : 'outline'"
+                  [selected]="getInterestStatus(idea.id) === 'HighlyInterested'"
                   [fullWidth]="true">
                   <span class="mr-2">🔥</span> Highly Interested
                 </app-button>
                 <app-button 
                   (onClick)="expressInterest(idea.id, 'Maybe')" 
-                  [variant]="getInterestStatus(idea.id) === 'Maybe' ? 'secondary' : 'outline'"
+                  variant="outline"
+                  [selected]="getInterestStatus(idea.id) === 'Maybe'"
                   [fullWidth]="true">
                   <span class="mr-2">🤔</span> Keep in Touch
                 </app-button>
                 <app-button 
                   (onClick)="expressInterest(idea.id, 'Pass')" 
                   [variant]="getInterestStatus(idea.id) === 'Pass' ? 'danger' : 'outline'"
+                  [selected]="getInterestStatus(idea.id) === 'Pass'"
                   [fullWidth]="true">
                   <span class="mr-2">❌</span> Pass
                 </app-button>
@@ -254,6 +257,16 @@ export class BrowseIdeasComponent implements OnInit {
       next: (res) => {
         this.ideas.set(res.items);
         this.totalCount.set(res.totalCount);
+        
+        // Sync interest states from backend
+        const interests: { [id: string]: any } = { ...this.myInterests() };
+        res.items.forEach(idea => {
+          if (idea.currentUserInterest) {
+            interests[idea.id] = idea.currentUserInterest;
+          }
+        });
+        this.myInterests.set(interests);
+
         this.isLoading.set(false);
         this.cdr.markForCheck();
       },

@@ -1,6 +1,7 @@
 using FounderHub.Application.Interfaces;
 using FounderHub.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 namespace FounderHub.Application
 {
@@ -29,6 +30,9 @@ namespace FounderHub.Application
             services.AddScoped<IMeetingService, MeetingService>();
             services.AddScoped<ICredibilityScoreService, CredibilityScoreService>();
             services.AddScoped<ISmartMatchService, SmartMatchService>();
+
+            // Register AI Match Service with a named HttpClient for the Python FastAPI microservice
+            services.AddHttpClient<IAIMatchService, AIMatchService>();
 
             return services;
         }

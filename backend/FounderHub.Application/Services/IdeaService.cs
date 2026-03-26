@@ -10,7 +10,7 @@ namespace FounderHub.Application.Services
 {
     public class IdeaService : IIdeaService
     {
-        public async Task<IEnumerable<TrendingIdeaDto>> GetTrendingAsync(int limit = 10)
+        public async Task<IEnumerable<TrendingIdeaDto>> GetTrendingAsync(int limit = 10, string? currentUserId = null)
         {
             if (limit < 1) limit = 10;
 
@@ -28,35 +28,19 @@ namespace FounderHub.Application.Services
 
                 var score = (interested * 8) + (maybe * 3) + views + recencyBoost;
 
-                scored.Add(new TrendingIdeaDto
+                var dto = MapToTrendingDto(idea, currentUserId);
+                dto.TrendingScore = score;
+                dto.ViewsLast7Days = views;
+                dto.InterestsLast7Days = interested + maybe;
+                dto.ConnectionsLast7Days = 0;
+                
+                if (currentUserId != null)
                 {
-                    TrendingScore = score,
-                    ViewsLast7Days = views,
-                    InterestsLast7Days = interested + maybe,
-                    ConnectionsLast7Days = 0,
-                    Id = idea.Id,
-                    FounderId = idea.FounderId,
-                    Title = idea.Title,
-                    Problem = idea.Problem,
-                    Solution = idea.Solution,
-                    Stage = idea.Stage,
-                    Industry = idea.Industry,
-                    PitchDeckUrl = idea.PitchDeckUrl,
-                    DemoUrl = idea.DemoUrl,
-                    StartupWebsite = idea.StartupWebsite,
-                    ProductImages = idea.ProductImages,
-                    MarketSize = idea.MarketSize,
-                    TargetCustomers = idea.TargetCustomers,
-                    TractionMetrics = idea.TractionMetrics,
-                    PreviouslyRejected = idea.PreviouslyRejected,
-                    RejectedBy = idea.RejectedBy,
-                    RejectionReasonCategory = idea.RejectionReasonCategory,
-                    WhatChangedAfterRejection = idea.WhatChangedAfterRejection,
-                    FundingRange = idea.FundingRange,
-                    Location = idea.Location,
-                    CreatedAt = idea.CreatedAt,
-                    UpdatedAt = idea.UpdatedAt
-                });
+                    var interest = await _interestRepository.GetInterestAsync(idea.Id, currentUserId);
+                    dto.CurrentUserInterest = interest?.Status.ToString();
+                }
+
+                scored.Add(dto);
             }
 
             return scored
@@ -117,7 +101,7 @@ namespace FounderHub.Application.Services
 
                 if (score > 0)
                 {
-                    var dto = MapToRecommendedDto(idea);
+                    var dto = await MapToRecommendedDtoAsync(idea, investorId);
                     dto.MatchScore = score;
                     dto.MatchReasons = reasons;
                     recommendations.Add(dto);
@@ -234,10 +218,10 @@ namespace FounderHub.Application.Services
             await _ideaRepository.DeleteAsync(ideaId);
         }
 
-        public async Task<IdeaDto?> GetIdeaByIdAsync(string ideaId)
+        public async Task<IdeaDto?> GetIdeaByIdAsync(string ideaId, string? currentUserId = null)
         {
             var idea = await _ideaRepository.GetByIdAsync(ideaId);
-            return idea != null ? MapToDto(idea) : null;
+            return idea != null ? await MapToDtoAsync(idea, currentUserId) : null;
         }
 
         public async Task<IEnumerable<IdeaDto>> GetMyIdeasAsync(string founderId)
@@ -246,21 +230,66 @@ namespace FounderHub.Application.Services
             return ideas.Select(MapToDto);
         }
 
-        public async Task<PaginatedResult<IdeaDto>> GetIdeasAsync(string? stage, string? industry, bool? previouslyRejected, string? location, string? keyword, int page, int pageSize)
+        public async Task<PaginatedResult<IdeaDto>> GetIdeasAsync(string? stage, string? industry, bool? previouslyRejected, string? location, string? keyword, int page, int pageSize, string? currentUserId = null)
         {
             var result = await _ideaRepository.GetIdeasAsync(stage, industry, previouslyRejected, location, keyword, page, pageSize);
+            
+            var dtos = new List<IdeaDto>();
+            foreach(var idea in result.Ideas)
+            {
+                dtos.Add(await MapToDtoAsync(idea, currentUserId));
+            }
+
             return new PaginatedResult<IdeaDto>
             {
-                Items = result.Ideas.Select(MapToDto),
+                Items = dtos,
                 TotalCount = result.TotalCount,
                 Page = page,
                 PageSize = pageSize
             };
         }
 
-        private static IdeaDto MapToDto(Idea idea)
+        private async Task<IdeaDto> MapToDtoAsync(Idea idea, string? currentUserId)
         {
-            return new IdeaDto
+            var dto = new IdeaDto
+            {
+                Id = idea.Id,
+                FounderId = idea.FounderId,
+                Title = idea.Title,
+                Problem = idea.Problem,
+                Solution = idea.Solution,
+                Stage = idea.Stage,
+                Industry = idea.Industry,
+                PitchDeckUrl = idea.PitchDeckUrl,
+                DemoUrl = idea.DemoUrl,
+                StartupWebsite = idea.StartupWebsite,
+                ProductImages = idea.ProductImages,
+                MarketSize = idea.MarketSize,
+                TargetCustomers = idea.TargetCustomers,
+                TractionMetrics = idea.TractionMetrics,
+                PreviouslyRejected = idea.PreviouslyRejected,
+                RejectedBy = idea.RejectedBy,
+                RejectionReasonCategory = idea.RejectionReasonCategory,
+                WhatChangedAfterRejection = idea.WhatChangedAfterRejection,
+                FundingRange = idea.FundingRange,
+                Location = idea.Location,
+                CreatedAt = idea.CreatedAt,
+                UpdatedAt = idea.UpdatedAt
+            };
+
+            if (currentUserId != null)
+            {
+                var interest = await _interestRepository.GetInterestAsync(idea.Id, currentUserId);
+                dto.CurrentUserInterest = interest?.Status.ToString();
+            }
+
+            return dto;
+        }
+
+        private TrendingIdeaDto MapToTrendingDto(Idea idea, string? currentUserId)
+        {
+            // Simple mapping without async interest fetch for now, logic handled in loop
+            return new TrendingIdeaDto
             {
                 Id = idea.Id,
                 FounderId = idea.FounderId,
@@ -287,9 +316,46 @@ namespace FounderHub.Application.Services
             };
         }
 
-        private static RecommendedIdeaDto MapToRecommendedDto(Idea idea)
+        private async Task<RecommendedIdeaDto> MapToRecommendedDtoAsync(Idea idea, string? currentUserId)
         {
-            return new RecommendedIdeaDto
+            var dto = new RecommendedIdeaDto
+            {
+                Id = idea.Id,
+                FounderId = idea.FounderId,
+                Title = idea.Title,
+                Problem = idea.Problem,
+                Solution = idea.Solution,
+                Stage = idea.Stage,
+                Industry = idea.Industry,
+                PitchDeckUrl = idea.PitchDeckUrl,
+                DemoUrl = idea.DemoUrl,
+                StartupWebsite = idea.StartupWebsite,
+                ProductImages = idea.ProductImages,
+                MarketSize = idea.MarketSize,
+                TargetCustomers = idea.TargetCustomers,
+                TractionMetrics = idea.TractionMetrics,
+                PreviouslyRejected = idea.PreviouslyRejected,
+                RejectedBy = idea.RejectedBy,
+                RejectionReasonCategory = idea.RejectionReasonCategory,
+                WhatChangedAfterRejection = idea.WhatChangedAfterRejection,
+                FundingRange = idea.FundingRange,
+                Location = idea.Location,
+                CreatedAt = idea.CreatedAt,
+                UpdatedAt = idea.UpdatedAt
+            };
+
+            if (currentUserId != null)
+            {
+                var interest = await _interestRepository.GetInterestAsync(idea.Id, currentUserId);
+                dto.CurrentUserInterest = interest?.Status.ToString();
+            }
+
+            return dto;
+        }
+
+        private static IdeaDto MapToDto(Idea idea)
+        {
+            return new IdeaDto
             {
                 Id = idea.Id,
                 FounderId = idea.FounderId,
