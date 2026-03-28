@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ToastComponent } from './shared/ui/toast/toast.component';
-
+import { inject } from "@vercel/analytics"
+inject()
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -12,4 +13,8 @@ import { ToastComponent } from './shared/ui/toast/toast.component';
   `,
   styles: []
 })
-export class AppComponent { }
+export class AppComponent {
+  constructor() {
+    inject()
+  }
+}
