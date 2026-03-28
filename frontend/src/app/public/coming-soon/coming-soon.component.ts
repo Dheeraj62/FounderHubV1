@@ -183,7 +183,7 @@ export class ComingSoonComponent {
                 'Cannot reach the server. If you use ng serve, ensure the backend is running (e.g. on port 5111).';
               return;
             }
-            this.errorMessage = 'Something went wrong. Please try again in a moment.';
+            this.errorMessage = this.apiFailureMessage(httpErr);
           });
         }
       });
@@ -194,6 +194,57 @@ export class ComingSoonComponent {
     this.email = '';
     this.confirmedEmail = '';
     this.errorMessage = '';
+  }
+
+  /**
+   * Maps unexpected HTTP failures to actionable copy. Production often hits 404/502 when
+   * `/api` is not rewritten to the backend or the upstream is down.
+   */
+  private apiFailureMessage(err: HttpErrorResponse): string {
+    const msg = err.message ?? '';
+    if (msg.includes('JSON') || msg.includes('parse')) {
+      return 'The server response was not valid JSON (often HTML from a missing /api rewrite). Check Vercel rewrites and API deployment.';
+    }
+
+    const body = err.error;
+    const fromObject =
+      body &&
+      typeof body === 'object' &&
+      !Array.isArray(body) &&
+      ('error' in body || 'message' in body || 'title' in body)
+        ? String(
+            (body as { error?: unknown; message?: unknown; title?: unknown }).error ??
+              (body as { message?: unknown }).message ??
+              (body as { title?: unknown }).title ??
+              ''
+          ).trim()
+        : '';
+    const safeDetail =
+      fromObject && fromObject.length < 400 && !fromObject.startsWith('<') ? fromObject : '';
+
+    switch (err.status) {
+      case 401:
+      case 403:
+        return 'Access was denied. Try a private window or sign out and try again.';
+      case 404:
+        return 'API not found (404). Confirm /api requests are rewritten to your live API (e.g. Vercel → Render) and /api/v1/waitlist exists.';
+      case 408:
+      case 504:
+        return 'The request timed out on the server. Please try again.';
+      case 502:
+      case 503:
+        return 'The API is temporarily unavailable (502/503). The hosting proxy or backend may be down or cold-starting.';
+      case 500:
+      case 501:
+      case 505:
+        return safeDetail || 'The server returned an error. Please try again later.';
+      default:
+        if (safeDetail) return safeDetail;
+        if (err.status >= 400) {
+          return `Request failed (HTTP ${err.status}). Please try again later.`;
+        }
+        return 'Something went wrong. Please try again in a moment.';
+    }
   }
 }
 
