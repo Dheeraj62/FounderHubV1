@@ -34,6 +34,7 @@ namespace FounderHub.Infrastructure
             services.AddScoped<IWatchlistRepository, WatchlistRepository>();
             services.AddScoped<IFeedbackRepository, FeedbackRepository>();
             services.AddScoped<IMeetingRepository, MeetingRepository>();
+            services.AddScoped<IWaitlistRepository, WaitlistRepository>();
             
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<IJwtProvider, JwtProvider>();

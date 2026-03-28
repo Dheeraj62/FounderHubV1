@@ -142,4 +142,10 @@ namespace FounderHub.Application.Interfaces
         Task CreateAsync(Watchlist watchlist);
         Task<bool> DeleteAsync(string investorId, string ideaId);
     }
+
+    public interface IWaitlistRepository
+    {
+        Task<WaitlistEntry?> GetByEmailAsync(string email);
+        Task CreateAsync(WaitlistEntry entry);
+    }
 }

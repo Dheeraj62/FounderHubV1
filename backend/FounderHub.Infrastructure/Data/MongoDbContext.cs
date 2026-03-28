@@ -35,6 +35,7 @@ namespace FounderHub.Infrastructure.Data
         public IMongoCollection<Watchlist> Watchlists => _database.GetCollection<Watchlist>("Watchlists");
         public IMongoCollection<InvestorFeedback> InvestorFeedbacks => _database.GetCollection<InvestorFeedback>("InvestorFeedbacks");
         public IMongoCollection<Meeting> Meetings => _database.GetCollection<Meeting>("Meetings");
+        public IMongoCollection<WaitlistEntry> WaitlistEntries => _database.GetCollection<WaitlistEntry>("WaitlistEntries");
 
         private void ConfigureIndexes()
         {
@@ -126,6 +127,11 @@ namespace FounderHub.Infrastructure.Data
             // Watchlists: Compound InvestorId + IdeaId
             Watchlists.Indexes.CreateOne(new CreateIndexModel<Watchlist>(
                 Builders<Watchlist>.IndexKeys.Ascending(w => w.InvestorId).Ascending(w => w.IdeaId),
+                new CreateIndexOptions { Unique = true }));
+
+            // Waitlist: unique normalized email
+            WaitlistEntries.Indexes.CreateOne(new CreateIndexModel<WaitlistEntry>(
+                Builders<WaitlistEntry>.IndexKeys.Ascending(w => w.Email),
                 new CreateIndexOptions { Unique = true }));
         }
     }
