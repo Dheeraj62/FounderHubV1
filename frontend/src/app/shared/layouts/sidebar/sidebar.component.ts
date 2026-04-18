@@ -12,10 +12,10 @@ import { AppConstants } from '../../../core/constants/app.constants';
   template: `
     <div class="flex flex-col h-full bg-white border-r border-neutral-200 w-64">
       <div class="h-16 flex items-center px-6 border-b border-neutral-100">
-        <a routerLink="/" class="flex items-center gap-2.5">
+        <div class="flex items-center gap-2.5">
           <img src="/assets/images/logo.png" alt="Logo" class="h-8 w-8 rounded-xl shadow-sm" />
           <span class="text-xl font-black text-neutral-900 tracking-tight">{{ appName }}</span>
-        </a>
+        </div>
       </div>
 
       <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">

@@ -20,22 +20,22 @@ import { AppConstants } from '../../core/constants/app.constants';
       <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/40 to-[#0a0a0f]/10 z-0"></div>
 
       <!-- Centered Container -->
-      <div class="relative z-10 w-full max-w-[460px] mx-auto">
+      <div class="relative z-10 w-full max-w-[460px] mx-auto px-1">
         
         <!-- Branding Logo -->
-        <div class="text-center mb-8">
-          <a routerLink="/" class="inline-flex flex-col items-center gap-3 group">
+        <div class="text-center mb-6 sm:mb-8">
+          <a routerLink="/" class="inline-flex flex-col items-center gap-2 sm:gap-3 group">
             <div class="p-1 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl group-hover:scale-105 transition-transform">
-              <img src="/assets/images/logo.png" alt="Logo" class="h-12 w-12 rounded-xl" />
+              <img src="/assets/images/logo.png" alt="Logo" class="h-10 w-10 sm:h-12 sm:w-12 rounded-xl" />
             </div>
-            <span class="text-3xl font-black tracking-tight text-white group-hover:text-indigo-400 transition-colors">{{ appName }}</span>
+            <span class="text-2xl sm:text-3xl font-black tracking-tight text-white group-hover:text-indigo-400 transition-colors">{{ appName }}</span>
           </a>
-          <p class="mt-3 text-indigo-100/80 text-sm font-medium tracking-wide">Join the network of the future builders.</p>
+          <p class="mt-2 sm:mt-3 text-indigo-100/80 text-xs sm:text-sm font-medium tracking-wide">Join the network of the future builders.</p>
         </div>
 
         <!-- The Frosted Glass Form Box -->
-        <div class="bg-white/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/40 rounded-3xl p-8 sm:p-10 transition-all">
-          <h2 class="text-2xl font-extrabold text-neutral-900 mb-6 text-center tracking-tight">Create your account</h2>
+        <div class="bg-white/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/40 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 transition-all">
+          <h2 class="text-xl sm:text-2xl font-extrabold text-neutral-900 mb-5 sm:mb-6 text-center tracking-tight">Create your account</h2>
           
           <form class="space-y-4" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
             
