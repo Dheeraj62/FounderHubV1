@@ -6,11 +6,8 @@ import { MessageService } from '../../../core/services/message.service';
 import { ConnectionService } from '../../../core/services/connection.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Message, SendMessageRequest } from '../../../core/models/message.models';
-import { Connection } from '../../../core/models/connection.models';
 import { ButtonComponent } from '../../ui/button/button.component';
 import { AvatarComponent } from '../../ui/avatar/avatar.component';
-import { CardComponent } from '../../ui/card/card.component';
-import { InputComponent } from '../../ui/input/input.component';
 
 @Component({
   selector: 'app-message-thread',
@@ -22,15 +19,15 @@ import { InputComponent } from '../../ui/input/input.component';
       <!-- Header -->
       <header class="bg-white/80 backdrop-blur-md border-b border-neutral-200/80 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10">
         <div class="flex items-center gap-4">
-          <app-button variant="ghost" size="sm" class="sm:hidden -ml-2 text-neutral-500" routerLink="/founder/dashboard">
+          <app-button variant="ghost" size="sm" class="sm:hidden -ml-2 text-neutral-500" routerLink="/connections">
             &larr;
           </app-button>
-          <app-avatar [alt]="partnerName" size="md" variant="squircle" [online]="true" color="primary"></app-avatar>
+          <app-avatar [alt]="partnerName" size="md" variant="squircle" color="primary"></app-avatar>
           <div>
             <h2 class="text-neutral-900 font-bold text-lg tracking-tight leading-tight">{{ partnerName }}</h2>
-            <div class="flex items-center text-xs font-semibold tracking-wide text-emerald-600">
-              <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-1.5 animate-pulse"></span>
-              Active Now
+            <div class="flex items-center text-xs font-semibold tracking-wide text-neutral-500">
+              <span class="w-1.5 h-1.5 bg-neutral-400 rounded-full mr-1.5"></span>
+              {{ partnerRole }}
             </div>
           </div>
         </div>
@@ -38,11 +35,15 @@ import { InputComponent } from '../../ui/input/input.component';
 
       <!-- Messages Area -->
       <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-6" #scrollContainer>
-        <div *ngIf="messages.length === 0" class="h-full flex flex-col items-center justify-center text-neutral-400">
+        <div *ngIf="messages.length === 0 && !loading" class="h-full flex flex-col items-center justify-center text-neutral-400">
           <svg class="w-12 h-12 mb-3 text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
           <p class="text-sm font-medium">No messages yet. Start the conversation!</p>
+        </div>
+
+        <div *ngIf="loading" class="h-full flex items-center justify-center">
+          <div class="animate-spin w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full"></div>
         </div>
 
         <div *ngFor="let msg of messages" 
@@ -50,10 +51,13 @@ import { InputComponent } from '../../ui/input/input.component';
           <div [class]="isMe(msg.senderId) ? 'bg-primary-600 text-white rounded-br-none shadow-sm' : 'bg-white border border-neutral-200 text-neutral-800 rounded-bl-none shadow-sm'"
                class="max-w-[85%] sm:max-w-[70%] px-5 py-3.5 rounded-2xl relative group">
             <p class="text-[15px] leading-relaxed break-words">{{ msg.content }}</p>
-            <span [class]="isMe(msg.senderId) ? 'text-primary-200' : 'text-neutral-400'"
-                  class="text-[10px] font-bold uppercase tracking-wider mt-1.5 block text-right select-none">
-              {{ msg.sentAt | date:'shortTime' }}
-            </span>
+            <div class="flex items-center gap-1.5 mt-1.5 justify-end">
+              <span [class]="isMe(msg.senderId) ? 'text-primary-200' : 'text-neutral-400'"
+                    class="text-[10px] font-bold uppercase tracking-wider select-none">
+                {{ msg.createdAt | date:'shortTime' }}
+              </span>
+              <span *ngIf="isMe(msg.senderId) && msg.isRead" class="text-primary-200 text-[10px]">✓✓</span>
+            </div>
           </div>
         </div>
       </div>
@@ -68,7 +72,7 @@ import { InputComponent } from '../../ui/input/input.component';
               rows="1"
               placeholder="Type your message..."
               (keydown.enter)="$event.preventDefault(); send()"
-              class="block w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-400 transition-all duration-200 resize-none max-h-32"
+              class="block w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-primary-400 focus:bg-white transition-all duration-200 resize-none max-h-32"
               ></textarea>
           </div>
           <app-button type="submit" [disabled]="!newMessage.trim()" variant="primary" size="md" class="shrink-0 pb-[2px]">
@@ -87,14 +91,18 @@ import { InputComponent } from '../../ui/input/input.component';
     }
   `]
 })
-export class MessageThreadComponent implements OnInit, OnDestroy {
+export class MessageThreadComponent implements OnInit, OnDestroy, AfterViewChecked {
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef;
+
   connectionId!: string;
-  partnerId!: string;
-  partnerName = 'Connection Partner';
+  partnerName = '';
+  partnerRole = '';
   messages: Message[] = [];
   newMessage = '';
   currentUserId: string = '';
+  loading = true;
   pollInterval: any;
+  private shouldScrollToBottom = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -108,32 +116,58 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
     this.currentUserId = this.authService.getUserId() || '';
     this.connectionId = this.route.snapshot.paramMap.get('id')!;
 
-    this.loadMessages();
     this.loadConnectionDetails();
+    this.loadMessages();
 
-    // Poll for new messages every 3 seconds (since we don't have signalr/real-time)
-    this.pollInterval = setInterval(() => this.loadMessages(), 3000);
+    // Poll for new messages every 3 seconds
+    this.pollInterval = setInterval(() => {
+      this.loadMessages();
+      this.markRead();
+    }, 3000);
   }
 
   ngOnDestroy(): void {
     if (this.pollInterval) clearInterval(this.pollInterval);
   }
 
+  ngAfterViewChecked(): void {
+    if (this.shouldScrollToBottom) {
+      this.scrollToBottom();
+      this.shouldScrollToBottom = false;
+    }
+  }
+
   loadConnectionDetails() {
     this.connectionService.getMyConnections().subscribe(list => {
       const conn = list.find(c => c.id === this.connectionId);
       if (conn) {
-        this.partnerId = conn.founderId === this.currentUserId ? conn.investorId : conn.founderId;
+        this.partnerName = conn.partnerUsername || 'Unknown';
+        this.partnerRole = conn.partnerRole || '';
         this.cdr.markForCheck();
       }
     });
   }
 
   loadMessages() {
-    this.messageService.getThread(this.connectionId).subscribe(list => {
-      this.messages = list;
-      this.cdr.markForCheck();
+    this.messageService.getThread(this.connectionId).subscribe({
+      next: (list) => {
+        const isNewMessages = list.length !== this.messages.length;
+        this.messages = list;
+        this.loading = false;
+        if (isNewMessages) {
+          this.shouldScrollToBottom = true;
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loading = false;
+        this.cdr.markForCheck();
+      }
     });
+  }
+
+  markRead() {
+    this.messageService.markAsRead(this.connectionId).subscribe();
   }
 
   isMe(senderId: string): boolean {
@@ -145,7 +179,6 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
 
     const request: SendMessageRequest = {
       connectionId: this.connectionId,
-      recipientId: this.partnerId,
       content: this.newMessage
     };
 
@@ -153,5 +186,14 @@ export class MessageThreadComponent implements OnInit, OnDestroy {
       this.newMessage = '';
       this.loadMessages();
     });
+  }
+
+  private scrollToBottom() {
+    try {
+      const el = this.scrollContainer?.nativeElement;
+      if (el) {
+        el.scrollTop = el.scrollHeight;
+      }
+    } catch (_) { }
   }
 }

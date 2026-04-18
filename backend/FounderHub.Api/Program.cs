@@ -108,6 +108,14 @@ builder.Services.AddRateLimiter(options =>
         opt.QueueLimit = 0;
         opt.Window = TimeSpan.FromMinutes(1);
     });
+
+    options.AddFixedWindowLimiter("MessageLimiter", opt =>
+    {
+        opt.AutoReplenishment = true;
+        opt.PermitLimit = 30;
+        opt.QueueLimit = 0;
+        opt.Window = TimeSpan.FromMinutes(1);
+    });
 });
 
 var app = builder.Build();

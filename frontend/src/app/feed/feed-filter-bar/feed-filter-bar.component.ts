@@ -8,18 +8,22 @@ export type FeedMode = 'global' | 'following';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="flex items-center gap-2">
+    <div class="inline-flex items-center bg-neutral-100 rounded-lg p-1 gap-1">
       <button
         type="button"
         (click)="modeChange.emit('global')"
-        [class]="mode === 'global' ? 'app-btn-primary' : 'app-btn-secondary'"
+        [class]="mode === 'global'
+          ? 'px-4 py-2 text-sm font-semibold rounded-md bg-white text-primary-700 shadow-sm transition-all duration-200 cursor-pointer'
+          : 'px-4 py-2 text-sm font-medium rounded-md text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50 transition-all duration-200 cursor-pointer'"
       >
         Global
       </button>
       <button
         type="button"
         (click)="modeChange.emit('following')"
-        [class]="mode === 'following' ? 'app-btn-primary' : 'app-btn-secondary'"
+        [class]="mode === 'following'
+          ? 'px-4 py-2 text-sm font-semibold rounded-md bg-white text-primary-700 shadow-sm transition-all duration-200 cursor-pointer'
+          : 'px-4 py-2 text-sm font-medium rounded-md text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50 transition-all duration-200 cursor-pointer'"
       >
         Following
       </button>

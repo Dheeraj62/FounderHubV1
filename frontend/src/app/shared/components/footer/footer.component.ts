@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { AppConstants } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-footer',
@@ -11,12 +12,8 @@ import { RouterLink } from '@angular/router';
       <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
         
         <div class="flex items-center gap-2">
-          <div class="bg-primary-600 p-1 rounded-md shadow-sm">
-            <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <span class="text-sm font-black text-neutral-900 tracking-tight">FounderHub</span>
+          <img src="/assets/images/logo.png" alt="Logo" class="h-5 w-5 rounded-md shadow-sm" />
+          <span class="text-sm font-black text-neutral-900 tracking-tight">{{ appName }}</span>
           <span class="text-xs text-neutral-500 ml-2">&copy; {{ currentYear }} All rights reserved.</span>
         </div>
 
@@ -32,5 +29,6 @@ import { RouterLink } from '@angular/router';
   `
 })
 export class FooterComponent {
+  appName = AppConstants.APP_NAME;
   currentYear = new Date().getFullYear();
 }

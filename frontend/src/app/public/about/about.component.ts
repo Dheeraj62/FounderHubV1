@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AppConstants } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-about',
@@ -10,11 +11,7 @@ import { CommonModule } from '@angular/common';
       <div class="max-w-4xl mx-auto bg-white border border-neutral-200 rounded-3xl p-10 md:p-16 shadow-lg text-center">
         
         <div class="mb-8 flex justify-center">
-          <div class="bg-primary-50 p-6 rounded-3xl border border-primary-100">
-             <svg class="h-16 w-16 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
+            <img src="/assets/images/logo.png" alt="Logo" class="h-20 w-20 rounded-2xl shadow-sm" />
         </div>
 
         <h1 class="text-4xl md:text-5xl font-black text-neutral-900 mb-6 tracking-tight">
@@ -22,7 +19,7 @@ import { CommonModule } from '@angular/common';
         </h1>
         
         <p class="text-lg text-neutral-600 leading-relaxed mb-10 max-w-2xl mx-auto">
-          FounderHub is the premier platform connecting ambitious founders with forward-thinking investors. 
+          {{ appName }} is the premier platform connecting ambitious founders with forward-thinking investors. 
           We believe that great ideas deserve the capital to grow, and great capital deserves the best ideas.
         </p>
 
@@ -45,4 +42,6 @@ import { CommonModule } from '@angular/common';
     </div>
   `
 })
-export class AboutComponent {}
+export class AboutComponent {
+  appName = AppConstants.APP_NAME;
+}

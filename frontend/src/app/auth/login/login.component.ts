@@ -6,38 +6,40 @@ import { AuthService } from '../../core/services/auth.service';
 import { InputComponent } from '../../shared/ui/input/input.component';
 import { ButtonComponent } from '../../shared/ui/button/button.component';
 import { CardComponent } from '../../shared/ui/card/card.component';
+import { AppConstants } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, InputComponent, ButtonComponent, CardComponent],
   template: `
-    <div class="min-h-[100dvh] flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-neutral-50 relative overflow-hidden">
-      <!-- Background Decorations -->
-      <div class="absolute inset-0 pointer-events-none overflow-hidden">
-        <div class="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-primary-100/50 blur-3xl opacity-50"></div>
-        <div class="absolute -bottom-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-indigo-100/50 blur-3xl opacity-50"></div>
-      </div>
+    <div class="min-h-[100dvh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-black">
+      
+      <!-- Full-Screen Background -->
+      <img src="/assets/images/login-bg-real.png" alt="Collaborative workspace" class="absolute inset-0 w-full h-full object-cover opacity-70 scale-[1.02] hover:scale-100 transition-transform duration-[20s] ease-out z-0" />
+      <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/40 to-[#0a0a0f]/10 z-0"></div>
 
-      <div class="relative z-10 sm:mx-auto sm:w-full sm:max-w-md text-center mb-6">
-        <div class="flex justify-center items-center mb-4">
-          <div class="bg-primary-600 p-2.5 rounded-xl shadow-lg shadow-primary-500/20">
-            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <span class="ml-3 text-2xl font-black tracking-tight text-neutral-900">FounderHub</span>
+      <!-- Centered Container -->
+      <div class="relative z-10 w-full max-w-[420px] mx-auto">
+        
+        <!-- Branding Logo -->
+        <div class="text-center mb-8">
+          <a routerLink="/" class="inline-flex flex-col items-center gap-3 group">
+            <div class="p-1 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl group-hover:scale-105 transition-transform">
+              <img src="/assets/images/logo.png" alt="Logo" class="h-12 w-12 rounded-xl" />
+            </div>
+            <span class="text-3xl font-black tracking-tight text-white group-hover:text-indigo-400 transition-colors">{{ appName }}</span>
+          </a>
+          <p class="mt-3 text-indigo-100/80 text-sm font-medium tracking-wide">Connect founders with investors. No noise.</p>
         </div>
-        <p class="text-neutral-500 text-sm font-medium">Connect founders with investors. No noise.</p>
-      </div>
 
-      <div class="relative z-10 mt-2 sm:mx-auto sm:w-full sm:max-w-[420px]">
-        <app-card padding="lg" class="shadow-premium border-0 ring-1 ring-neutral-200/50">
-          <h2 class="text-xl font-bold text-neutral-900 mb-6 text-center">Sign in to your account</h2>
+        <!-- The Frosted Glass Form Box -->
+        <div class="bg-white/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/40 rounded-3xl p-8 sm:p-10 transition-all">
+          <h2 class="text-2xl font-extrabold text-neutral-900 mb-6 text-center tracking-tight">Welcome back</h2>
           
-          <form class="space-y-5" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <form class="space-y-4" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
             
-            <div *ngIf="errorMessage" class="bg-rose-50 border border-rose-200 p-4 mb-4 rounded-xl flex items-start gap-3">
+            <div *ngIf="errorMessage" class="bg-rose-50 border border-rose-200 p-4 rounded-xl flex items-start gap-3">
               <svg class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -46,44 +48,50 @@ import { CardComponent } from '../../shared/ui/card/card.component';
 
             <app-input
               id="identifier"
+              label="Email address"
+              type="email"
               formControlName="identifier"
-              label="Email or Username"
-              placeholder="Enter email or username">
-            </app-input>
+              placeholder="you@company.com"
+              [error]="(loginForm.get('identifier')?.touched && loginForm.get('identifier')?.hasError('required')) ? 'Email is required' : (loginForm.get('identifier')?.touched && loginForm.get('identifier')?.hasError('email')) ? 'Invalid email format' : ''"
+            ></app-input>
 
-            <app-input
-              id="password"
-              type="password"
-              formControlName="password"
-              label="Password"
-              placeholder="Enter password">
-            </app-input>
-
-            <div class="pt-2">
-              <app-button 
-                type="submit" 
-                variant="primary" 
-                [fullWidth]="true" 
-                [loading]="isLoading" 
-                [disabled]="loginForm.invalid">
-                Sign In
-              </app-button>
+            <div>
+              <app-input
+                id="password"
+                label="Password"
+                type="password"
+                formControlName="password"
+                placeholder="••••••••"
+                [error]="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required') ? 'Password is required' : ''"
+              ></app-input>
+              <div class="flex items-center justify-end mt-1.5">
+                <a href="#" class="text-xs font-bold text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition-colors">Forgot password?</a>
+              </div>
             </div>
+
+            <button
+              type="submit"
+              [disabled]="loginForm.invalid || isLoading"
+              class="w-full mt-6 flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-[0_10px_20px_rgba(79,70,229,0.25)] text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {{ isLoading ? 'Signing in...' : 'Sign in to platform' }}
+            </button>
           </form>
-
-
-          <div class="mt-8 text-center bg-neutral-50 -mx-8 -mb-8 px-8 py-4 border-t border-neutral-100 rounded-b-[24px]">
-            <p class="text-sm text-neutral-500">
-              Don't have an account? 
-              <a routerLink="/auth/register" class="font-bold text-primary-600 hover:text-primary-700 transition-colors">Create one</a>
-            </p>
-          </div>
-        </app-card>
+        </div>
+        
+        <p class="mt-8 text-center text-sm text-neutral-300 font-medium">
+          Don't have an account?
+          <a routerLink="/auth/register" class="font-bold text-white hover:text-indigo-300 transition-colors ml-1 uppercase text-xs tracking-wider border-b border-white/30 pb-0.5 hover:border-indigo-300">
+            Join as a founder
+          </a>
+        </p>
       </div>
+
     </div>
   `
 })
 export class LoginComponent {
+  appName = AppConstants.APP_NAME;
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);

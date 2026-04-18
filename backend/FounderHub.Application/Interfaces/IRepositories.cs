@@ -76,8 +76,9 @@ namespace FounderHub.Application.Interfaces
 
     public interface IMessageRepository
     {
-        Task<IEnumerable<Message>> GetByConnectionIdAsync(string connectionId);
-        Task CreateAsync(Message message);
+        Task AddAsync(Message message);
+        Task<List<Message>> GetByConnectionIdAsync(string connectionId, int skip, int limit);
+        Task MarkAsReadAsync(string connectionId, string receiverId);
     }
 
     public interface ISavedIdeaRepository

@@ -12,11 +12,13 @@ namespace FounderHub.Application.Services
     {
         private readonly IConnectionRepository _connectionRepo;
         private readonly INotificationRepository _notificationRepo;
+        private readonly IUserRepository _userRepo;
 
-        public ConnectionService(IConnectionRepository connectionRepo, INotificationRepository notificationRepo)
+        public ConnectionService(IConnectionRepository connectionRepo, INotificationRepository notificationRepo, IUserRepository userRepo)
         {
             _connectionRepo = connectionRepo;
             _notificationRepo = notificationRepo;
+            _userRepo = userRepo;
         }
 
         public async Task SendRequestAsync(string investorId, SendConnectionRequest request)
@@ -83,15 +85,27 @@ namespace FounderHub.Application.Services
         public async Task<IEnumerable<ConnectionDto>> GetMyConnectionsAsync(string userId)
         {
             var connections = await _connectionRepo.GetByUserIdAsync(userId);
-            return connections.Select(c => new ConnectionDto
+            var result = new List<ConnectionDto>();
+
+            foreach (var c in connections)
             {
-                Id = c.Id,
-                FounderId = c.FounderId,
-                InvestorId = c.InvestorId,
-                Status = c.Status,
-                CreatedAt = c.CreatedAt,
-                UpdatedAt = c.UpdatedAt
-            });
+                var partnerId = c.FounderId == userId ? c.InvestorId : c.FounderId;
+                var partner = await _userRepo.GetByIdAsync(partnerId);
+
+                result.Add(new ConnectionDto
+                {
+                    Id = c.Id,
+                    FounderId = c.FounderId,
+                    InvestorId = c.InvestorId,
+                    Status = c.Status,
+                    CreatedAt = c.CreatedAt,
+                    UpdatedAt = c.UpdatedAt,
+                    PartnerUsername = partner?.Username ?? "Unknown",
+                    PartnerRole = partner?.Role.ToString() ?? "Unknown"
+                });
+            }
+
+            return result;
         }
     }
 }

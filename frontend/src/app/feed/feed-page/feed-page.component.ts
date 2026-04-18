@@ -30,12 +30,12 @@ import { ButtonComponent } from '../../shared/ui/button/button.component';
 
         <!-- Composer (Founders) -->
         <div *ngIf="isFounder">
-          <app-card padding="md" class="border-2 border-primary-100 hover:border-primary-200 transition-colors">
+          <app-card padding="md" class="hover:border-neutral-300 transition-colors">
             <h3 class="text-sm font-black text-neutral-900 uppercase tracking-widest mb-3">Post an update</h3>
             <textarea
               [(ngModel)]="newUpdate"
               rows="3"
-              class="w-full px-4 py-3 bg-neutral-50 border border-neutral-300 rounded-xl text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-200 resize-none"
+              class="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-primary-400 focus:bg-white transition-all duration-200 resize-none"
               placeholder="We launched MVP today…"
             ></textarea>
             <div class="mt-4 flex items-center justify-end gap-3">

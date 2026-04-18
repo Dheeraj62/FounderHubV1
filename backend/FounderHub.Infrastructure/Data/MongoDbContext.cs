@@ -1,6 +1,7 @@
 using FounderHub.Domain.Entities;
 using FounderHub.Infrastructure.Config;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
 namespace FounderHub.Infrastructure.Data
@@ -8,6 +9,12 @@ namespace FounderHub.Infrastructure.Data
     public class MongoDbContext
     {
         private readonly IMongoDatabase _database;
+
+        static MongoDbContext()
+        {
+            var pack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
+            ConventionRegistry.Register("IgnoreExtraElements", pack, t => true);
+        }
 
         public MongoDbContext(IOptions<MongoDbSettings> options)
         {
@@ -127,6 +134,10 @@ namespace FounderHub.Infrastructure.Data
             Watchlists.Indexes.CreateOne(new CreateIndexModel<Watchlist>(
                 Builders<Watchlist>.IndexKeys.Ascending(w => w.InvestorId).Ascending(w => w.IdeaId),
                 new CreateIndexOptions { Unique = true }));
+
+            // Messages: Compound ConnectionId + CreatedAt for paginated thread queries
+            Messages.Indexes.CreateOne(new CreateIndexModel<Message>(
+                Builders<Message>.IndexKeys.Ascending(m => m.ConnectionId).Ascending(m => m.CreatedAt)));
         }
     }
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { AvatarComponent } from '../../ui/avatar/avatar.component';
+import { AppConstants } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-sidebar',
@@ -12,12 +13,8 @@ import { AvatarComponent } from '../../ui/avatar/avatar.component';
     <div class="flex flex-col h-full bg-white border-r border-neutral-200 w-64">
       <div class="h-16 flex items-center px-6 border-b border-neutral-100">
         <a routerLink="/" class="flex items-center gap-2.5">
-          <div class="bg-primary-600 p-1.5 rounded-xl shadow-sm">
-            <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <span class="text-xl font-black text-neutral-900 tracking-tight">FounderHub</span>
+          <img src="/assets/images/logo.png" alt="Logo" class="h-8 w-8 rounded-xl shadow-sm" />
+          <span class="text-xl font-black text-neutral-900 tracking-tight">{{ appName }}</span>
         </a>
       </div>
 
@@ -111,7 +108,7 @@ import { AvatarComponent } from '../../ui/avatar/avatar.component';
           <app-avatar [initials]="(userRole || 'U')[0]" size="sm" color="indigo"></app-avatar>
           <div class="flex-1 min-w-0">
             <p class="text-xs font-black text-neutral-900 truncate">{{ userRole }} Account</p>
-            <p class="text-[10px] text-neutral-500 truncate italic">FounderHub Platinum</p>
+            <p class="text-[10px] text-neutral-500 truncate italic">{{ appName }} Platinum</p>
           </div>
         </div>
       </div>
@@ -120,5 +117,6 @@ import { AvatarComponent } from '../../ui/avatar/avatar.component';
   styles: []
 })
 export class SidebarComponent {
+  appName = AppConstants.APP_NAME;
   @Input() userRole: string | null = null;
 }

@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { API_CONFIG } from '../../core/config/api.config';
 import { CardComponent } from '../../shared/ui/card/card.component';
 import { BadgeComponent } from '../../shared/ui/badge/badge.component';
+import { AppConstants } from '../../core/constants/app.constants';
 
 @Component({
   selector: 'app-startup-page',
@@ -19,12 +20,8 @@ import { BadgeComponent } from '../../shared/ui/badge/badge.component';
       <header class="bg-white border-b border-neutral-200 sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
           <a routerLink="/" class="flex items-center gap-2 font-black text-xl text-neutral-900 tracking-tight">
-            <div class="bg-primary-600 p-1.5 rounded-lg">
-              <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            FounderHub
+            <img src="/assets/images/logo.png" alt="Logo" class="h-6 w-6 rounded-lg shadow-sm" />
+            {{ appName }}
           </a>
           <div class="flex items-center gap-3">
             <a routerLink="/auth/login" class="text-sm font-bold text-neutral-600 hover:text-primary-600 transition-colors">Sign in</a>
@@ -132,7 +129,7 @@ import { BadgeComponent } from '../../shared/ui/badge/badge.component';
         <!-- Investor CTA Banner -->
         <div class="bg-gradient-to-br from-primary-600 to-indigo-700 rounded-3xl p-8 text-white text-center">
           <h2 class="text-2xl font-black mb-2">Are you an investor?</h2>
-          <p class="text-primary-100 mb-6">Join FounderHub to connect directly with this founder, access the full pitch, and track this startup.</p>
+          <p class="text-primary-100 mb-6">Join {{ appName }} to connect directly with this founder, access the full pitch, and track this startup.</p>
           <a routerLink="/auth/register"
              class="inline-flex items-center gap-2 bg-white text-primary-700 font-black px-6 py-3 rounded-xl hover:bg-primary-50 transition-colors">
             Get Investor Access &rarr;
@@ -143,6 +140,8 @@ import { BadgeComponent } from '../../shared/ui/badge/badge.component';
   `
 })
 export class StartupPageComponent implements OnInit {
+  appName = AppConstants.APP_NAME;
+
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
   private meta = inject(Meta);
@@ -169,7 +168,7 @@ export class StartupPageComponent implements OnInit {
   }
 
   private injectSeoTags(idea: any) {
-    const pageTitle = `${idea.title} — Startup Pitch | FounderHub`;
+    const pageTitle = `${idea.title} — Startup Pitch | ${AppConstants.APP_NAME}`;
     this.title.setTitle(pageTitle);
 
     // Standard SEO

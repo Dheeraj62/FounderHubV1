@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { AvatarComponent } from '../../ui/avatar/avatar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
+import { AppConstants } from '../../../core/constants/app.constants';
 
 @Component({
     selector: 'app-dashboard-layout',
@@ -143,7 +144,7 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
         if (url.includes('notifications')) return 'Updates';
         if (url.includes('connections')) return 'Network';
         if (url.includes('profile')) return 'Settings';
-        return 'FounderHub';
+        return AppConstants.APP_NAME;
     }
 
     logout() {

@@ -63,8 +63,9 @@ namespace FounderHub.Application.Interfaces
 
     public interface IMessageService
     {
-        Task SendMessageAsync(string senderId, SendMessageRequest request);
-        Task<IEnumerable<MessageDto>> GetThreadAsync(string userId, string connectionId);
+        Task SendMessageAsync(string userId, SendMessageRequest request);
+        Task<List<MessageResponse>> GetMessagesAsync(string userId, string connectionId, int page, int pageSize);
+        Task MarkAsReadAsync(string userId, string connectionId);
     }
 
     public interface ISavedIdeaService

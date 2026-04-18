@@ -10,6 +10,16 @@ namespace FounderHub.Application.DTOs.Connections
         public string Status { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+
+        /// <summary>
+        /// The username of the other participant (resolved server-side for the requesting user).
+        /// </summary>
+        public string PartnerUsername { get; set; } = string.Empty;
+
+        /// <summary>
+        /// The role of the other participant (Founder or Investor).
+        /// </summary>
+        public string PartnerRole { get; set; } = string.Empty;
     }
 
     public class SendConnectionRequest
