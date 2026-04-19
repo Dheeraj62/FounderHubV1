@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, signal, computed, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { IdeaService } from '../../../core/services/idea.service';
 import { ProfileService } from '../../../core/services/profile.service';
 import { ConnectionService } from '../../../core/services/connection.service';
@@ -22,7 +22,7 @@ import { CredibilityScoreComponent } from '../credibility-score/credibility-scor
   standalone: true,
   imports: [CommonModule, RouterModule, IdeaTimelineComponent, FounderSignalsComponent, FeedbackPanelComponent, CredibilityScoreComponent, ButtonComponent],
   template: `
-    <div class="max-w-6xl mx-auto py-10 px-4 font-sans" *ngIf="idea">
+    <div class="max-w-5xl mx-auto py-8 lg:py-12 px-4 font-sans" *ngIf="idea">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-8">
@@ -190,12 +190,16 @@ import { CredibilityScoreComponent } from '../credibility-score/credibility-scor
                           [fullWidth]="true">
                     Request Direct Connection
                   </app-button>
-                  <div *ngIf="connectionStatus === 'Pending'" class="w-full bg-amber-50 text-amber-700 font-bold py-3.5 px-4 text-center rounded-xl border border-amber-200">
-                    Connection Pending...
+                  <div *ngIf="connectionStatus === 'Pending'" class="w-full bg-amber-50 text-amber-700 text-sm font-bold py-3 px-4 text-center rounded-xl border border-amber-200">
+                    Connection Request Pending
                   </div>
-                  <button *ngIf="connectionStatus === 'Accepted'" routerLink="/messages" class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-md font-bold py-3.5 px-4 rounded-xl transition-all">
-                    Message Founder
-                  </button>
+                  <app-button *ngIf="connectionStatus === 'Accepted'" 
+                          (onClick)="goToMessages()"
+                          variant="primary"
+                          [fullWidth]="true"
+                          class="shadow-md">
+                    ✉️ Message Founder
+                  </app-button>
                 </div>
               </div>
             </div>
@@ -222,10 +226,12 @@ export class IdeaDetailComponent implements OnInit {
   isSaved = false;
   isWatchlisted = false;
   connectionStatus?: string;
+  activeConnectionId?: string;
   myInterest = signal<'HighlyInterested' | 'Maybe' | 'Pass' | 'Interested' | undefined>(undefined);
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private ideaService: IdeaService,
     private profileService: ProfileService,
     private connectionService: ConnectionService,
@@ -241,6 +247,14 @@ export class IdeaDetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.loadIdea(id);
+    }
+  }
+
+  goToMessages() {
+    if (this.activeConnectionId) {
+      this.router.navigate(['/messages', this.activeConnectionId]);
+    } else {
+      this.toastService.error("Connection thread not found.");
     }
   }
 
@@ -288,6 +302,7 @@ export class IdeaDetailComponent implements OnInit {
     this.connectionService.getMyConnections().subscribe(list => {
       const conn = list.find(c => c.founderId === founderId);
       this.connectionStatus = conn?.status;
+      this.activeConnectionId = conn?.id;
       this.cdr.markForCheck();
     });
   }

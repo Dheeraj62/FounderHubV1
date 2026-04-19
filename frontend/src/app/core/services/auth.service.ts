@@ -43,7 +43,13 @@ export class AuthService {
     private loadToken() {
         const userStr = localStorage.getItem('user');
         if (userStr) {
-            this.currentUser.set(JSON.parse(userStr));
+            const parsed = JSON.parse(userStr);
+            // Invalidate stale sessions that don't have the username field
+            if (!parsed.username) {
+                this.logout();
+                return;
+            }
+            this.currentUser.set(parsed);
         }
     }
 
@@ -61,5 +67,9 @@ export class AuthService {
 
     getRole(): string | null {
         return this.getUserRole();
+    }
+
+    getUsername(): string | null {
+        return this.currentUser()?.username || null;
     }
 }

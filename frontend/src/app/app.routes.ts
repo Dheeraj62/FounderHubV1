@@ -7,13 +7,24 @@ import { DashboardLayoutComponent } from './shared/layouts/dashboard-layout/dash
 export const routes: Routes = [
     // PUBLIC ROUTES
     { path: '', component: LandingComponent, pathMatch: 'full' },
+    // STATIC PUBLIC PAGES (With Header/Footer)
     {
-        path: 'about',
-        loadComponent: () => import('./public/about/about.component').then(m => m.AboutComponent)
-    },
-    {
-        path: 'contact',
-        loadComponent: () => import('./public/contact/contact.component').then(m => m.ContactComponent)
+        path: '',
+        loadComponent: () => import('./shared/layouts/public-layout/public-layout.component').then(m => m.PublicLayoutComponent),
+        children: [
+            {
+                path: 'about',
+                loadComponent: () => import('./public/about/about.component').then(m => m.AboutComponent)
+            },
+            {
+                path: 'contact',
+                loadComponent: () => import('./public/contact/contact.component').then(m => m.ContactComponent)
+            },
+            {
+                path: 'privacy-policy',
+                loadComponent: () => import('./public/privacy/privacy.component').then(m => m.PrivacyComponent)
+            }
+        ]
     },
     {
         path: 'startup/:id',

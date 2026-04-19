@@ -65,6 +65,7 @@ namespace FounderHub.Application.Services
             {
                 Token = token,
                 UserId = user.Id,
+                Username = user.Username,
                 Email = user.Email,
                 Role = user.Role.ToString()
             };
@@ -87,6 +88,7 @@ namespace FounderHub.Application.Services
             {
                 Token = token,
                 UserId = user.Id,
+                Username = user.Username,
                 Email = user.Email,
                 Role = user.Role.ToString()
             };

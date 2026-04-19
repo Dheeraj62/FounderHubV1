@@ -103,12 +103,22 @@ import { AppConstants } from '../../../core/constants/app.constants';
         </div>
       </nav>
 
+      <!-- Contact -->
+      <div class="px-4 pb-2">
+        <a href="mailto:{{ contactEmail }}" class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-bold text-neutral-500 hover:bg-neutral-50 hover:text-indigo-600 transition-all group">
+          <svg class="w-5 h-5 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+          Contact Us
+        </a>
+      </div>
+
       <div class="p-4 border-t border-neutral-100">
         <div class="flex items-center gap-3 p-2 bg-neutral-50 rounded-2xl border border-neutral-100">
-          <app-avatar [initials]="(userRole || 'U')[0]" size="sm" color="indigo"></app-avatar>
+          <app-avatar [initials]="(userName || userRole || 'U')[0].toUpperCase()" size="sm" color="indigo"></app-avatar>
           <div class="flex-1 min-w-0">
-            <p class="text-xs font-black text-neutral-900 truncate">{{ userRole }} Account</p>
-            <p class="text-[10px] text-neutral-500 truncate italic">{{ appName }} Platinum</p>
+            <p class="text-xs font-black text-neutral-900 truncate capitalize">{{ userName || 'User' }}</p>
+            <p class="text-[10px] text-neutral-500 truncate italic">{{ userRole }} · {{ appName }}</p>
           </div>
         </div>
       </div>
@@ -118,5 +128,7 @@ import { AppConstants } from '../../../core/constants/app.constants';
 })
 export class SidebarComponent {
   appName = AppConstants.APP_NAME;
+  contactEmail = AppConstants.CONTACT_EMAIL;
   @Input() userRole: string | null = null;
+  @Input() userName: string | null = null;
 }

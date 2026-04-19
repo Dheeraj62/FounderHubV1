@@ -18,19 +18,19 @@ import { ButtonComponent } from '../../shared/ui/button/button.component';
   template: `
     <div class="space-y-8">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 class="text-h1">Discover Ideas</h1>
-          <p class="text-body mt-2">Find the next big thing and connect with visionary founders.</p>
+          <h1 class="text-3xl font-black text-neutral-900 tracking-tight">Discover Ideas</h1>
+          <p class="text-sm text-neutral-500 mt-1">Find the next big thing and connect with visionary founders.</p>
         </div>
       </div>
 
       <!-- Filters -->
-      <app-card padding="md" class="mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+      <div class="bg-white rounded-2xl border border-neutral-200 shadow-sm p-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
           <div>
-            <label class="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">Stage</label>
-            <select [(ngModel)]="filters.stage" (change)="loadIdeas(1)" class="w-full px-4 py-2 bg-white border border-neutral-300 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-200">
+            <label class="block text-[10px] font-black text-neutral-500 uppercase tracking-widest fill-neutral-400 mb-1.5">Stage</label>
+            <select [(ngModel)]="filters.stage" (change)="loadIdeas(1)" class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-xl text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 hover:bg-neutral-100 transition-all cursor-pointer">
               <option value="">All Stages</option>
               <option value="Idea">Idea Only</option>
               <option value="MVP">MVP Built</option>
@@ -38,8 +38,8 @@ import { ButtonComponent } from '../../shared/ui/button/button.component';
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">Industry</label>
-            <select [(ngModel)]="filters.industry" (change)="loadIdeas(1)" class="w-full px-4 py-2 bg-white border border-neutral-300 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-200">
+            <label class="block text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1.5">Industry</label>
+            <select [(ngModel)]="filters.industry" (change)="loadIdeas(1)" class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-xl text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 hover:bg-neutral-100 transition-all cursor-pointer">
               <option value="">All Industries</option>
               <option value="SaaS">SaaS</option>
               <option value="Fintech">Fintech</option>
@@ -52,30 +52,30 @@ import { ButtonComponent } from '../../shared/ui/button/button.component';
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">Previously Rejected?</label>
-            <select [(ngModel)]="filters.previouslyRejected" (change)="loadIdeas(1)" class="w-full px-4 py-2 bg-white border border-neutral-300 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-200">
+            <label class="block text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1.5">Rejected?</label>
+            <select [(ngModel)]="filters.previouslyRejected" (change)="loadIdeas(1)" class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-xl text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 hover:bg-neutral-100 transition-all cursor-pointer">
               <option value="">Any</option>
               <option [ngValue]="true">Yes</option>
               <option [ngValue]="false">No</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">Location</label>
-            <input [(ngModel)]="filters.location" (input)="loadIdeas(1)" type="text" placeholder="e.g. San Francisco"
-              class="w-full px-4 py-2 bg-white border border-neutral-300 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-200" />
+            <label class="block text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1.5">Location</label>
+            <input [(ngModel)]="filters.location" (input)="loadIdeas(1)" type="text" placeholder="e.g. SF, Remote"
+              class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-xl text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 hover:border-neutral-400 transition-all" />
           </div>
-          <div class="sm:col-span-2 lg:col-span-1">
-            <label class="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">Keyword</label>
-            <input [(ngModel)]="filters.keyword" (input)="loadIdeas(1)" type="text" placeholder="Search titles, problems..."
-              class="w-full px-4 py-2 bg-white border border-neutral-300 rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all duration-200" />
+          <div class="lg:col-span-1">
+            <label class="block text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1.5">Keyword</label>
+            <input [(ngModel)]="filters.keyword" (input)="loadIdeas(1)" type="text" placeholder="Search..."
+              class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-xl text-xs font-medium text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 hover:border-neutral-400 transition-all" />
           </div>
-          <div>
-            <app-button variant="secondary" [fullWidth]="true" (onClick)="resetFilters()">
-              Reset Filters
-            </app-button>
+          <div class="flex items-center">
+            <button (click)="resetFilters()" class="w-full px-3 py-2 rounded-xl text-xs font-bold text-neutral-600 bg-neutral-100 hover:bg-neutral-200 border border-transparent transition-colors">
+              Clear
+            </button>
           </div>
         </div>
-      </app-card>
+      </div>
 
       <!-- Loading State -->
       <div *ngIf="isLoading()" class="flex justify-center py-20">
@@ -96,85 +96,94 @@ import { ButtonComponent } from '../../shared/ui/button/button.component';
       </div>
 
       <!-- Content List -->
-      <div *ngIf="!isLoading() && ideas().length > 0" class="space-y-6 max-w-4xl mx-auto">
-        <app-card *ngFor="let idea of ideas()" [hoverable]="true" padding="lg">
-            <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center gap-2">
-                <app-badge variant="indigo">{{ idea.industry }}</app-badge>
-                <app-badge variant="neutral">{{ idea.stage }}</app-badge>
+      <div *ngIf="!isLoading() && ideas().length > 0" class="space-y-5 max-w-4xl mx-auto">
+        <div *ngFor="let idea of ideas()" class="bg-white border border-neutral-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-5 sm:p-7 relative overflow-hidden group">
+            
+            <div class="flex items-start justify-between mb-2">
+              <div>
+                <div class="flex flex-wrap items-center gap-2 mb-2">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-black bg-indigo-50 text-indigo-600 border border-indigo-100 uppercase tracking-wider">{{ idea.industry }}</span>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-black bg-neutral-100 text-neutral-600 border border-neutral-200 uppercase tracking-wider">{{ idea.stage }}</span>
+                  <span *ngIf="idea.location" class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-black bg-neutral-50 text-neutral-500 border border-neutral-100 uppercase tracking-wider">
+                    📍 {{ idea.location }}
+                  </span>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-black text-neutral-900 tracking-tight leading-tight group-hover:text-primary-600 transition-colors cursor-pointer" [routerLink]="['/idea', idea.id]">
+                  {{ idea.title }}
+                </h3>
               </div>
-              <div class="flex items-center gap-4">
-                <span class="text-xs font-medium text-neutral-500">Posted {{ idea.createdAt | date:'MMM d, y' }}</span>
+              <div class="flex flex-col items-end gap-1">
                 <button (click)="toggleWatchlist(idea.id); $event.stopPropagation()" 
-                        [class]="isWatchlisted(idea.id) ? 'text-primary-500 bg-primary-50 hover:bg-primary-100' : 'text-neutral-400 hover:text-primary-500 hover:bg-primary-50'"
-                        class="p-2 rounded-full transition-colors flex items-center justify-center shrink-0" 
+                        [class]="isWatchlisted(idea.id) ? 'text-primary-500 bg-primary-50 hover:bg-primary-100' : 'text-neutral-300 hover:text-primary-500 hover:bg-neutral-50'"
+                        class="p-2 rounded-xl transition-all border border-transparent hover:border-neutral-200 flex items-center justify-center -mr-2 -mt-2" 
                         title="Watchlist">
-                  <span class="text-xl leading-none">{{ isWatchlisted(idea.id) ? '👀' : '👁️' }}</span>
+                  <svg class="w-5 h-5" [attr.fill]="isWatchlisted(idea.id) ? 'currentColor' : 'none'" [attr.stroke]="isWatchlisted(idea.id) ? 'none' : 'currentColor'" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                  </svg>
+                </button>
+                <span class="text-[10px] sm:text-xs font-semibold text-neutral-400 whitespace-nowrap">{{ idea.createdAt | date:'MMM d, y' }}</span>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 mt-4">
+              <div class="bg-neutral-50/50 p-4 rounded-xl border border-neutral-100 relative">
+                <h4 class="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> The Problem
+                </h4>
+                <p class="text-sm text-neutral-700 leading-relaxed font-medium">{{ idea.problem | slice:0:300 }}{{ idea.problem.length > 300 ? '...' : '' }}</p>
+              </div>
+              <div class="bg-neutral-50/50 p-4 rounded-xl border border-neutral-100 relative">
+                <h4 class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> The Solution
+                </h4>
+                <p class="text-sm text-neutral-700 leading-relaxed font-medium">{{ idea.solution | slice:0:300 }}{{ idea.solution.length > 300 ? '...' : '' }}</p>
+              </div>
+            </div>
+
+            <!-- Stats Flex Row (Replacing the bulky grid) -->
+            <div class="flex flex-wrap gap-2 mb-5">
+              <div *ngIf="idea.fundingRange" class="inline-flex flex-col px-3 py-1.5 bg-white border border-neutral-200 rounded-lg shadow-sm">
+                <span class="text-[9px] font-black text-neutral-400 uppercase tracking-widest">Target Funding</span>
+                <span class="text-xs font-bold text-neutral-900">{{ idea.fundingRange }}</span>
+              </div>
+              <div *ngIf="idea.previouslyRejected" class="inline-flex flex-col px-3 py-1.5 bg-rose-50 border border-rose-100 rounded-lg shadow-sm">
+                <span class="text-[9px] font-black text-rose-400 uppercase tracking-widest">Previously Rejected</span>
+                <span class="text-xs font-bold text-rose-700" [title]="idea.rejectionReasonCategory">{{ idea.rejectionReasonCategory || 'Yes' }}</span>
+              </div>
+              <div *ngIf="idea.marketSize" class="inline-flex flex-col px-3 py-1.5 bg-white border border-neutral-200 rounded-lg shadow-sm">
+                <span class="text-[9px] font-black text-neutral-400 uppercase tracking-widest">Market Size</span>
+                <span class="text-xs font-bold text-neutral-900 line-clamp-1 max-w-[150px]">{{ idea.marketSize }}</span>
+              </div>
+            </div>
+
+            <div class="border-t border-neutral-100 pt-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+              
+              <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button 
+                  (click)="expressInterest(idea.id, 'HighlyInterested')" 
+                  [class]="getInterestStatus(idea.id) === 'HighlyInterested' ? 'bg-indigo-600 text-white shadow-indigo-200 border-indigo-600' : 'bg-white text-neutral-700 hover:bg-neutral-50 border-neutral-200'"
+                  class="flex-1 sm:flex-none border shadow-sm px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                  🔥 Interested
+                </button>
+                <button 
+                  (click)="expressInterest(idea.id, 'Maybe')" 
+                  [class]="getInterestStatus(idea.id) === 'Maybe' ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-white text-neutral-700 hover:bg-neutral-50 border-neutral-200'"
+                  class="flex-1 sm:flex-none border shadow-sm px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                  🤔 Keep in Touch
+                </button>
+                <button 
+                  (click)="expressInterest(idea.id, 'Pass')" 
+                  [class]="getInterestStatus(idea.id) === 'Pass' ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-white text-neutral-700 hover:bg-neutral-50 border-neutral-200'"
+                  class="flex-1 sm:flex-none border shadow-sm px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                  ❌ Pass
                 </button>
               </div>
-            </div>
 
-            <h3 class="text-h2 mb-4">{{ idea.title }}</h3>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-              <div>
-                <h4 class="text-xs font-black text-neutral-900 uppercase tracking-widest mb-3">The Problem</h4>
-                <p class="text-body text-sm whitespace-pre-line">{{ idea.problem }}</p>
-              </div>
-              <div>
-                <h4 class="text-xs font-black text-neutral-900 uppercase tracking-widest mb-3">The Solution</h4>
-                <p class="text-body text-sm whitespace-pre-line">{{ idea.solution }}</p>
-              </div>
+              <a [routerLink]="['/idea', idea.id]" class="w-full sm:w-auto text-center sm:text-right text-xs font-black text-primary-600 hover:text-primary-700 uppercase tracking-widest flex items-center justify-center sm:justify-end gap-1 group">
+                Full Details <span class="group-hover:translate-x-1 transition-transform">→</span>
+              </a>
             </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-neutral-50 p-5 rounded-2xl border border-neutral-100 mb-6">
-              <div *ngIf="idea.fundingRange">
-                <span class="block text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">Target Funding</span>
-                <span class="block text-sm font-bold text-neutral-900">{{ idea.fundingRange }}</span>
-              </div>
-              <div *ngIf="idea.previouslyRejected">
-                <span class="block text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1">Previously Rejected</span>
-                <span class="block text-sm font-bold text-neutral-900" [title]="idea.rejectionReasonCategory">{{ idea.rejectionReasonCategory || 'Yes' }}</span>
-              </div>
-              <div *ngIf="idea.previouslyRejected && idea.whatChangedAfterRejection" class="sm:col-span-3 mt-4 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-0 border-neutral-200">
-                <span class="block text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">What changed</span>
-                <span class="block text-sm italic text-neutral-700">{{ idea.whatChangedAfterRejection }}</span>
-              </div>
-            </div>
-
-            <div class="border-t border-neutral-100 pt-6 mt-6">
-              <div class="flex items-center justify-between mb-4">
-                <h4 class="text-sm font-bold text-neutral-900">Interest Actions</h4>
-                <a [routerLink]="['/idea', idea.id]" class="text-sm font-bold text-primary-600 hover:text-primary-700 flex items-center group">
-                  Full Prospectus <span class="ml-1 group-hover:translate-x-1 transition-transform">→</span>
-                </a>
-              </div>
-              
-              <div class="flex flex-col sm:flex-row gap-3">
-                <app-button 
-                  (onClick)="expressInterest(idea.id, 'HighlyInterested')" 
-                  [variant]="getInterestStatus(idea.id) === 'HighlyInterested' ? 'primary' : 'outline'"
-                  [selected]="getInterestStatus(idea.id) === 'HighlyInterested'"
-                  [fullWidth]="true">
-                  <span class="mr-2">🔥</span> Highly Interested
-                </app-button>
-                <app-button 
-                  (onClick)="expressInterest(idea.id, 'Maybe')" 
-                  variant="outline"
-                  [selected]="getInterestStatus(idea.id) === 'Maybe'"
-                  [fullWidth]="true">
-                  <span class="mr-2">🤔</span> Keep in Touch
-                </app-button>
-                <app-button 
-                  (onClick)="expressInterest(idea.id, 'Pass')" 
-                  [variant]="getInterestStatus(idea.id) === 'Pass' ? 'danger' : 'outline'"
-                  [selected]="getInterestStatus(idea.id) === 'Pass'"
-                  [fullWidth]="true">
-                  <span class="mr-2">❌</span> Pass
-                </app-button>
-              </div>
-            </div>
-        </app-card>
+        </div>
       </div>
       
       <!-- Pagination -->

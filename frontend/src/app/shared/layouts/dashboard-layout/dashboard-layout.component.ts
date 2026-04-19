@@ -17,12 +17,12 @@ import { AppConstants } from '../../../core/constants/app.constants';
     <div class="min-h-screen bg-background font-sans">
       
       <!-- DESKTOP SIDEBAR -->
-      <app-sidebar [userRole]="authService.getRole()" class="hidden lg:block fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-border overflow-y-auto"></app-sidebar>
+      <app-sidebar [userRole]="authService.getRole()" [userName]="authService.getUsername()" class="hidden lg:block fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-border overflow-y-auto"></app-sidebar>
 
       <!-- MOBILE OVERLAY & DRAWER -->
       <div *ngIf="isMobileMenuOpen()" class="lg:hidden fixed inset-0 z-50 flex">
         <div (click)="toggleMobileMenu()" class="fixed inset-0 bg-neutral-900/40 backdrop-blur-sm transition-opacity"></div>
-        <app-sidebar [userRole]="authService.getRole()" class="relative w-64 bg-white border-r border-border overflow-y-auto h-full"></app-sidebar>
+        <app-sidebar [userRole]="authService.getRole()" [userName]="authService.getUsername()" class="relative w-64 bg-white border-r border-border overflow-y-auto h-full"></app-sidebar>
       </div>
 
       <!-- MAIN AREA -->
