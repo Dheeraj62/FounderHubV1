@@ -5,7 +5,6 @@ import { ProfileService } from '../../core/services/profile.service';
 import { AuthService } from '../../core/services/auth.service';
 import { UpsertFounderProfileRequest } from '../../core/models/profile.models';
 import { ToastService } from '../../shared/ui/toast/toast.service';
-import { LinkedInService } from '../../core/services/linkedin.service';
 
 @Component({
   selector: 'app-founder-profile',
@@ -131,7 +130,6 @@ import { LinkedInService } from '../../core/services/linkedin.service';
 })
 export class FounderProfileComponent implements OnInit {
   private toastService = inject(ToastService);
-  private linkedInService = inject(LinkedInService);
   
   model: UpsertFounderProfileRequest = {
     technicalFounder: false,
@@ -180,22 +178,14 @@ export class FounderProfileComponent implements OnInit {
    * the user to the LinkedIn authorization page.
    */
   startLinkedInOAuth(): void {
-    this.linkedInError = '';
     this.linkedInVerifying = true;
-
-    this.linkedInService.getAuthUrl().subscribe({
-      next: (res) => {
-        // Store OAuth state in sessionStorage for CSRF validation
-        sessionStorage.setItem('linkedin_oauth_state', res.state);
-        // Redirect the user to LinkedIn's OAuth authorization page
-        window.location.href = res.authUrl;
-      },
-      error: (err) => {
+    
+    // Simulate API delay, then show error since it's disabled.
+    setTimeout(() => {
         this.linkedInVerifying = false;
-        this.linkedInError = err.error?.message || 'LinkedIn integration is not configured. Ask the admin to set up LinkedIn API credentials.';
+        this.linkedInError = 'LinkedIn integration is not configured. Ask the admin to set up LinkedIn API credentials.';
         this.cdr.markForCheck();
-      }
-    });
+    }, 500);
   }
 
   unlinkLinkedIn(): void {
