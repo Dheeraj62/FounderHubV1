@@ -10,6 +10,7 @@ namespace FounderHub.Application.Interfaces
         Task<User?> GetByEmailAsync(string email);
         Task<User?> GetByUsernameAsync(string username);
         Task CreateAsync(User user);
+        Task<long> CountByRoleAsync(Domain.Enums.UserRole role);
     }
 
     public interface IIdeaRepository

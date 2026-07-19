@@ -34,5 +34,10 @@ namespace FounderHub.Infrastructure.Repositories
         {
             await _context.Users.InsertOneAsync(user);
         }
+
+        public async Task<long> CountByRoleAsync(FounderHub.Domain.Enums.UserRole role)
+        {
+            return await _context.Users.CountDocumentsAsync(u => u.Role == role);
+        }
     }
 }

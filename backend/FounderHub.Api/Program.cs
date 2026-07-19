@@ -55,6 +55,9 @@ builder.Services.AddApiVersioning(options =>
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// HttpClient for external API calls (LinkedIn OAuth, etc.)
+builder.Services.AddHttpClient();
+
 // JWT Authentication
 var jwtSecret = builder.Configuration["JwtSettings:Secret"]
     ?? throw new InvalidOperationException("JWT Secret not configured");
@@ -76,14 +79,18 @@ builder.Services
         };
     });
 
-// CORS
+// CORS — Whitelist origins per environment
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:4200", "http://localhost:4300" };
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -131,7 +138,7 @@ app.UseSerilogRequestLogging();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 app.UseRateLimiter();
 
 app.UseAuthentication();

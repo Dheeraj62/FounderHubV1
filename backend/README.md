@@ -82,9 +82,11 @@ dotnet run
 ```
 
 ### 5. Connect Frontend
-Create `.env` in the React project root:
-```
-VITE_API_BASE_URL=https://localhost:5001
+The Angular frontend reads the API URL from `frontend/src/environments/environment.ts`:
+```typescript
+export const environment = {
+  apiUrl: 'https://localhost:5001/api'
+};
 ```
 
 ## API Endpoints

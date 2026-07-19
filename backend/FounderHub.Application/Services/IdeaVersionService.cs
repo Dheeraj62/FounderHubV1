@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FounderHub.Application.DTOs.IdeaVersions;
 using FounderHub.Application.Interfaces;
 using FounderHub.Domain.Entities;
+using FounderHub.Domain.Exceptions;
 
 namespace FounderHub.Application.Services
 {
@@ -24,8 +25,8 @@ namespace FounderHub.Application.Services
         public async Task CreateVersionAsync(string userId, string ideaId, CreateVersionRequest request)
         {
             var idea = await _ideaRepo.GetByIdAsync(ideaId);
-            if (idea == null) throw new Exception("Idea not found");
-            if (idea.FounderId != userId) throw new UnauthorizedAccessException("Only the founder can create versions");
+            if (idea == null) throw new NotFoundException("Idea", ideaId);
+            if (idea.FounderId != userId) throw new ForbiddenException("Only the founder can create versions.");
 
             var latest = await _versionRepo.GetLatestVersionNumberAsync(ideaId);
             var version = new IdeaVersion

@@ -6,5 +6,6 @@ namespace FounderHub.Application.Interfaces
     public interface IAnalyticsService
     {
         Task<FounderAnalyticsSummaryDto> GetFounderAnalyticsAsync(string founderId);
+        Task<PlatformStatsDto> GetPlatformStatsAsync();
     }
 }

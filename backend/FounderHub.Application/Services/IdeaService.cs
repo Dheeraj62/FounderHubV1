@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FounderHub.Application.DTOs.Ideas;
 using FounderHub.Application.Interfaces;
 using FounderHub.Domain.Entities;
+using FounderHub.Domain.Exceptions;
 
 namespace FounderHub.Application.Services
 {
@@ -175,8 +176,8 @@ namespace FounderHub.Application.Services
         public async Task<IdeaDto> UpdateIdeaAsync(string founderId, string ideaId, UpdateIdeaRequest request)
         {
             var idea = await _ideaRepository.GetByIdAsync(ideaId);
-            if (idea == null) throw new Exception("Idea not found");
-            if (idea.FounderId != founderId) throw new UnauthorizedAccessException("You can only edit your own ideas");
+            if (idea == null) throw new NotFoundException("Idea", ideaId);
+            if (idea.FounderId != founderId) throw new ForbiddenException("You can only edit your own ideas.");
 
             idea.Title = _sanitizer.Sanitize(request.Title);
             idea.Problem = _sanitizer.Sanitize(request.Problem);
@@ -212,8 +213,8 @@ namespace FounderHub.Application.Services
         public async Task DeleteIdeaAsync(string founderId, string ideaId)
         {
             var idea = await _ideaRepository.GetByIdAsync(ideaId);
-            if (idea == null) throw new Exception("Idea not found");
-            if (idea.FounderId != founderId) throw new UnauthorizedAccessException("You can only delete your own ideas");
+            if (idea == null) throw new NotFoundException("Idea", ideaId);
+            if (idea.FounderId != founderId) throw new ForbiddenException("You can only delete your own ideas.");
 
             await _ideaRepository.DeleteAsync(ideaId);
         }

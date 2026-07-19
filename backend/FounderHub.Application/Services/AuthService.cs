@@ -4,6 +4,7 @@ using FounderHub.Application.DTOs.Auth;
 using FounderHub.Application.Interfaces;
 using FounderHub.Domain.Entities;
 using FounderHub.Domain.Enums;
+using FounderHub.Domain.Exceptions;
 
 namespace FounderHub.Application.Services
 {
@@ -30,13 +31,13 @@ namespace FounderHub.Application.Services
 
             // Validate uniqueness
             var existingByEmail = await _userRepository.GetByEmailAsync(email);
-            if (existingByEmail != null) throw new Exception("Email already exists");
+            if (existingByEmail != null) throw new ConflictException("Email already exists.");
 
             var existingByUsername = await _userRepository.GetByUsernameAsync(username);
-            if (existingByUsername != null) throw new Exception("Username already exists");
+            if (existingByUsername != null) throw new ConflictException("Username already exists.");
 
             if (!Enum.TryParse<UserRole>(request.Role, true, out var role))
-                throw new Exception("Invalid role. Must be 'Founder' or 'Investor'.");
+                throw new ValidationException("Invalid role. Must be 'Founder' or 'Investor'.");
 
             var user = new User
             {
@@ -80,7 +81,7 @@ namespace FounderHub.Application.Services
                        ?? await _userRepository.GetByUsernameAsync(identifier);
 
             if (user == null || !_passwordHasher.Verify(request.Password, user.PasswordHash))
-                throw new Exception("Invalid identifier or password.");
+                throw new AuthenticationException("Invalid identifier or password.");
 
             var token = _jwtProvider.GenerateToken(user);
 

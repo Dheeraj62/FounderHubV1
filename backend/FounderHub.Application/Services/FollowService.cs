@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FounderHub.Application.DTOs.Follows;
 using FounderHub.Application.Interfaces;
 using FounderHub.Domain.Entities;
+using FounderHub.Domain.Exceptions;
 
 namespace FounderHub.Application.Services
 {
@@ -24,10 +25,10 @@ namespace FounderHub.Application.Services
         {
             var type = (request.Type ?? string.Empty).Trim().ToUpperInvariant();
             if (!AllowedTypes.Contains(type))
-                throw new Exception("Invalid follow type. Must be FOUNDER, INVESTOR, or IDEA.");
+                throw new ValidationException("Invalid follow type. Must be FOUNDER, INVESTOR, or IDEA.");
 
             if ((type == "FOUNDER" || type == "INVESTOR") && request.FollowingId == followerId)
-                throw new Exception("You cannot follow yourself.");
+                throw new ValidationException("You cannot follow yourself.");
 
             var existing = await _follows.GetAsync(followerId, request.FollowingId, type);
             if (existing != null) return; // idempotent
@@ -45,7 +46,7 @@ namespace FounderHub.Application.Services
         {
             var type = (request.Type ?? string.Empty).Trim().ToUpperInvariant();
             if (!AllowedTypes.Contains(type))
-                throw new Exception("Invalid follow type. Must be FOUNDER, INVESTOR, or IDEA.");
+                throw new ValidationException("Invalid follow type. Must be FOUNDER, INVESTOR, or IDEA.");
 
             await _follows.DeleteAsync(followerId, request.FollowingId, type);
         }

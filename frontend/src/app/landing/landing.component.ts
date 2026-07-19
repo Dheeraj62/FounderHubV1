@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AppConstants } from '../core/constants/app.constants';
+import { StatsService, PlatformStats } from '../core/services/stats.service';
 
 @Component({
   selector: 'app-landing',
@@ -93,20 +94,20 @@ import { AppConstants } from '../core/constants/app.constants';
       <section class="relative border-y border-white/5 bg-white/[0.02] py-8 sm:py-10 px-4">
         <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 text-center bg-black/40 backdrop-blur-md rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-white/10">
           <div>
-            <div class="text-2xl sm:text-4xl font-extrabold text-white mb-1 drop-shadow-md">500+</div>
+            <div class="text-2xl sm:text-4xl font-extrabold text-white mb-1 drop-shadow-md">{{ stats?.totalIdeas || '—' }}</div>
             <div class="text-xs sm:text-sm text-gray-400 font-medium">Startup Ideas</div>
           </div>
           <div>
-            <div class="text-2xl sm:text-4xl font-extrabold text-white mb-1 drop-shadow-md">120+</div>
+            <div class="text-2xl sm:text-4xl font-extrabold text-white mb-1 drop-shadow-md">{{ stats?.totalFounders || '—' }}</div>
+            <div class="text-xs sm:text-sm text-gray-400 font-medium">Founders</div>
+          </div>
+          <div>
+            <div class="text-2xl sm:text-4xl font-extrabold text-white mb-1 drop-shadow-md">{{ stats?.totalInvestors || '—' }}</div>
             <div class="text-xs sm:text-sm text-gray-400 font-medium">Active Investors</div>
           </div>
           <div>
-            <div class="text-2xl sm:text-4xl font-extrabold text-white mb-1 drop-shadow-md">$4.2M</div>
-            <div class="text-xs sm:text-sm text-gray-400 font-medium">Funding Connected</div>
-          </div>
-          <div>
-            <div class="text-2xl sm:text-4xl font-extrabold text-white mb-1 drop-shadow-md">48h</div>
-            <div class="text-xs sm:text-sm text-gray-400 font-medium">Avg. First Response</div>
+            <div class="text-2xl sm:text-4xl font-extrabold text-white mb-1 drop-shadow-md">{{ stats?.totalConnections || '—' }}</div>
+            <div class="text-xs sm:text-sm text-gray-400 font-medium">Connections Made</div>
           </div>
         </div>
       </section>
@@ -217,9 +218,9 @@ import { AppConstants } from '../core/constants/app.constants';
             <div>
               <h4 class="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-4">Resources</h4>
               <ul class="space-y-3">
-                <li><a href="#" class="text-sm text-gray-500 hover:text-white transition-colors font-medium">Privacy Policy</a></li>
-                <li><a href="#" class="text-sm text-gray-500 hover:text-white transition-colors font-medium">Terms of Service</a></li>
-                <li><a href="#" class="text-sm text-gray-500 hover:text-white transition-colors font-medium">FAQ</a></li>
+                <li><a routerLink="/privacy-policy" class="text-sm text-gray-500 hover:text-white transition-colors font-medium">Privacy Policy</a></li>
+                <li><a routerLink="/about" class="text-sm text-gray-500 hover:text-white transition-colors font-medium">About Us</a></li>
+                <li><a routerLink="/contact" class="text-sm text-gray-500 hover:text-white transition-colors font-medium">Contact</a></li>
               </ul>
             </div>
 
@@ -252,10 +253,14 @@ import { AppConstants } from '../core/constants/app.constants';
     </div>
   `
 })
-export class LandingComponent {
+export class LandingComponent implements OnInit {
+  private statsService = inject(StatsService);
+
   appName = AppConstants.APP_NAME;
   contactEmail = AppConstants.CONTACT_EMAIL;
   currentYear = new Date().getFullYear();
+  stats: PlatformStats | null = null;
+
   features = [
     { icon: '🎯', title: 'Smart Matching', desc: 'AI-powered filters connect you with investors who actually care about your vertical.' },
     { icon: '🔒', title: 'Role-Based Access', desc: 'Founders post, investors discover. Clean, purpose-built experience for each role.' },
@@ -264,5 +269,11 @@ export class LandingComponent {
     { icon: '🔄', title: 'Rejection Resilience', desc: 'VC-rejected ideas get a second chance. Track what changed and why it matters now.' },
     { icon: '⚡', title: 'Rapid Response', desc: 'Average investor response time under 48 hours. No more months of waiting.' },
   ];
-}
 
+  ngOnInit() {
+    this.statsService.getPublicStats().subscribe({
+      next: (data) => this.stats = data,
+      error: () => {} // Silently fail — stats are non-critical
+    });
+  }
+}

@@ -4,6 +4,7 @@ using FounderHub.Application.DTOs.Interests;
 using FounderHub.Application.Interfaces;
 using FounderHub.Domain.Entities;
 using FounderHub.Domain.Enums;
+using FounderHub.Domain.Exceptions;
 
 namespace FounderHub.Application.Services
 {
@@ -32,11 +33,11 @@ namespace FounderHub.Application.Services
         public async Task ExpressInterestAsync(string ideaId, string investorId, ExpressInterestRequest request)
         {
             var idea = await _ideaRepository.GetByIdAsync(ideaId);
-            if (idea == null) throw new Exception("Idea not found");
-            if (idea.FounderId == investorId) throw new Exception("Investor cannot express interest in own idea");
+            if (idea == null) throw new NotFoundException("Idea", ideaId);
+            if (idea.FounderId == investorId) throw new ValidationException("You cannot express interest in your own idea.");
 
             if (!Enum.TryParse<InterestStatus>(request.Status, true, out var status))
-                throw new Exception("Invalid status. Must be 'Interested', 'HighlyInterested', 'Maybe', or 'Pass'.");
+                throw new ValidationException("Invalid status. Must be 'Interested', 'HighlyInterested', 'Maybe', or 'Pass'.");
 
             var existingInterest = await _interestRepository.GetInterestAsync(ideaId, investorId);
             string interestId;
@@ -116,8 +117,8 @@ namespace FounderHub.Application.Services
         public async Task<InterestCountResponse> GetInterestCountAsync(string ideaId, string founderId)
         {
             var idea = await _ideaRepository.GetByIdAsync(ideaId);
-            if (idea == null) throw new Exception("Idea not found");
-            if (idea.FounderId != founderId) throw new UnauthorizedAccessException("Only the founder can view interest counts");
+            if (idea == null) throw new NotFoundException("Idea", ideaId);
+            if (idea.FounderId != founderId) throw new ForbiddenException("Only the founder can view interest counts.");
 
             var interestedCount = await _interestRepository.GetInterestedCountAsync(ideaId);
             var maybeCount = await _interestRepository.GetMaybeCountAsync(ideaId);

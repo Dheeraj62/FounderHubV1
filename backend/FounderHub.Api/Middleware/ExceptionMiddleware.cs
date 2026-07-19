@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FounderHub.Domain.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -26,27 +27,45 @@ namespace FounderHub.Api.Middleware
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An unhandled exception occurred.");
                 await HandleExceptionAsync(httpContext, ex);
             }
         }
 
-        private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
 
-            var statusCode = (int)HttpStatusCode.InternalServerError;
-            var message = "Internal server error";
+            int statusCode;
+            string message;
 
-            if (exception is UnauthorizedAccessException)
+            switch (exception)
             {
-                statusCode = (int)HttpStatusCode.Forbidden;
-                message = "Access denied";
-            }
-            else if (exception is ArgumentException)
-            {
-                statusCode = (int)HttpStatusCode.BadRequest;
-                message = exception.Message;
+                // Custom application exceptions — carry their own status code
+                case AppException appEx:
+                    statusCode = appEx.StatusCode;
+                    message = appEx.Message;
+                    _logger.LogWarning("Application error ({StatusCode}): {Message}", statusCode, message);
+                    break;
+
+                // .NET built-in — used for authorization checks
+                case UnauthorizedAccessException:
+                    statusCode = (int)HttpStatusCode.Forbidden;
+                    message = "Access denied.";
+                    _logger.LogWarning("Access denied: {Message}", exception.Message);
+                    break;
+
+                case ArgumentException argEx:
+                    statusCode = (int)HttpStatusCode.BadRequest;
+                    message = argEx.Message;
+                    _logger.LogWarning("Bad request: {Message}", message);
+                    break;
+
+                // Unhandled — log full details but return generic message
+                default:
+                    statusCode = (int)HttpStatusCode.InternalServerError;
+                    message = "An unexpected error occurred. Please try again later.";
+                    _logger.LogError(exception, "Unhandled exception occurred.");
+                    break;
             }
 
             context.Response.StatusCode = statusCode;
@@ -54,7 +73,7 @@ namespace FounderHub.Api.Middleware
             var response = new
             {
                 error = message,
-                status = context.Response.StatusCode
+                status = statusCode
             };
 
             var json = JsonSerializer.Serialize(response);

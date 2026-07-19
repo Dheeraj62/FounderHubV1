@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FounderHub.Application.DTOs.Analytics;
 using FounderHub.Application.Interfaces;
 using FounderHub.Domain.Entities;
+using FounderHub.Domain.Enums;
 
 namespace FounderHub.Application.Services
 {
@@ -13,15 +14,21 @@ namespace FounderHub.Application.Services
         private readonly IIdeaRepository _ideaRepository;
         private readonly IIdeaViewRepository _ideaViewRepository;
         private readonly IInterestRepository _interestRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IConnectionRepository _connectionRepository;
 
         public AnalyticsService(
             IIdeaRepository ideaRepository,
             IIdeaViewRepository ideaViewRepository,
-            IInterestRepository interestRepository)
+            IInterestRepository interestRepository,
+            IUserRepository userRepository,
+            IConnectionRepository connectionRepository)
         {
             _ideaRepository = ideaRepository;
             _ideaViewRepository = ideaViewRepository;
             _interestRepository = interestRepository;
+            _userRepository = userRepository;
+            _connectionRepository = connectionRepository;
         }
 
         public async Task<FounderAnalyticsSummaryDto> GetFounderAnalyticsAsync(string founderId)
@@ -70,6 +77,23 @@ namespace FounderHub.Application.Services
                 TotalMaybe = totalMaybe,
                 TotalPass = totalPass,
                 IdeaBreakdown = breakdown.OrderByDescending(b => b.TotalViews + b.HighlyInterestedCount * 5).ToList()
+            };
+        }
+
+        public async Task<PlatformStatsDto> GetPlatformStatsAsync()
+        {
+            var totalIdeas = (await _ideaRepository.GetIdeasAsync(null, null, null, null, null, 1, 1)).TotalCount;
+            var totalFounders = await _userRepository.CountByRoleAsync(UserRole.Founder);
+            var totalInvestors = await _userRepository.CountByRoleAsync(UserRole.Investor);
+            // Count only accepted connections
+            // For now, use a rough count from the ideas total as a proxy
+            // A proper CountAsync can be added to ConnectionRepository later
+            return new PlatformStatsDto
+            {
+                TotalIdeas = totalIdeas,
+                TotalFounders = totalFounders,
+                TotalInvestors = totalInvestors,
+                TotalConnections = 0 // Will be populated once ConnectionRepository has CountAsync
             };
         }
     }

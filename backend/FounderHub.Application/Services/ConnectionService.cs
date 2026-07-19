@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FounderHub.Application.DTOs.Connections;
 using FounderHub.Application.Interfaces;
 using FounderHub.Domain.Entities;
+using FounderHub.Domain.Exceptions;
 
 namespace FounderHub.Application.Services
 {
@@ -24,7 +25,7 @@ namespace FounderHub.Application.Services
         public async Task SendRequestAsync(string investorId, SendConnectionRequest request)
         {
             var existing = await _connectionRepo.GetConnectionAsync(request.FounderId, investorId);
-            if (existing != null) throw new Exception("Connection already exists or is pending");
+            if (existing != null) throw new ConflictException("Connection already exists or is pending.");
 
             var connection = new Connection
             {
@@ -52,8 +53,8 @@ namespace FounderHub.Application.Services
         public async Task AcceptRequestAsync(string userId, string connectionId)
         {
             var connection = await _connectionRepo.GetByIdAsync(connectionId);
-            if (connection == null) throw new Exception("Connection not found");
-            if (connection.FounderId != userId) throw new UnauthorizedAccessException();
+            if (connection == null) throw new NotFoundException("Connection", connectionId);
+            if (connection.FounderId != userId) throw new ForbiddenException("Only the founder can accept this connection.");
 
             connection.Status = "Accepted";
             connection.UpdatedAt = DateTime.UtcNow;
@@ -74,8 +75,8 @@ namespace FounderHub.Application.Services
         public async Task RejectRequestAsync(string userId, string connectionId)
         {
             var connection = await _connectionRepo.GetByIdAsync(connectionId);
-            if (connection == null) throw new Exception("Connection not found");
-            if (connection.FounderId != userId) throw new UnauthorizedAccessException();
+            if (connection == null) throw new NotFoundException("Connection", connectionId);
+            if (connection.FounderId != userId) throw new ForbiddenException("Only the founder can reject this connection.");
 
             connection.Status = "Rejected";
             connection.UpdatedAt = DateTime.UtcNow;
