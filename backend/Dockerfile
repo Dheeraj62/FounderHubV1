@@ -8,6 +8,7 @@ COPY ["FounderHub.Api/FounderHub.Api.csproj", "FounderHub.Api/"]
 COPY ["FounderHub.Application/FounderHub.Application.csproj", "FounderHub.Application/"]
 COPY ["FounderHub.Domain/FounderHub.Domain.csproj", "FounderHub.Domain/"]
 COPY ["FounderHub.Infrastructure/FounderHub.Infrastructure.csproj", "FounderHub.Infrastructure/"]
+COPY ["FounderHub.Tests/FounderHub.Tests.csproj", "FounderHub.Tests/"]
 
 # Restore dependencies
 RUN dotnet restore
