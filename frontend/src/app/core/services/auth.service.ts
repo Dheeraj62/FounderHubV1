@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, throwError } from 'rxjs';
 import { AuthResponse, LoginRequest, RegisterRequest } from '../models/auth.models';
 import { API_CONFIG } from '../config/api.config';
 
@@ -28,14 +28,31 @@ export class AuthService {
         );
     }
 
+    refreshAccessToken(): Observable<AuthResponse> {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) {
+            this.logout();
+            return throwError(() => new Error('No refresh token'));
+        }
+        return this.http.post<AuthResponse>(`${this.baseUrl}/refresh`, { refreshToken }).pipe(
+            tap(res => this.setSession(res))
+        );
+    }
+
+    refreshToken(): Observable<AuthResponse> {
+        return this.refreshAccessToken();
+    }
+
     logout() {
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
         this.currentUser.set(null);
     }
 
     private setSession(authResult: AuthResponse) {
         localStorage.setItem('token', authResult.token);
+        localStorage.setItem('refreshToken', authResult.refreshToken);
         localStorage.setItem('user', JSON.stringify(authResult));
         this.currentUser.set(authResult);
     }
@@ -55,6 +72,10 @@ export class AuthService {
 
     getToken(): string | null {
         return localStorage.getItem('token');
+    }
+
+    getRefreshToken(): string | null {
+        return localStorage.getItem('refreshToken');
     }
 
     getUserId(): string | null {

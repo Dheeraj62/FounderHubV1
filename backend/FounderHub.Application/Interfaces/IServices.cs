@@ -19,6 +19,8 @@ namespace FounderHub.Application.Interfaces
     {
         Task<AuthResponse> RegisterAsync(RegisterRequest request);
         Task<AuthResponse> LoginAsync(LoginRequest request);
+        Task<AuthResponse> RefreshTokenAsync(string refreshToken);
+        Task RevokeTokenAsync(string userId);
     }
 
     public interface IIdeaService
@@ -45,6 +47,18 @@ namespace FounderHub.Application.Interfaces
         Task UpsertFounderProfileAsync(string userId, UpsertFounderProfileRequest request);
         Task<InvestorProfileDto?> GetInvestorProfileAsync(string userId);
         Task UpsertInvestorProfileAsync(string userId, UpsertInvestorProfileRequest request);
+
+        // Public profiles
+        Task<PublicFounderProfileDto?> GetPublicFounderProfileAsync(string username);
+        Task<PublicInvestorProfileDto?> GetPublicInvestorProfileAsync(string username);
+
+        // User-level profile (name, headline, avatar, cover)
+        Task UpdateUserProfileAsync(string userId, UpdateUserProfileRequest request);
+        Task UpdateProfilePictureAsync(string userId, string url);
+        Task UpdateCoverImageAsync(string userId, string url);
+
+        // Profile completion
+        Task<ProfileCompletionDto> GetProfileCompletionAsync(string userId, string role);
     }
 
     public interface IIdeaVersionService

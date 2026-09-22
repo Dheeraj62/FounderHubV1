@@ -7,15 +7,18 @@ namespace FounderHub.Application.Interfaces
     public interface IUserRepository
     {
         Task<User?> GetByIdAsync(string id);
+        Task<Dictionary<string, User>> GetByIdsAsync(IEnumerable<string> ids);
         Task<User?> GetByEmailAsync(string email);
         Task<User?> GetByUsernameAsync(string username);
         Task CreateAsync(User user);
+        Task UpdateAsync(User user);
         Task<long> CountByRoleAsync(Domain.Enums.UserRole role);
     }
 
     public interface IIdeaRepository
     {
         Task<Idea?> GetByIdAsync(string id);
+        Task<IEnumerable<Idea>> GetByIdsAsync(IEnumerable<string> ids);
         Task<IEnumerable<Idea>> GetByFounderIdAsync(string founderId);
         
         // Paginated & filtered ideas
@@ -36,12 +39,15 @@ namespace FounderHub.Application.Interfaces
     public interface IInterestRepository
     {
         Task<Interest?> GetInterestAsync(string ideaId, string investorId);
+        Task<Dictionary<string, Interest?>> GetInterestBatchAsync(IEnumerable<string> ideaIds, string investorId);
         Task<Interest?> GetByIdAsync(string id);
         Task CreateAsync(Interest interest);
         Task UpdateAsync(Interest interest);
         
         Task<int> GetInterestedCountAsync(string ideaId);
+        Task<Dictionary<string, int>> GetInterestedCountBatchAsync(IEnumerable<string> ideaIds);
         Task<int> GetMaybeCountAsync(string ideaId);
+        Task<Dictionary<string, int>> GetMaybeCountBatchAsync(IEnumerable<string> ideaIds);
     }
 
     public interface IFounderProfileRepository
@@ -125,6 +131,7 @@ namespace FounderHub.Application.Interfaces
     {
         Task CreateAsync(IdeaView view);
         Task<int> GetIdeaViewCountAsync(string ideaId);
+        Task<Dictionary<string, int>> GetViewCountBatchAsync(IEnumerable<string> ideaIds);
         Task<int> GetFounderTotalViewsAsync(string founderId);
     }
 
@@ -143,5 +150,14 @@ namespace FounderHub.Application.Interfaces
         Task<Watchlist?> GetAsync(string investorId, string ideaId);
         Task CreateAsync(Watchlist watchlist);
         Task<bool> DeleteAsync(string investorId, string ideaId);
+    }
+
+    public interface IRefreshTokenRepository
+    {
+        Task<RefreshToken?> GetByTokenHashAsync(string tokenHash);
+        Task<IEnumerable<RefreshToken>> GetByUserIdAsync(string userId);
+        Task CreateAsync(RefreshToken token);
+        Task UpdateAsync(RefreshToken token);
+        Task RevokeAllByUserIdAsync(string userId);
     }
 }

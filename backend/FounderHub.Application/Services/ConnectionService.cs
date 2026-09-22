@@ -86,12 +86,16 @@ namespace FounderHub.Application.Services
         public async Task<IEnumerable<ConnectionDto>> GetMyConnectionsAsync(string userId)
         {
             var connections = await _connectionRepo.GetByUserIdAsync(userId);
+            var connectionList = connections.ToList();
+            var partnerIds = connectionList.Select(c => c.FounderId == userId ? c.InvestorId : c.FounderId).Distinct();
+            var partners = await _userRepo.GetByIdsAsync(partnerIds);
+
             var result = new List<ConnectionDto>();
 
-            foreach (var c in connections)
+            foreach (var c in connectionList)
             {
                 var partnerId = c.FounderId == userId ? c.InvestorId : c.FounderId;
-                var partner = await _userRepo.GetByIdAsync(partnerId);
+                var partner = partners.GetValueOrDefault(partnerId);
 
                 result.Add(new ConnectionDto
                 {

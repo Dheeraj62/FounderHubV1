@@ -42,9 +42,17 @@ namespace FounderHub.Infrastructure.Data
         public IMongoCollection<Watchlist> Watchlists => _database.GetCollection<Watchlist>("Watchlists");
         public IMongoCollection<InvestorFeedback> InvestorFeedbacks => _database.GetCollection<InvestorFeedback>("InvestorFeedbacks");
         public IMongoCollection<Meeting> Meetings => _database.GetCollection<Meeting>("Meetings");
+        public IMongoCollection<RefreshToken> RefreshTokens => _database.GetCollection<RefreshToken>("RefreshTokens");
 
         private void ConfigureIndexes()
         {
+            // RefreshTokens: Index on TokenHash (for fast lookup) and UserId
+            RefreshTokens.Indexes.CreateOne(new CreateIndexModel<RefreshToken>(
+                Builders<RefreshToken>.IndexKeys.Ascending(r => r.TokenHash),
+                new CreateIndexOptions { Unique = true }));
+            RefreshTokens.Indexes.CreateOne(new CreateIndexModel<RefreshToken>(
+                Builders<RefreshToken>.IndexKeys.Ascending(r => r.UserId)));
+
             // Users: Unique Email, Username
             var userEmailIndexOptions = new CreateIndexOptions { Unique = true };
             var userEmailIndexModel = new CreateIndexModel<User>(
@@ -72,6 +80,14 @@ namespace FounderHub.Infrastructure.Data
                 new CreateIndexModel<Idea>(Builders<Idea>.IndexKeys.Descending(i => i.CreatedAt)),
                 new CreateIndexModel<Idea>(Builders<Idea>.IndexKeys.Ascending(i => i.FundingRange))
             });
+
+            // Text index for full-text keyword search on Ideas
+            Ideas.Indexes.CreateOne(new CreateIndexModel<Idea>(
+                Builders<Idea>.IndexKeys
+                    .Text(i => i.Title)
+                    .Text(i => i.Problem)
+                    .Text(i => i.Solution),
+                new CreateIndexOptions { Name = "ideas_text_search" }));
 
             // FounderProfiles: Unique UserId
             FounderProfiles.Indexes.CreateOne(new CreateIndexModel<FounderProfile>(

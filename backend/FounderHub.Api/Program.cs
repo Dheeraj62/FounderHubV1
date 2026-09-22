@@ -58,6 +58,10 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // HttpClient for external API calls (LinkedIn OAuth, etc.)
 builder.Services.AddHttpClient();
 
+// SignalR
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IRealTimeNotifier, FounderHub.Api.Hubs.SignalRNotifier>();
+
 // JWT Authentication
 var jwtSecret = builder.Configuration["JwtSettings:Secret"]
     ?? throw new InvalidOperationException("JWT Secret not configured");
@@ -141,6 +145,8 @@ app.UseSwaggerUI();
 app.UseCors("AllowFrontend");
 app.UseRateLimiter();
 
+app.UseStaticFiles(); // Serve uploaded images from wwwroot/
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -154,6 +160,10 @@ using (var scope = app.Services.CreateScope())
 
 // Controllers
 app.MapControllers();
+
+// SignalR Hubs
+app.MapHub<FounderHub.Api.Hubs.NotificationHub>("/hubs/notifications");
+app.MapHub<FounderHub.Api.Hubs.ChatHub>("/hubs/chat");
 
 // Health endpoints
 app.MapGet("/", () => "FounderHub API running");

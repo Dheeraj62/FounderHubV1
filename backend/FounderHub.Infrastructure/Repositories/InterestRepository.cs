@@ -49,5 +49,57 @@ namespace FounderHub.Infrastructure.Repositories
             return (int)await _context.Interests
                 .CountDocumentsAsync(i => i.IdeaId == ideaId && i.Status == InterestStatus.Maybe);
         }
+
+        public async Task<Dictionary<string, int>> GetInterestedCountBatchAsync(IEnumerable<string> ideaIds)
+        {
+            var idList = ideaIds.ToList();
+            if (idList.Count == 0) return new Dictionary<string, int>();
+            
+            var filter = Builders<Interest>.Filter.In(i => i.IdeaId, idList)
+                       & (Builders<Interest>.Filter.Eq(i => i.Status, InterestStatus.Interested) 
+                        | Builders<Interest>.Filter.Eq(i => i.Status, InterestStatus.HighlyInterested));
+            
+            var results = await _context.Interests.Aggregate()
+                .Match(filter)
+                .Group(i => i.IdeaId, g => new { IdeaId = g.Key, Count = g.Count() })
+                .ToListAsync();
+            
+            var dict = results.ToDictionary(r => r.IdeaId, r => r.Count);
+            foreach (var id in idList) dict.TryAdd(id, 0);
+            return dict;
+        }
+
+        public async Task<Dictionary<string, int>> GetMaybeCountBatchAsync(IEnumerable<string> ideaIds)
+        {
+            var idList = ideaIds.ToList();
+            if (idList.Count == 0) return new Dictionary<string, int>();
+            
+            var filter = Builders<Interest>.Filter.In(i => i.IdeaId, idList)
+                       & Builders<Interest>.Filter.Eq(i => i.Status, InterestStatus.Maybe);
+            
+            var results = await _context.Interests.Aggregate()
+                .Match(filter)
+                .Group(i => i.IdeaId, g => new { IdeaId = g.Key, Count = g.Count() })
+                .ToListAsync();
+            
+            var dict = results.ToDictionary(r => r.IdeaId, r => r.Count);
+            foreach (var id in idList) dict.TryAdd(id, 0);
+            return dict;
+        }
+
+        public async Task<Dictionary<string, Interest?>> GetInterestBatchAsync(IEnumerable<string> ideaIds, string investorId)
+        {
+            var idList = ideaIds.ToList();
+            if (idList.Count == 0) return new Dictionary<string, Interest?>();
+            
+            var filter = Builders<Interest>.Filter.In(i => i.IdeaId, idList)
+                       & Builders<Interest>.Filter.Eq(i => i.InvestorId, investorId);
+            
+            var results = await _context.Interests.Find(filter).ToListAsync();
+            
+            var dict = results.ToDictionary(r => r.IdeaId, r => (Interest?)r);
+            foreach (var id in idList) dict.TryAdd(id, null);
+            return dict;
+        }
     }
 }

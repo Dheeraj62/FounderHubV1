@@ -9,9 +9,14 @@ namespace FounderHub.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
+            services.AddAutoMapper(typeof(DependencyInjection).Assembly);
             services.AddSingleton<IHtmlSanitizerService, HtmlSanitizerService>();
             services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IIdeaService, IdeaService>();
+            services.AddScoped<IdeaService>();
+            services.AddScoped<IIdeaService>(sp =>
+                new CachedIdeaServiceDecorator(
+                    sp.GetRequiredService<IdeaService>(),
+                    sp.GetRequiredService<ICacheService>()));
             services.AddScoped<IInterestService, InterestService>();
             services.AddScoped<IProfileService, ProfileService>();
             services.AddScoped<IIdeaVersionService, IdeaVersionService>();
@@ -30,6 +35,7 @@ namespace FounderHub.Application
             services.AddScoped<IMeetingService, MeetingService>();
             services.AddScoped<ICredibilityScoreService, CredibilityScoreService>();
             services.AddScoped<ISmartMatchService, SmartMatchService>();
+            services.AddScoped<IFileUploadService, FileUploadService>();
 
             // Register AI Match Service with a named HttpClient for the Python FastAPI microservice
             services.AddHttpClient<IAIMatchService, AIMatchService>();

@@ -3,4 +3,5 @@
   <Project Path="FounderHub.Application/FounderHub.Application.csproj" />
   <Project Path="FounderHub.Domain/FounderHub.Domain.csproj" />
   <Project Path="FounderHub.Infrastructure/FounderHub.Infrastructure.csproj" />
+  <Project Path="FounderHub.Tests/FounderHub.Tests.csproj" />
 </Solution>

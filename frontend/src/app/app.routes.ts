@@ -23,6 +23,14 @@ export const routes: Routes = [
             {
                 path: 'privacy-policy',
                 loadComponent: () => import('./public/privacy/privacy.component').then(m => m.PrivacyComponent)
+            },
+            {
+                path: 'founders/:username',
+                loadComponent: () => import('./public/profiles/public-founder-profile.component').then(m => m.PublicFounderProfileComponent)
+            },
+            {
+                path: 'investors/:username',
+                loadComponent: () => import('./public/profiles/public-investor-profile.component').then(m => m.PublicInvestorProfileComponent)
             }
         ]
     },

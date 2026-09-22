@@ -29,6 +29,22 @@ namespace FounderHub.Infrastructure.Repositories
             return (int)count;
         }
 
+        public async Task<Dictionary<string, int>> GetViewCountBatchAsync(IEnumerable<string> ideaIds)
+        {
+            var idList = ideaIds.ToList();
+            if (idList.Count == 0) return new Dictionary<string, int>();
+            
+            var filter = Builders<IdeaView>.Filter.In(v => v.IdeaId, idList);
+            var results = await _context.IdeaViews.Aggregate()
+                .Match(filter)
+                .Group(v => v.IdeaId, g => new { IdeaId = g.Key, Count = g.Count() })
+                .ToListAsync();
+            
+            var dict = results.ToDictionary(r => r.IdeaId, r => r.Count);
+            foreach (var id in idList) dict.TryAdd(id, 0);
+            return dict;
+        }
+
         public async Task<int> GetFounderTotalViewsAsync(string founderId)
         {
             var ideaIds = await _context.Ideas

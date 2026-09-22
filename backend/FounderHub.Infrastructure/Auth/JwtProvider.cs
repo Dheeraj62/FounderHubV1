@@ -35,7 +35,7 @@ namespace FounderHub.Infrastructure.Auth
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(2), // 2 hour expiry MVP requirement
+                expires: DateTime.UtcNow.AddMinutes(15),
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FounderHub.Application.DTOs.Ideas;
 using FounderHub.Application.Interfaces;
+using FounderHub.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace FounderHub.Application.Services
@@ -15,19 +16,22 @@ namespace FounderHub.Application.Services
         private readonly IAIMatchService _aiMatchService;
         private readonly IInterestRepository _interestRepo;
         private readonly ILogger<SmartMatchService> _logger;
+        private readonly AutoMapper.IMapper _mapper;
 
         public SmartMatchService(
             IInvestorProfileRepository investorRepo,
             IIdeaRepository ideaRepo,
             IAIMatchService aiMatchService,
             IInterestRepository interestRepo,
-            ILogger<SmartMatchService> logger)
+            ILogger<SmartMatchService> logger,
+            AutoMapper.IMapper mapper)
         {
             _investorRepo = investorRepo;
             _ideaRepo = ideaRepo;
             _aiMatchService = aiMatchService;
             _interestRepo = interestRepo;
             _logger = logger;
+            _mapper = mapper;
         }
 
         public async Task<PaginatedResult<RecommendedIdeaDto>> GetSmartMatchesAsync(string userId, int page = 1, int pageSize = 20)
@@ -49,8 +53,8 @@ namespace FounderHub.Application.Services
             var aiResults = await _aiMatchService.GetAiMatchesAsync(userId);
 
             // Fetch all active ideas for enrichment / fallback
-            var allIdeas = await _ideaRepo.GetIdeasAsync(null, null, null, null, null, 1, 1000);
-            var ideaLookup = allIdeas.Ideas.ToDictionary(i => i.Id);
+            var (ideaEntities, _) = await _ideaRepo.GetIdeasAsync(null, null, null, null, null, 1, 1000);
+            var ideaLookup = ideaEntities.ToDictionary(i => i.Id);
 
             if (aiResults != null && aiResults.Count > 0)
             {
@@ -72,7 +76,7 @@ namespace FounderHub.Application.Services
             _logger.LogWarning("AI service unavailable. Falling back to rule-based matching for {UserId}.", userId);
             var scoredIdeas = new List<RecommendedIdeaDto>();
 
-            foreach (var idea in allIdeas.Ideas)
+            foreach (var idea in ideaEntities)
             {
                 int score = 0;
                 var reasons = new List<string>();
@@ -108,40 +112,17 @@ namespace FounderHub.Application.Services
             return Paginate(sorted, page, pageSize);
         }
 
-        private async Task<RecommendedIdeaDto> MapToDtoAsync(dynamic idea, string userId, int matchScore, List<string> reasons, double aiScore, string aiReason)
+        private async Task<RecommendedIdeaDto> MapToDtoAsync(Idea idea, string userId, int matchScore, List<string> reasons, double aiScore, string aiReason)
         {
-            var interest = await _interestRepo.GetInterestAsync(idea.Id, userId);
+            var dto = _mapper.Map<RecommendedIdeaDto>(idea);
+            dto.MatchScore = matchScore;
+            dto.MatchReasons = reasons;
+            dto.AiScore = aiScore;
+            dto.AiReason = aiReason;
             
-            return new RecommendedIdeaDto
-            {
-                Id = idea.Id,
-                FounderId = idea.FounderId,
-                Title = idea.Title,
-                Problem = idea.Problem,
-                Solution = idea.Solution,
-                Stage = idea.Stage,
-                Industry = idea.Industry,
-                PitchDeckUrl = idea.PitchDeckUrl,
-                DemoUrl = idea.DemoUrl,
-                StartupWebsite = idea.StartupWebsite,
-                ProductImages = idea.ProductImages,
-                MarketSize = idea.MarketSize,
-                TargetCustomers = idea.TargetCustomers,
-                TractionMetrics = idea.TractionMetrics,
-                FundingRange = idea.FundingRange,
-                Location = idea.Location,
-                PreviouslyRejected = idea.PreviouslyRejected,
-                RejectedBy = idea.RejectedBy,
-                RejectionReasonCategory = idea.RejectionReasonCategory,
-                WhatChangedAfterRejection = idea.WhatChangedAfterRejection,
-                CreatedAt = idea.CreatedAt,
-                UpdatedAt = idea.UpdatedAt,
-                MatchScore = matchScore,
-                MatchReasons = reasons,
-                AiScore = aiScore,
-                AiReason = aiReason,
-                CurrentUserInterest = interest?.Status.ToString()
-            };
+            var interest = await _interestRepo.GetInterestAsync(idea.Id, userId);
+            dto.CurrentUserInterest = interest?.Status.ToString();
+            return dto;
         }
 
         private static PaginatedResult<RecommendedIdeaDto> Paginate(List<RecommendedIdeaDto> items, int page, int pageSize)

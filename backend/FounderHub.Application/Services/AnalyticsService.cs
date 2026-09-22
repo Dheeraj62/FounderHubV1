@@ -41,12 +41,17 @@ namespace FounderHub.Application.Services
             int totalPass = 0;
 
             var breakdown = new List<IdeaAnalyticsDto>();
+            
+            var ideaIds = ideas.Select(i => i.Id).ToList();
+            var viewCounts = await _ideaViewRepository.GetViewCountBatchAsync(ideaIds);
+            var highlyCounts = await _interestRepository.GetInterestedCountBatchAsync(ideaIds);
+            var maybeCounts = await _interestRepository.GetMaybeCountBatchAsync(ideaIds);
 
             foreach (var idea in ideas)
             {
-                var views = await _ideaViewRepository.GetIdeaViewCountAsync(idea.Id);
-                var highly = await _interestRepository.GetInterestedCountAsync(idea.Id);
-                var maybe = await _interestRepository.GetMaybeCountAsync(idea.Id);
+                var views = viewCounts.GetValueOrDefault(idea.Id);
+                var highly = highlyCounts.GetValueOrDefault(idea.Id);
+                var maybe = maybeCounts.GetValueOrDefault(idea.Id);
                 // Pass count derived from IdeaId — reuse interest mechanism
                 var pass = 0; // Pass is tracked but doesn't have a dedicated count method; default to 0
 

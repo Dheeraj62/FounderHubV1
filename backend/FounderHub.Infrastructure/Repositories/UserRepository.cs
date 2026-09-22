@@ -20,6 +20,15 @@ namespace FounderHub.Infrastructure.Repositories
             return await _context.Users.Find(u => u.Id == id).FirstOrDefaultAsync();
         }
 
+        public async Task<Dictionary<string, User>> GetByIdsAsync(IEnumerable<string> ids)
+        {
+            var idList = ids.Distinct().ToList();
+            if (idList.Count == 0) return new Dictionary<string, User>();
+            var filter = Builders<User>.Filter.In(u => u.Id, idList);
+            var users = await _context.Users.Find(filter).ToListAsync();
+            return users.ToDictionary(u => u.Id);
+        }
+
         public async Task<User?> GetByEmailAsync(string email)
         {
             return await _context.Users.Find(u => u.Email == email).FirstOrDefaultAsync();
@@ -38,6 +47,11 @@ namespace FounderHub.Infrastructure.Repositories
         public async Task<long> CountByRoleAsync(FounderHub.Domain.Enums.UserRole role)
         {
             return await _context.Users.CountDocumentsAsync(u => u.Role == role);
+        }
+
+        public async Task UpdateAsync(User user)
+        {
+            await _context.Users.ReplaceOneAsync(u => u.Id == user.Id, user);
         }
     }
 }

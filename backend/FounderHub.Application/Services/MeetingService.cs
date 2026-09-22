@@ -13,15 +13,18 @@ namespace FounderHub.Application.Services
         private readonly IMeetingRepository _meetingRepository;
         private readonly IUserRepository _userRepository;
         private readonly IIdeaRepository _ideaRepository;
+        private readonly AutoMapper.IMapper _mapper;
 
         public MeetingService(
             IMeetingRepository meetingRepository,
             IUserRepository userRepository,
-            IIdeaRepository ideaRepository)
+            IIdeaRepository ideaRepository,
+            AutoMapper.IMapper mapper)
         {
             _meetingRepository = meetingRepository;
             _userRepository = userRepository;
             _ideaRepository = ideaRepository;
+            _mapper = mapper;
         }
 
         public async Task<MeetingDto> RequestMeetingAsync(RequestMeetingDto request, string investorId)
@@ -80,15 +83,22 @@ namespace FounderHub.Application.Services
             else
                 meetings = await _meetingRepository.GetByFounderIdAsync(userId);
 
+            var meetingList = meetings.ToList();
+            var allUserIds = meetingList.Select(m => m.RequestedByInvestorId)
+                .Concat(meetingList.Select(m => m.FounderId)).Distinct();
+            var users = await _userRepository.GetByIdsAsync(allUserIds);
+            var ideaIds = meetingList.Where(m => m.IdeaId != null).Select(m => m.IdeaId!).Distinct();
+            var ideas = (await _ideaRepository.GetByIdsAsync(ideaIds)).ToDictionary(i => i.Id);
+
             var dtos = new List<MeetingDto>();
-            foreach (var m in meetings)
+            foreach (var m in meetingList)
             {
-                var investor = await _userRepository.GetByIdAsync(m.RequestedByInvestorId);
-                var founder = await _userRepository.GetByIdAsync(m.FounderId);
+                var investor = users.GetValueOrDefault(m.RequestedByInvestorId);
+                var founder = users.GetValueOrDefault(m.FounderId);
                 string? ideaTitle = null;
                 if (m.IdeaId != null)
                 {
-                    var idea = await _ideaRepository.GetByIdAsync(m.IdeaId);
+                    var idea = ideas.GetValueOrDefault(m.IdeaId);
                     ideaTitle = idea?.Title;
                 }
                 dtos.Add(MapToDto(m, investor?.Username ?? "Investor", founder?.Username ?? "Founder", ideaTitle));
@@ -97,22 +107,13 @@ namespace FounderHub.Application.Services
             return dtos.OrderBy(d => d.ScheduledAt);
         }
 
-        private static MeetingDto MapToDto(Meeting m, string investorName, string founderName, string? ideaTitle) =>
-            new()
-            {
-                Id = m.Id,
-                RequestedByInvestorId = m.RequestedByInvestorId,
-                InvestorName = investorName,
-                FounderId = m.FounderId,
-                FounderName = founderName,
-                IdeaId = m.IdeaId,
-                IdeaTitle = ideaTitle,
-                ScheduledAt = m.ScheduledAt,
-                Platform = m.Platform,
-                MeetingLink = m.MeetingLink,
-                Notes = m.Notes,
-                Status = m.Status,
-                CreatedAt = m.CreatedAt
-            };
+        private MeetingDto MapToDto(Meeting m, string investorName, string founderName, string? ideaTitle)
+        {
+            var dto = _mapper.Map<MeetingDto>(m);
+            dto.InvestorName = investorName;
+            dto.FounderName = founderName;
+            dto.IdeaTitle = ideaTitle;
+            return dto;
+        }
     }
 }

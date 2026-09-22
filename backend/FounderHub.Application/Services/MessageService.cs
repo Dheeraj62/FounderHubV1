@@ -16,6 +16,7 @@ namespace FounderHub.Application.Services
         private readonly INotificationRepository _notificationRepo;
         private readonly IHtmlSanitizerService _sanitizer;
         private readonly ILogger<MessageService> _logger;
+        private readonly IRealTimeNotifier _realTimeNotifier;
 
         private const int MaxPageSize = 50;
         private const int DefaultPageSize = 20;
@@ -25,13 +26,15 @@ namespace FounderHub.Application.Services
             IConnectionRepository connectionRepo,
             INotificationRepository notificationRepo,
             IHtmlSanitizerService sanitizer,
-            ILogger<MessageService> logger)
+            ILogger<MessageService> logger,
+            IRealTimeNotifier realTimeNotifier)
         {
             _messageRepo = messageRepo;
             _connectionRepo = connectionRepo;
             _notificationRepo = notificationRepo;
             _sanitizer = sanitizer;
             _logger = logger;
+            _realTimeNotifier = realTimeNotifier;
         }
 
         public async Task SendMessageAsync(string userId, SendMessageRequest request)
@@ -58,6 +61,8 @@ namespace FounderHub.Application.Services
             };
 
             await _messageRepo.AddAsync(message);
+            
+            await _realTimeNotifier.SendChatMessageAsync(request.ConnectionId, MapToResponse(message));
 
             // Create notification for receiver
             await _notificationRepo.CreateAsync(new Notification
@@ -69,6 +74,8 @@ namespace FounderHub.Application.Services
                 ReferenceId = connection.Id,
                 CreatedAt = DateTime.UtcNow
             });
+            
+            await _realTimeNotifier.SendNotificationAsync(receiverId, "NewMessage", new { connectionId = request.ConnectionId });
 
             _logger.LogInformation(
                 "Message sent: ConnectionId={ConnectionId}, SenderId={SenderId}, ReceiverId={ReceiverId}",

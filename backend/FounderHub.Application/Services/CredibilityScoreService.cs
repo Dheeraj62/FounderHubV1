@@ -50,16 +50,14 @@ namespace FounderHub.Application.Services
             int ideaScore = Math.Min(ideas.Count * 5, 20);
 
             // Engagement score from views and interests (up to 50 pts)
-            int totalViews = 0;
-            int totalInterested = 0;
-            int totalMaybe = 0;
+            var ideaIds = ideas.Select(i => i.Id).ToList();
+            var viewCounts = await _ideaViewRepository.GetViewCountBatchAsync(ideaIds);
+            var interestedCounts = await _interestRepository.GetInterestedCountBatchAsync(ideaIds);
+            var maybeCounts = await _interestRepository.GetMaybeCountBatchAsync(ideaIds);
 
-            foreach (var idea in ideas)
-            {
-                totalViews += await _ideaViewRepository.GetIdeaViewCountAsync(idea.Id);
-                totalInterested += await _interestRepository.GetInterestedCountAsync(idea.Id);
-                totalMaybe += await _interestRepository.GetMaybeCountAsync(idea.Id);
-            }
+            int totalViews = viewCounts.Values.Sum();
+            int totalInterested = interestedCounts.Values.Sum();
+            int totalMaybe = maybeCounts.Values.Sum();
 
             int engagementScore = Math.Min(
                 (totalViews / 10) + (totalInterested * 5) + (totalMaybe * 2),

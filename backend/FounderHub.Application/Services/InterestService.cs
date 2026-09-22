@@ -15,19 +15,22 @@ namespace FounderHub.Application.Services
         private readonly INotificationRepository _notificationRepository;
         private readonly IConnectionRepository _connectionRepository;
         private readonly IFeedEventRepository _feedEvents;
+        private readonly IDomainEventPublisher _eventPublisher;
 
         public InterestService(
             IInterestRepository interestRepository, 
             IIdeaRepository ideaRepository,
             INotificationRepository notificationRepository,
             IConnectionRepository connectionRepository,
-            IFeedEventRepository feedEvents)
+            IFeedEventRepository feedEvents,
+            IDomainEventPublisher eventPublisher)
         {
             _interestRepository = interestRepository;
             _ideaRepository = ideaRepository;
             _notificationRepository = notificationRepository;
             _connectionRepository = connectionRepository;
             _feedEvents = feedEvents;
+            _eventPublisher = eventPublisher;
         }
 
         public async Task ExpressInterestAsync(string ideaId, string investorId, ExpressInterestRequest request)
@@ -62,25 +65,8 @@ namespace FounderHub.Application.Services
                 interestId = interest.Id;
             }
 
-            await _feedEvents.CreateAsync(new FeedEvent
-            {
-                Type = "INTEREST_EVENT",
-                UserId = investorId,
-                ReferenceId = interestId,
-                CreatedAt = DateTime.UtcNow
-            });
-
-            // Trigger Notification to Founder
-            await _notificationRepository.CreateAsync(new Notification
-            {
-                UserId = idea.FounderId,
-                Title = "New Interest in your Idea!",
-                Body = $"An investor is {status} in '{idea.Title}'.",
-                Type = "NewInterest",
-                IsRead = false,
-                ReferenceId = idea.Id,
-                CreatedAt = DateTime.UtcNow
-            });
+            await _eventPublisher.PublishAsync(new FounderHub.Domain.Events.InterestExpressedEvent(
+                interestId, idea.Id, investorId, status.ToString(), idea.FounderId, idea.Title, DateTime.UtcNow));
 
             // If HighlyInterested, auto-initiate connection
             if (status == InterestStatus.HighlyInterested)

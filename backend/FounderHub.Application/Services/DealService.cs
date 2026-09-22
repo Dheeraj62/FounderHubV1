@@ -13,15 +13,18 @@ namespace FounderHub.Application.Services
         private readonly IInvestorDealRepository _dealRepository;
         private readonly IIdeaRepository _ideaRepository;
         private readonly IUserRepository _userRepository;
+        private readonly AutoMapper.IMapper _mapper;
 
         public DealService(
             IInvestorDealRepository dealRepository,
             IIdeaRepository ideaRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            AutoMapper.IMapper mapper)
         {
             _dealRepository = dealRepository;
             _ideaRepository = ideaRepository;
             _userRepository = userRepository;
+            _mapper = mapper;
         }
 
         public async Task<List<DealDto>> GetInvestorDealsAsync(string investorId)
@@ -34,38 +37,20 @@ namespace FounderHub.Application.Services
             if (deals.Any())
             {
                 var ideaIds = deals.Select(d => d.IdeaId).Distinct().ToList();
-                var ideas = new List<Idea>();
-                foreach (var id in ideaIds)
-                {
-                    var idea = await _ideaRepository.GetByIdAsync(id);
-                    if (idea != null) ideas.Add(idea);
-                }
+                var ideas = (await _ideaRepository.GetByIdsAsync(ideaIds)).ToDictionary(i => i.Id);
                 
-                var founderIds = ideas.Select(i => i.FounderId).Distinct().ToList();
-                var founders = new List<User>();
-                foreach (var id in founderIds)
-                {
-                    var user = await _userRepository.GetByIdAsync(id);
-                    if (user != null) founders.Add(user);
-                }
+                var founderIds = ideas.Values.Select(i => i.FounderId).Distinct().ToList();
+                var founders = await _userRepository.GetByIdsAsync(founderIds);
 
                 foreach (var deal in deals)
                 {
-                    var idea = ideas.FirstOrDefault(i => i.Id == deal.IdeaId);
-                    var founder = idea != null ? founders.FirstOrDefault(f => f.Id == idea.FounderId) : null;
+                    var idea = ideas.GetValueOrDefault(deal.IdeaId);
+                    var founder = idea != null ? founders.GetValueOrDefault(idea.FounderId) : null;
 
-                    dealDtos.Add(new DealDto
-                    {
-                        Id = deal.Id,
-                        InvestorId = deal.InvestorId,
-                        IdeaId = deal.IdeaId,
-                        Stage = deal.Stage,
-                        Notes = deal.Notes,
-                        CreatedAt = deal.CreatedAt,
-                        UpdatedAt = deal.UpdatedAt,
-                        IdeaTitle = idea?.Title,
-                        FounderName = founder?.Username
-                    });
+                    var dto = _mapper.Map<DealDto>(deal);
+                    dto.IdeaTitle = idea?.Title;
+                    dto.FounderName = founder?.Username;
+                    dealDtos.Add(dto);
                 }
             }
 
@@ -90,16 +75,7 @@ namespace FounderHub.Application.Services
 
             await _dealRepository.CreateAsync(newDeal);
 
-            return new DealDto
-            {
-                Id = newDeal.Id,
-                InvestorId = newDeal.InvestorId,
-                IdeaId = newDeal.IdeaId,
-                Stage = newDeal.Stage,
-                Notes = newDeal.Notes,
-                CreatedAt = newDeal.CreatedAt,
-                UpdatedAt = newDeal.UpdatedAt
-            };
+            return _mapper.Map<DealDto>(newDeal);
         }
 
         public async Task<DealDto> UpdateDealAsync(string investorId, string dealId, UpdateDealRequest request)
@@ -115,16 +91,7 @@ namespace FounderHub.Application.Services
 
             await _dealRepository.UpdateAsync(deal);
 
-            return new DealDto
-            {
-                Id = deal.Id,
-                InvestorId = deal.InvestorId,
-                IdeaId = deal.IdeaId,
-                Stage = deal.Stage,
-                Notes = deal.Notes,
-                CreatedAt = deal.CreatedAt,
-                UpdatedAt = deal.UpdatedAt
-            };
+            return _mapper.Map<DealDto>(deal);
         }
 
         public async Task DeleteDealAsync(string investorId, string dealId)

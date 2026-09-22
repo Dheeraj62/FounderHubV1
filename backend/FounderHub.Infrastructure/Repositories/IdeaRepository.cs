@@ -22,6 +22,12 @@ namespace FounderHub.Infrastructure.Repositories
             return await _context.Ideas.Find(i => i.Id == id).FirstOrDefaultAsync();
         }
 
+        public async Task<IEnumerable<Idea>> GetByIdsAsync(IEnumerable<string> ids)
+        {
+            var filter = Builders<Idea>.Filter.In(i => i.Id, ids);
+            return await _context.Ideas.Find(filter).ToListAsync();
+        }
+
         public async Task<IEnumerable<Idea>> GetByFounderIdAsync(string founderId)
         {
             return await _context.Ideas.Find(i => i.FounderId == founderId).ToListAsync();
@@ -37,35 +43,34 @@ namespace FounderHub.Infrastructure.Repositories
             int page,
             int pageSize)
         {
-            var query = _context.Ideas.AsQueryable();
+            var filter = Builders<Idea>.Filter.Empty;
 
             if (!string.IsNullOrEmpty(stage))
-                query = query.Where(i => i.Stage == stage);
+                filter &= Builders<Idea>.Filter.Eq(i => i.Stage, stage);
 
             if (!string.IsNullOrEmpty(industry))
-                query = query.Where(i => i.Industry == industry);
+                filter &= Builders<Idea>.Filter.Eq(i => i.Industry, industry);
 
             if (previouslyRejected.HasValue)
-                query = query.Where(i => i.PreviouslyRejected == previouslyRejected.Value);
+                filter &= Builders<Idea>.Filter.Eq(i => i.PreviouslyRejected, previouslyRejected.Value);
 
             if (!string.IsNullOrEmpty(location))
-                query = query.Where(i => i.Location != null && i.Location.ToLower().Contains(location.ToLower()));
+                filter &= Builders<Idea>.Filter.Regex(i => i.Location, 
+                    new MongoDB.Bson.BsonRegularExpression(location, "i"));
 
             if (!string.IsNullOrEmpty(keyword))
-                query = query.Where(i =>
-                    i.Title.ToLower().Contains(keyword.ToLower()) ||
-                    i.Problem.ToLower().Contains(keyword.ToLower()) ||
-                    i.Solution.ToLower().Contains(keyword.ToLower()));
+                filter &= Builders<Idea>.Filter.Text(keyword);
 
-            var totalCount = await query.CountAsync();
+            var totalCount = await _context.Ideas.CountDocumentsAsync(filter);
 
-            var ideas = await query
-                .OrderByDescending(i => i.CreatedAt)
+            var sort = Builders<Idea>.Sort.Descending(i => i.CreatedAt);
+            var ideas = await _context.Ideas.Find(filter)
+                .Sort(sort)
                 .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                .Limit(pageSize)
                 .ToListAsync();
 
-            return (ideas, totalCount);
+            return (ideas, (int)totalCount);
         }
 
         public async Task CreateAsync(Idea idea)

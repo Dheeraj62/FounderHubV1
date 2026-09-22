@@ -40,14 +40,57 @@ namespace FounderHub.Application.Services
         {
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 20;
-
             var skip = (page - 1) * pageSize;
             var events = (await _feedEvents.GetLatestAsync(skip, pageSize)).ToList();
-
+            
+            // Batch-fetch all referenced entities
+            var allUserIds = events.Select(e => e.UserId).Distinct().ToList();
+            // Add idea founder IDs later
+            var ideaRefIds = events.Where(e => e.Type is "IDEA_CREATED" or "IDEA_UPDATED" or "TRENDING_IDEA")
+                .Where(e => !string.IsNullOrWhiteSpace(e.ReferenceId))
+                .Select(e => e.ReferenceId!).Distinct().ToList();
+            var updateRefIds = events.Where(e => e.Type == "FOUNDER_UPDATE")
+                .Where(e => !string.IsNullOrWhiteSpace(e.ReferenceId))
+                .Select(e => e.ReferenceId!).Distinct().ToList();
+            var interestRefIds = events.Where(e => e.Type == "INTEREST_EVENT")
+                .Where(e => !string.IsNullOrWhiteSpace(e.ReferenceId))
+                .Select(e => e.ReferenceId!).Distinct().ToList();
+            
+            // Fetch ideas by IDs (for IDEA_ events and also for INTEREST events after resolving)
+            var ideas = (await _ideas.GetByIdsAsync(ideaRefIds)).ToDictionary(i => i.Id);
+            
+            // For interest events, we need to fetch interests first, then their ideas
+            var interestEntities = new Dictionary<string, Interest>();
+            foreach (var iid in interestRefIds)
+            {
+                var interest = await _interests.GetByIdAsync(iid);
+                if (interest != null) interestEntities[iid] = interest;
+            }
+            var interestIdeaIds = interestEntities.Values.Select(i => i.IdeaId).Except(ideas.Keys).Distinct().ToList();
+            if (interestIdeaIds.Any())
+            {
+                foreach (var idea in await _ideas.GetByIdsAsync(interestIdeaIds))
+                    ideas.TryAdd(idea.Id, idea);
+            }
+            
+            // Collect all founder IDs from ideas + event actors
+            var additionalUserIds = ideas.Values.Select(i => i.FounderId).Distinct();
+            allUserIds = allUserIds.Concat(additionalUserIds).Distinct().ToList();
+            var users = await _users.GetByIdsAsync(allUserIds);
+            
+            // Fetch updates
+            var updates = new Dictionary<string, FounderUpdate>();
+            foreach (var uid in updateRefIds)
+            {
+                var update = await _updates.GetByIdAsync(uid);
+                if (update != null) updates[uid] = update;
+            }
+            
+            // Map events
             var items = new List<FeedItemDto>(events.Count);
             foreach (var e in events)
             {
-                var item = await MapEventAsync(e);
+                var item = MapEvent(e, users, ideas, updates, interestEntities);
                 if (item != null) items.Add(item);
             }
             return items;
@@ -62,13 +105,52 @@ namespace FounderHub.Application.Services
             var followedIdeas = new HashSet<string>(following.Where(f => f.Type == "IDEA").Select(f => f.FollowingId));
 
             var events = (await _feedEvents.GetLatestAsync(0, 200)).ToList();
+            
+            // Batch-fetch all referenced entities for following feed
+            var allUserIds = events.Select(e => e.UserId).Distinct().ToList();
+            var ideaRefIds = events.Where(e => e.Type is "IDEA_CREATED" or "IDEA_UPDATED" or "TRENDING_IDEA")
+                .Where(e => !string.IsNullOrWhiteSpace(e.ReferenceId))
+                .Select(e => e.ReferenceId!).Distinct().ToList();
+            var updateRefIds = events.Where(e => e.Type == "FOUNDER_UPDATE")
+                .Where(e => !string.IsNullOrWhiteSpace(e.ReferenceId))
+                .Select(e => e.ReferenceId!).Distinct().ToList();
+            var interestRefIds = events.Where(e => e.Type == "INTEREST_EVENT")
+                .Where(e => !string.IsNullOrWhiteSpace(e.ReferenceId))
+                .Select(e => e.ReferenceId!).Distinct().ToList();
+            
+            var ideas = (await _ideas.GetByIdsAsync(ideaRefIds)).ToDictionary(i => i.Id);
+            
+            var interestEntities = new Dictionary<string, Interest>();
+            foreach (var iid in interestRefIds)
+            {
+                var interest = await _interests.GetByIdAsync(iid);
+                if (interest != null) interestEntities[iid] = interest;
+            }
+            var interestIdeaIds = interestEntities.Values.Select(i => i.IdeaId).Except(ideas.Keys).Distinct().ToList();
+            if (interestIdeaIds.Any())
+            {
+                foreach (var idea in await _ideas.GetByIdsAsync(interestIdeaIds))
+                    ideas.TryAdd(idea.Id, idea);
+            }
+            
+            var additionalUserIds = ideas.Values.Select(i => i.FounderId).Distinct();
+            allUserIds = allUserIds.Concat(additionalUserIds).Distinct().ToList();
+            var users = await _users.GetByIdsAsync(allUserIds);
+            
+            var updates = new Dictionary<string, FounderUpdate>();
+            foreach (var uid in updateRefIds)
+            {
+                var update = await _updates.GetByIdAsync(uid);
+                if (update != null) updates[uid] = update;
+            }
+            
             var result = new List<FeedItemDto>();
 
             foreach (var e in events)
             {
                 if (result.Count >= pageSize * page) break;
 
-                var item = await MapEventAsync(e);
+                var item = MapEvent(e, users, ideas, updates, interestEntities);
                 if (item == null) continue;
 
                 var include = followedUsers.Contains(item.Actor.UserId);
@@ -127,9 +209,14 @@ namespace FounderHub.Application.Services
             return items;
         }
 
-        private async Task<FeedItemDto?> MapEventAsync(FeedEvent e)
+        private FeedItemDto? MapEvent(
+            FeedEvent e,
+            Dictionary<string, User> users,
+            Dictionary<string, Idea> ideas,
+            Dictionary<string, FounderUpdate> updates,
+            Dictionary<string, Interest> interests)
         {
-            var actor = await _users.GetByIdAsync(e.UserId);
+            var actor = users.GetValueOrDefault(e.UserId);
             if (actor == null) return null;
 
             var dto = new FeedItemDto
@@ -153,9 +240,9 @@ namespace FounderHub.Application.Services
                 case "TRENDING_IDEA":
                 {
                     if (string.IsNullOrWhiteSpace(e.ReferenceId)) return dto;
-                    var idea = await _ideas.GetByIdAsync(e.ReferenceId);
+                    var idea = ideas.GetValueOrDefault(e.ReferenceId);
                     if (idea == null) return null;
-                    var founder = await _users.GetByIdAsync(idea.FounderId);
+                    var founder = users.GetValueOrDefault(idea.FounderId);
                     if (founder == null) return null;
                     dto.Idea = new FeedIdeaDto
                     {
@@ -172,7 +259,7 @@ namespace FounderHub.Application.Services
                 case "FOUNDER_UPDATE":
                 {
                     if (string.IsNullOrWhiteSpace(e.ReferenceId)) return dto;
-                    var update = await _updates.GetByIdAsync(e.ReferenceId);
+                    var update = updates.GetValueOrDefault(e.ReferenceId);
                     if (update == null) return null;
                     dto.Update = new FeedUpdateDto
                     {
@@ -186,11 +273,11 @@ namespace FounderHub.Application.Services
                 case "INTEREST_EVENT":
                 {
                     if (string.IsNullOrWhiteSpace(e.ReferenceId)) return dto;
-                    var interest = await _interests.GetByIdAsync(e.ReferenceId);
+                    var interest = interests.GetValueOrDefault(e.ReferenceId);
                     if (interest == null) return null;
-                    var idea = await _ideas.GetByIdAsync(interest.IdeaId);
+                    var idea = ideas.GetValueOrDefault(interest.IdeaId);
                     if (idea == null) return null;
-                    var founder = await _users.GetByIdAsync(idea.FounderId);
+                    var founder = users.GetValueOrDefault(idea.FounderId);
                     if (founder == null) return null;
                     dto.InterestStatus = interest.Status.ToString();
                     dto.Idea = new FeedIdeaDto

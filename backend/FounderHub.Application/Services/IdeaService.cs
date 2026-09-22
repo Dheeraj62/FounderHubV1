@@ -29,7 +29,7 @@ namespace FounderHub.Application.Services
 
                 var score = (interested * 8) + (maybe * 3) + views + recencyBoost;
 
-                var dto = MapToTrendingDto(idea, currentUserId);
+                var dto = _mapper.Map<TrendingIdeaDto>(idea);
                 dto.TrendingScore = score;
                 dto.ViewsLast7Days = views;
                 dto.InterestsLast7Days = interested + maybe;
@@ -118,6 +118,8 @@ namespace FounderHub.Application.Services
         private readonly IIdeaViewRepository _ideaViewRepository;
         private readonly IFeedEventRepository _feedEvents;
         private readonly IHtmlSanitizerService _sanitizer;
+        private readonly AutoMapper.IMapper _mapper;
+        private readonly IDomainEventPublisher _eventPublisher;
 
         public IdeaService(
             IIdeaRepository ideaRepository,
@@ -125,7 +127,9 @@ namespace FounderHub.Application.Services
             IInterestRepository interestRepository,
             IIdeaViewRepository ideaViewRepository,
             IFeedEventRepository feedEvents,
-            IHtmlSanitizerService sanitizer)
+            IHtmlSanitizerService sanitizer,
+            AutoMapper.IMapper mapper,
+            IDomainEventPublisher eventPublisher)
         {
             _ideaRepository = ideaRepository;
             _investorRepository = investorRepository;
@@ -133,6 +137,8 @@ namespace FounderHub.Application.Services
             _ideaViewRepository = ideaViewRepository;
             _feedEvents = feedEvents;
             _sanitizer = sanitizer;
+            _mapper = mapper;
+            _eventPublisher = eventPublisher;
         }
 
         public async Task<IdeaDto> CreateIdeaAsync(string founderId, CreateIdeaRequest request)
@@ -163,14 +169,8 @@ namespace FounderHub.Application.Services
             };
 
             await _ideaRepository.CreateAsync(idea);
-            await _feedEvents.CreateAsync(new FeedEvent
-            {
-                Type = "IDEA_CREATED",
-                UserId = founderId,
-                ReferenceId = idea.Id,
-                CreatedAt = idea.CreatedAt
-            });
-            return MapToDto(idea);
+            await _eventPublisher.PublishAsync(new FounderHub.Domain.Events.IdeaCreatedEvent(idea.Id, founderId, idea.Title, idea.CreatedAt));
+            return _mapper.Map<IdeaDto>(idea);
         }
 
         public async Task<IdeaDto> UpdateIdeaAsync(string founderId, string ideaId, UpdateIdeaRequest request)
@@ -200,14 +200,8 @@ namespace FounderHub.Application.Services
             idea.UpdatedAt = DateTime.UtcNow;
 
             await _ideaRepository.UpdateAsync(idea);
-            await _feedEvents.CreateAsync(new FeedEvent
-            {
-                Type = "IDEA_UPDATED",
-                UserId = founderId,
-                ReferenceId = idea.Id,
-                CreatedAt = idea.UpdatedAt
-            });
-            return MapToDto(idea);
+            await _eventPublisher.PublishAsync(new FounderHub.Domain.Events.IdeaUpdatedEvent(idea.Id, founderId, idea.UpdatedAt));
+            return _mapper.Map<IdeaDto>(idea);
         }
 
         public async Task DeleteIdeaAsync(string founderId, string ideaId)
@@ -228,7 +222,7 @@ namespace FounderHub.Application.Services
         public async Task<IEnumerable<IdeaDto>> GetMyIdeasAsync(string founderId)
         {
             var ideas = await _ideaRepository.GetByFounderIdAsync(founderId);
-            return ideas.Select(MapToDto);
+            return ideas.Select(idea => _mapper.Map<IdeaDto>(idea));
         }
 
         public async Task<PaginatedResult<IdeaDto>> GetIdeasAsync(string? stage, string? industry, bool? previouslyRejected, string? location, string? keyword, int page, int pageSize, string? currentUserId = null)
@@ -252,31 +246,7 @@ namespace FounderHub.Application.Services
 
         private async Task<IdeaDto> MapToDtoAsync(Idea idea, string? currentUserId)
         {
-            var dto = new IdeaDto
-            {
-                Id = idea.Id,
-                FounderId = idea.FounderId,
-                Title = idea.Title,
-                Problem = idea.Problem,
-                Solution = idea.Solution,
-                Stage = idea.Stage,
-                Industry = idea.Industry,
-                PitchDeckUrl = idea.PitchDeckUrl,
-                DemoUrl = idea.DemoUrl,
-                StartupWebsite = idea.StartupWebsite,
-                ProductImages = idea.ProductImages,
-                MarketSize = idea.MarketSize,
-                TargetCustomers = idea.TargetCustomers,
-                TractionMetrics = idea.TractionMetrics,
-                PreviouslyRejected = idea.PreviouslyRejected,
-                RejectedBy = idea.RejectedBy,
-                RejectionReasonCategory = idea.RejectionReasonCategory,
-                WhatChangedAfterRejection = idea.WhatChangedAfterRejection,
-                FundingRange = idea.FundingRange,
-                Location = idea.Location,
-                CreatedAt = idea.CreatedAt,
-                UpdatedAt = idea.UpdatedAt
-            };
+            var dto = _mapper.Map<IdeaDto>(idea);
 
             if (currentUserId != null)
             {
@@ -285,65 +255,11 @@ namespace FounderHub.Application.Services
             }
 
             return dto;
-        }
-
-        private TrendingIdeaDto MapToTrendingDto(Idea idea, string? currentUserId)
-        {
-            // Simple mapping without async interest fetch for now, logic handled in loop
-            return new TrendingIdeaDto
-            {
-                Id = idea.Id,
-                FounderId = idea.FounderId,
-                Title = idea.Title,
-                Problem = idea.Problem,
-                Solution = idea.Solution,
-                Stage = idea.Stage,
-                Industry = idea.Industry,
-                PitchDeckUrl = idea.PitchDeckUrl,
-                DemoUrl = idea.DemoUrl,
-                StartupWebsite = idea.StartupWebsite,
-                ProductImages = idea.ProductImages,
-                MarketSize = idea.MarketSize,
-                TargetCustomers = idea.TargetCustomers,
-                TractionMetrics = idea.TractionMetrics,
-                PreviouslyRejected = idea.PreviouslyRejected,
-                RejectedBy = idea.RejectedBy,
-                RejectionReasonCategory = idea.RejectionReasonCategory,
-                WhatChangedAfterRejection = idea.WhatChangedAfterRejection,
-                FundingRange = idea.FundingRange,
-                Location = idea.Location,
-                CreatedAt = idea.CreatedAt,
-                UpdatedAt = idea.UpdatedAt
-            };
         }
 
         private async Task<RecommendedIdeaDto> MapToRecommendedDtoAsync(Idea idea, string? currentUserId)
         {
-            var dto = new RecommendedIdeaDto
-            {
-                Id = idea.Id,
-                FounderId = idea.FounderId,
-                Title = idea.Title,
-                Problem = idea.Problem,
-                Solution = idea.Solution,
-                Stage = idea.Stage,
-                Industry = idea.Industry,
-                PitchDeckUrl = idea.PitchDeckUrl,
-                DemoUrl = idea.DemoUrl,
-                StartupWebsite = idea.StartupWebsite,
-                ProductImages = idea.ProductImages,
-                MarketSize = idea.MarketSize,
-                TargetCustomers = idea.TargetCustomers,
-                TractionMetrics = idea.TractionMetrics,
-                PreviouslyRejected = idea.PreviouslyRejected,
-                RejectedBy = idea.RejectedBy,
-                RejectionReasonCategory = idea.RejectionReasonCategory,
-                WhatChangedAfterRejection = idea.WhatChangedAfterRejection,
-                FundingRange = idea.FundingRange,
-                Location = idea.Location,
-                CreatedAt = idea.CreatedAt,
-                UpdatedAt = idea.UpdatedAt
-            };
+            var dto = _mapper.Map<RecommendedIdeaDto>(idea);
 
             if (currentUserId != null)
             {
@@ -352,35 +268,6 @@ namespace FounderHub.Application.Services
             }
 
             return dto;
-        }
-
-        private static IdeaDto MapToDto(Idea idea)
-        {
-            return new IdeaDto
-            {
-                Id = idea.Id,
-                FounderId = idea.FounderId,
-                Title = idea.Title,
-                Problem = idea.Problem,
-                Solution = idea.Solution,
-                Stage = idea.Stage,
-                Industry = idea.Industry,
-                PitchDeckUrl = idea.PitchDeckUrl,
-                DemoUrl = idea.DemoUrl,
-                StartupWebsite = idea.StartupWebsite,
-                ProductImages = idea.ProductImages,
-                MarketSize = idea.MarketSize,
-                TargetCustomers = idea.TargetCustomers,
-                TractionMetrics = idea.TractionMetrics,
-                PreviouslyRejected = idea.PreviouslyRejected,
-                RejectedBy = idea.RejectedBy,
-                RejectionReasonCategory = idea.RejectionReasonCategory,
-                WhatChangedAfterRejection = idea.WhatChangedAfterRejection,
-                FundingRange = idea.FundingRange,
-                Location = idea.Location,
-                CreatedAt = idea.CreatedAt,
-                UpdatedAt = idea.UpdatedAt
-            };
         }
     }
 }

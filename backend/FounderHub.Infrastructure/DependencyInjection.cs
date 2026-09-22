@@ -5,6 +5,9 @@ using FounderHub.Infrastructure.Data;
 using FounderHub.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Channels;
+using FounderHub.Domain.Events;
+using FounderHub.Infrastructure.Events;
 
 namespace FounderHub.Infrastructure
 {
@@ -34,10 +37,25 @@ namespace FounderHub.Infrastructure
             services.AddScoped<IWatchlistRepository, WatchlistRepository>();
             services.AddScoped<IFeedbackRepository, FeedbackRepository>();
             services.AddScoped<IMeetingRepository, MeetingRepository>();
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<IJwtProvider, JwtProvider>();
             
+            services.AddMemoryCache();
+            services.AddSingleton<ICacheService, FounderHub.Infrastructure.Caching.MemoryCacheService>();
+
+            // Domain Event Channel (bounded, in-process)
+            var channel = Channel.CreateBounded<IDomainEvent>(new BoundedChannelOptions(500)
+            {
+                FullMode = BoundedChannelFullMode.Wait,
+                SingleReader = true,
+                SingleWriter = false
+            });
+            services.AddSingleton(channel);
+            services.AddSingleton<IDomainEventPublisher, ChannelDomainEventPublisher>();
+            services.AddHostedService<DomainEventProcessorService>();
+
             return services;
         }
     }

@@ -31,5 +31,24 @@ namespace FounderHub.Api.Controllers
             var result = await _authService.LoginAsync(request);
             return Ok(result);
         }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            var result = await _authService.RefreshTokenAsync(request.RefreshToken);
+            return Ok(result);
+        }
+
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        [HttpPost("revoke")]
+        public async Task<IActionResult> RevokeToken()
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            
+            await _authService.RevokeTokenAsync(userId);
+            return NoContent();
+        }
     }
 }
